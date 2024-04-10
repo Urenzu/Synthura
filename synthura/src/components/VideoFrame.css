@@ -1,0 +1,21 @@
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #252526;
+    --border-color: #3e3e42;
+}
+
+.video-feed {
+    background-color: var(--background-dark2);
+    border: var(--border-color) solid 5px;
+    border-radius: 1%;
+    height: 20rem;
+    width: 20rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#plus-sign {
+    width: 5rem;
+    height: 5rem;
+}
