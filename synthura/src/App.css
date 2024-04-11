@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 :root {
   --background-primary-color: #1e1e1e;
   --border-color: #3e3e42;
@@ -15,3 +16,10 @@ body {
   height: 100vh;
   width: 100vw;
 }
+=======
+body{
+  margin: 0; /* Reset default margin to ensure full background coverage */
+  height: 100vh; /* Ensure the body covers the full viewport height */
+  background: linear-gradient(rgb(0, 0, 0), rgb(255, 255, 255));
+}
+>>>>>>> 1132c1d73cab21c73f778c871939c1043594b9a3
