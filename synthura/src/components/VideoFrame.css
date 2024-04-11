@@ -4,15 +4,20 @@
     --border-color: #3e3e42;
 }
 
-.video-feed {
+.video-frame {
     background-color: var(--background-dark2);
     border: var(--border-color) solid 5px;
     border-radius: 1%;
     height: 20rem;
     width: 20rem;
+}
+
+#plus-sign-span {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 #plus-sign {
