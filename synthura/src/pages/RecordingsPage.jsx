@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 
-let number = 0;
+let camera_number = 0;
+let existance_number = 0
 function DynamicTable() {
   const [rows, setRows] = useState([]);
 
   const addElement = () => {
     const newRow = [...rows];
     const lastRow = newRow[newRow.length - 1];
-    number += 1;
-    const idString = number;
+    camera_number += 1;
+    existance_number += 1;
+    const idString = camera_number;
     if (!lastRow || lastRow.length === 3) {
       newRow.push([]);
     }
-    newRow[newRow.length - 1].push({ id: idString });
+    newRow[newRow.length - 1].push({ id: idString, name: existance_number});
     setRows(newRow);
   };
 
@@ -26,7 +28,7 @@ function DynamicTable() {
         break;
       }
     }
-    number--;
+    camera_number--;
     setRows(newRow.filter(row => row.length > 0));
     for (let r = rowIndex; r < rows.length; r++)
     {
@@ -51,22 +53,43 @@ function DynamicTable() {
 
   return (
     <div>
-      <button onClick={addElement}>Add Element</button>
+      <button onClick={addElement} style={{fontSize: "20px", fontFamily: 'OCR A Std, monospace', borderRadius: "10px", backgroundColor: "black", color: "white"}}>Add Element</button>
       <p>Total Elements: {getTotalElements()}</p>
       <table>
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((element, elementIndex) => (
-                <td key={element.id} bord>
-                  <div>
-                    <center>
-                      <h2>{"Camera " + element.id + ": Name"}</h2>
-                      <button onClick={() => deleteElement(rowIndex, elementIndex)}>
-                        Delete Recording
-                      </button>
-                    </center>
-                  </div>
+                <td key={element.id} style={{border: '1px solid black', borderRadius: '5px!important', padding: '2px 40px 25px 40px'}}>
+                  <h2>{"Camera " + element.id + ": " + element.name}</h2>
+                  <center>
+                    <div style={{border: '1px solid black', borderRadius: '5px!important', backgroundColor: "#D9D9D9", height: "230px", width: "260px"}}></div>
+                    <div style={{padding: '0px 40px 0px 0px'}}>
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td style={{padding: '0px 10px 0px 0px'}}>
+                              <div style={{display: "flex", justifyContent: "center", alignItems: "center", width: "25px", height: "25px", borderRadius: "50%", backgroundColor: "red"}}></div>
+                            </td>
+                            <td>
+                              <h3>Dangerous - <br/>10:54:26 to 10:59:50</h3>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div style={{display: "flex", justifyContent: "center", alignItems: "center", width: "25px", height: "25px", borderRadius: "50%", backgroundColor: "purple"}}></div>
+                            </td>
+                            <td>
+                              <h3>Potential Threat - <br/>10:54:26 to 10:59:50</h3>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <button onClick={() => deleteElement(rowIndex, elementIndex)} style={{fontSize: "20px", fontFamily: 'OCR A Std, monospace', borderRadius: "10px", backgroundColor: "black", color: "white"}}>
+                      Delete Recording
+                    </button>
+                  </center>
                 </td>
               ))}
               {Array.from({ length: Math.max(0, 3 - row.length) }, (_, index) => (
@@ -82,11 +105,9 @@ function DynamicTable() {
 
 function RecordingsPage() {
   return (
-    <div>
+    <div style={{backgroundImage: 'url("https://gifdb.com/images/high/black-background-star-constellation-9yh7ozd1p01cctby.gif")', backgroundSize: 'cover', fontFamily: 'OCR A Std, monospace' ,overflow: "auto", position: "fixed", border: '1px solid black', borderRadius: '5px!important', padding: '2px 40px 25px 75px', height: "100%", width: "100%", backgroundColor: "gray", color: "white"}}> 
       <h1>Saved Recordings: </h1>
-      <center>
-        <DynamicTable />
-      </center>
+      <DynamicTable />
     </div>
   );
 }
