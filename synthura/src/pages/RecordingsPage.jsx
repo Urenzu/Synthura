@@ -8,7 +8,7 @@ function DynamicTable() {
     const newRow = [...rows];
     const lastRow = newRow[newRow.length - 1];
     number += 1;
-    const idString = `Camera ${number}: Name`;
+    const idString = number;
     if (!lastRow || lastRow.length === 3) {
       newRow.push([]);
     }
@@ -24,6 +24,21 @@ function DynamicTable() {
         newRow[i - 1].push(newRow[i].shift());
       } else {
         break;
+      }
+    }
+    number--;
+    setRows(newRow.filter(row => row.length > 0));
+    for (let r = rowIndex; r < rows.length; r++)
+    {
+      if (r == rowIndex){
+        for (let c = elementIndex; c < rows[r].length; c++) {
+          rows[r][c].id = rows[r][c].id - 1
+        }
+      }
+      else{
+        for (let c = 0; c < rows[r].length; c++) {
+          rows[r][c].id = rows[r][c].id - 1
+        }
       }
     }
     setRows(newRow.filter(row => row.length > 0));
@@ -43,12 +58,15 @@ function DynamicTable() {
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((element, elementIndex) => (
-                <td key={element.id}>
-                  {element.id}
-                  <br />
-                  <button onClick={() => deleteElement(rowIndex, elementIndex)}>
-                    Delete Recording
-                  </button>
+                <td key={element.id} bord>
+                  <div>
+                    <center>
+                      <h2>{"Camera " + element.id + ": Name"}</h2>
+                      <button onClick={() => deleteElement(rowIndex, elementIndex)}>
+                        Delete Recording
+                      </button>
+                    </center>
+                  </div>
                 </td>
               ))}
               {Array.from({ length: Math.max(0, 3 - row.length) }, (_, index) => (
@@ -66,7 +84,9 @@ function RecordingsPage() {
   return (
     <div>
       <h1>Saved Recordings: </h1>
+      <center>
         <DynamicTable />
+      </center>
     </div>
   );
 }
