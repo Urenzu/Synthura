@@ -5,7 +5,8 @@ function App() {
 
   return (
     <>
-      <VideoFrame srcFeed="https://www.youtube.com/watch?v=XfX2Ap30pwU" className="video-feed" type="live" />
+      <VideoFrame type="liveVideo" />
+      <VideoFrame type="addCamera" />
     </>
   )
 }
