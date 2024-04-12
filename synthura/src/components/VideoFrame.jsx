@@ -5,21 +5,29 @@ button depending on the 'type' prop.
 */}
 
 import './VideoFrame.css';
-import addCameraIcon from '../assets/addCameraIcon.svg';
 import Button from './Button';
 import Webcam from 'react-webcam';
+import { useState } from 'react';
 
 const VideoFrame = ( {srcFeed, type, handleAddCamera} ) => {
+  const [camNum, setCamNum] = useState(1);
 
   const renderLiveFeed = () => {
     const videoConstraints = {
-      aspectRatio: 1,
+      aspectRatio: 15/14,
     };
 
     return (
-        <Webcam videoConstraints={videoConstraints}
-          style={{ height: "20rem", width: "20rem", border: "#3e3e42 solid 5px", borderRadius: "1%" }}
-        />
+      <div className="video-frame ">
+        <div className="live-video-bar">
+          <span>Camera {camNum}</span>
+        </div>
+        <div className="live-video-container">
+          <Webcam videoConstraints={videoConstraints}
+            style={ {width: "100%", borderRadius: "3px"} }
+          />
+        </div>
+      </div>
     );
   };
 
