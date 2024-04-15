@@ -18,8 +18,10 @@ const CameraGrid = () => {
   const [activeCameras, setActiveCameras] = useState([]);
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
+  const [url, setUrl] = useState('');
 
-  const handleAddCamera = (url) => {
+  // adds a camera to the grid
+  const handleAddCamera = () => {
     if (url) {
         // Setup the video stream
         if (url.startsWith('http')) {
@@ -41,12 +43,13 @@ const CameraGrid = () => {
     }
   }
 
-  // will run when camList updates
+  // will run when camList updates, renders updated grid of cameras
   useEffect(() => { 
     console.log("camList updated");
     setActiveCameras(camList.render());
   }, [camList]);
 
+  // Remove a camera from the grid
   const handleRemoveCamera = (rem) => {
     setCamList(prevList => {
       const updatedList = new LinkedList();
@@ -56,11 +59,17 @@ const CameraGrid = () => {
     });
   }
 
+  const handleInputChange = (e) => {
+    setUrl(e.target.value);
+  }
+
   return (
     <section id="camera-grid-container">
-      <h2>Live Stream Inputs</h2>
-        <input type="text" id="streamUrl" placeholder="Enter Stream URL" />
-        <button onclick={handleAddCamera}>Add Stream</button>
+      <div id="input-url-container">
+        <h2>Live Stream Inputs</h2>
+        <input type="text" id="streamUrl" placeholder="Enter Stream URL" onChange={handleInputChange} />
+        <button onClick={handleAddCamera}>Add Stream</button>
+      </div>
       <div id="camera-grid">
         {activeCameras}
       </div>
