@@ -7,19 +7,42 @@ cameras to the grid by clicking the plus sign nested in an empty video frame.
 
 */}
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import VideoFrame from './VideoFrame';
 import './tempStyles/CameraGrid.css';
+import { LinkedList } from '../scripts/LinkedList';
 
 
 const CameraGrid = () => {
 
   const [activeCameras, setActiveCameras] = useState([]);
-  const [camNum, setCamNum] = useState(1);
+  const [camList, setCamList] = useState(new LinkedList());
+  const [id, setId] = useState(1);
+
 
   const handleAddCamera = () => {
-    setActiveCameras([...activeCameras, <VideoFrame key={activeCameras.length} type="liveVideo" camNum={camNum} />]);
-    setCamNum(camNum + 1);
+    setCamList(prevList => {
+      const updatedList = new LinkedList();
+      Object.assign(updatedList, prevList); // Copy previous state
+      updatedList.append(id, <VideoFrame key={id} type="liveVideo" camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
+      return updatedList; // Return updated list
+    });
+    setId(id+1);
+  }
+
+  useEffect(() => { 
+    // will run when camList updates
+    console.log("camList updated");
+    setActiveCameras(camList.render());
+  }, [camList]);
+
+  const handleRemoveCamera = (rem) => {
+    setCamList(prevList => {
+      const updatedList = new LinkedList();
+      Object.assign(updatedList, prevList); // Copy previous state
+      updatedList.remove(rem); // Append new data
+      return updatedList; // Return updated list
+    });
   }
 
   return (

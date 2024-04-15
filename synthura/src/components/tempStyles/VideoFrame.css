@@ -24,6 +24,7 @@
 .live-video-container {
     position: relative;
     top: calc(2rem - 5px);
+    transform: scaleX(-1);
 }
 
 /* styling for live video bar */

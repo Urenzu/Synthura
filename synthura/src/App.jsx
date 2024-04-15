@@ -1,12 +1,11 @@
 import './App.css'
-import VideoFrame from './components/VideoFrame.jsx'
+import CameraGrid from './components/CameraGrid';
 
 function App() {
 
   return (
     <>
-      <VideoFrame type="liveVideo" />
-      <VideoFrame type="addCamera" />
+      <CameraGrid />
     </>
   )
 }
