@@ -1,13 +1,10 @@
 import './App.css'
-import CameraGrid from './components/CameraGrid';
+import EnvironmentsPage from './pages/EnvironmentsPage';
 
 function App() {
-
   return (
-    <>
-      <CameraGrid />
-    </>
-  )
+    <EnvironmentsPage />
+  );
 }
 
 export default App

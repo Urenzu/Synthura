@@ -1,9 +1,13 @@
-function EnvironmentsPage() {
+import CameraGrid from '../components/CameraGrid';
+import EnvironmentButton from '../components/EnvironmentButton';
+
+const EnvironmentsPage = () => {
   return (
-    <div>
-      
-    </div>
-  )
+      <>
+        <EnvironmentButton />
+        <CameraGrid />
+      </>
+  );
 }
 
-export default EnvironmentsPage
+export default EnvironmentsPage;

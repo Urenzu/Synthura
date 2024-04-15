@@ -19,19 +19,30 @@ const CameraGrid = () => {
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
 
-
-  const handleAddCamera = () => {
-    setCamList(prevList => {
-      const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList); // Copy previous state
-      updatedList.append(id, <VideoFrame key={id} type="liveVideo" camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
-      return updatedList; // Return updated list
-    });
-    setId(id+1);
+  const handleAddCamera = (url) => {
+    if (url) {
+        // Setup the video stream
+        if (url.startsWith('http')) {
+          // If the URL is direct video stream
+            setCamList(prevList => {
+              const updatedList = new LinkedList();
+              Object.assign(updatedList, prevList); // Copy previous state
+              updatedList.append(id, <VideoFrame key={id} type="liveVideo" srcFeed={url} camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
+              return updatedList; // Return updated list
+            });
+            setId(id+1);
+        } else {
+            // Use WebRTC or other technologies to set up the stream
+            console.error('Invalid URL or setup required for WebRTC or similar technology');
+        }
+    }
+    else {
+         console.error('No URL provided');
+    }
   }
 
+  // will run when camList updates
   useEffect(() => { 
-    // will run when camList updates
     console.log("camList updated");
     setActiveCameras(camList.render());
   }, [camList]);
@@ -47,8 +58,12 @@ const CameraGrid = () => {
 
   return (
     <section id="camera-grid-container">
-      {activeCameras}
-      <VideoFrame type="addCamera" handleAddCamera={handleAddCamera} />
+      <h2>Live Stream Inputs</h2>
+        <input type="text" id="streamUrl" placeholder="Enter Stream URL" />
+        <button onclick={handleAddCamera}>Add Stream</button>
+      <div id="camera-grid">
+        {activeCameras}
+      </div>
     </section>
   )
 }
