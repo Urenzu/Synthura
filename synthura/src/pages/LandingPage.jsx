@@ -1,4 +1,5 @@
 import React from 'react'
+import {Link} from 'react-router-dom'
 import '../App.css'
 
 export default function LandingPage() {
@@ -10,7 +11,7 @@ export default function LandingPage() {
 
       <p>Blurb about product. Blurb about product. Blurb about product. Blurb about product. Blurb about product. </p>
       <div className="button2">
-        <button className="button1" >Get Started</button>
+        <Link to="/login">Get Started</Link>
       </div>
     </>
   )
