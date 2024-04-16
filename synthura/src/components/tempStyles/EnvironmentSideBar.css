@@ -1,0 +1,48 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --accent-dark: #2d2d30;
+    --accent-light: #4f4f55;
+    --border-color: #3e3e42;
+}
+/* imported font  */
+@font-face {
+    font-family: 'CustomFont';
+    src: url('/home/owenhustles/Desktop/Synthura/synthura/src/assets/fonts/neuropol.otf') format('otf');
+}
+
+#side-bar {
+    height: 100vh;
+    width: 20%;
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+}
+
+#environment-dropdown-btn {
+    width: 90%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--accent-light);
+    color: snow;
+    font-size: 16px;
+    font-family: 'Roboto' sans-serif;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+#environment-dropdown-icon {
+    width: 20px;
+    height: 20px;
+    fill: snow;
+    font-size: 16px;
+    position: relative;
+    bottom: 2px;
+    margin-left: 3px;
+
+}

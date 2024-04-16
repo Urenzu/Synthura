@@ -1,11 +1,12 @@
 import CameraGrid from '../components/CameraGrid';
-import EnvironmentButton from '../components/EnvironmentButton';
+import EnvironmentSideBar from '../components/EnvironmentSideBar';
 
 const EnvironmentsPage = () => {
   return (
-      <>
+      <main id="main">
+        <EnvironmentSideBar />
         <CameraGrid />
-      </>
+      </main>
   );
 }
 
