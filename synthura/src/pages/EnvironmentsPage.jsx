@@ -4,7 +4,6 @@ import EnvironmentButton from '../components/EnvironmentButton';
 const EnvironmentsPage = () => {
   return (
       <>
-        <EnvironmentButton />
         <CameraGrid />
       </>
   );
