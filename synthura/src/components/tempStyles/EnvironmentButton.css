@@ -1,4 +1,36 @@
-.environment-btn {
-    width: 100px;
+/* dropdown menu button  */
+.environment-dropdown-btn {
+    width: 100%;
     height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: transparent;
+    color: snow;
+    font-size: 16px;
+    font-family: 'Roboto' sans-serif;
+    letter-spacing: 1px;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+.environment-dropdown-btn:hover {
+    cursor: pointer;
+    transition: background-color 0.3s ease-out;
+    background-color: var(--accent-light);
+}
+.environment-dropdown-btn:hover > .environment-dropdown-icon {
+    /* CSS properties to transition */
+    transition: bottom 0.3s ease-out;
+    bottom: -3px;
+    
+}
+.environment-dropdown-icon {
+    width: 16px;
+    height: 16px;
+    fill: snow;
+    position: relative;
+    bottom: 2px;
+    margin-left: 3px;
 }
