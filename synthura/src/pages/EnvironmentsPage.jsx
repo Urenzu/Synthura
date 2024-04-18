@@ -3,7 +3,7 @@ import EnvironmentSideBar from '../components/EnvironmentSideBar';
 
 const EnvironmentsPage = () => {
   return (
-      <main id="main">
+      <main>
         <EnvironmentSideBar />
         <CameraGrid />
       </main>

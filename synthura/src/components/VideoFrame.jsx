@@ -3,14 +3,14 @@
 Contributor(s): Owen Arnst
 
 Description: This component is a video frame that displays a live feed from a camera, saved video playback, or an add camera
-button depending on the 'type' prop.
+button depending on the 'type' prop. See accepted propTypes below component function.
 
 */}
 
 import './tempStyles/VideoFrame.css';
-import Webcam from 'react-webcam';
+import PropTypes from 'prop-types';
 
-const VideoFrame = ( {srcFeed, type, camNum, handleRemoveCamera } ) => {
+const VideoFrame = ( {srcFeed, type, camNum, handleRemoveCamera} ) => {
 
   const renderLiveFeed = () => {
 
@@ -45,5 +45,12 @@ const VideoFrame = ( {srcFeed, type, camNum, handleRemoveCamera } ) => {
          renderSavedVideo();
    
 }
+
+VideoFrame.propTypes = {
+  srcFeed: PropTypes.string.isRequired, 
+  type: PropTypes.string.isRequired,
+  camNum: PropTypes.number.isRequired,
+  handleRemoveCamera: PropTypes.func.isRequired
+};
 
 export default VideoFrame

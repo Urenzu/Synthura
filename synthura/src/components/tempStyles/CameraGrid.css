@@ -9,34 +9,44 @@
 
 /* layout styling */
 #camera-grid-container {
-    width: 50vw;
-    height: 15vh;
+    width: 90vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
+    align-items: center;
 }
 #camera-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    border: 2px solid var(--accent-light);
+    border-radius: 3px;
+    height: 80%;
+    margin: 10px;
 }
 
 h2 {
-    text-align: center;
+    display: flex;
+    align-items: center;
     color: snow;
     font-family: 'Roboto', sans-serif;
     letter-spacing: 1px;
+    height: 4%;
 }
 
 /* styling of input field and button container */
 #input-url-container {
     position: relative;
-    display: flex;
+    display: flex;;
     justify-content: space-between;
     align-items: center;
     background: transparent;
     border: 1px solid var(--accent-light);
     border-radius: 20px;
     padding: 0 0 0 10px;
+    width: 50%;
+    height: 6%;
 }
 /* styling of input field */
 #streamUrl {

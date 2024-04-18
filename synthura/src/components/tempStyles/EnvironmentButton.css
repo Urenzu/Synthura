@@ -1,3 +1,12 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #141414;
+    --accent-dark: #2d2d30;
+    --accent-light: #4f4f55;
+    --border-color: #3e3e42;
+}
+
 /* dropdown menu button  */
 .environment-dropdown-btn {
     width: 100%;
@@ -5,7 +14,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: transparent;
+    background-color: var(--background-dark2);
     color: snow;
     font-size: 16px;
     font-family: 'Roboto' sans-serif;
