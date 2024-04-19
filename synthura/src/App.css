@@ -1,3 +1,29 @@
+body{
+  margin: 0; /* Reset default margin to ensure full background coverage */
+  height: 100vh; /* Ensure the body covers the full viewport height */
+  background: linear-gradient(rgb(0, 0, 0), rgb(255, 255, 255));
+  transform: translateY(+40%);
+}
+
+body h1,h2,h3,p{
+  color:white;
+  text-align: center;
+}
+
+body h2, h3{
+  size: 40px;
+}
+
+.button2{
+  text-align: center;
+}
+
+.google-auth{
+  text-align: center;
+  width: 50%;
+}
+
+/*recording page styling start*/
 /* global variables */
 :root {
   --background-dark1: #1e1e1e;
@@ -85,3 +111,4 @@ main {
   width: 100%;
   color: white
 }
+/*recording page styling end*/
