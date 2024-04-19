@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 
 let camera_number = 0;
-let existance_number = 0
+let existance_number = 0;
+var example_dict = {
+  1: "Yamato",
+  2: "Nagasaki",
+  3: "Itadori",
+  4: "Toji"
+};
+
 function DynamicTable() {
   const [rows, setRows] = useState([]);
 
@@ -14,13 +21,20 @@ function DynamicTable() {
     if (!lastRow || lastRow.length === 3) {
       newRow.push([]);
     }
-    newRow[newRow.length - 1].push({ id: idString, name: existance_number});
+
+    if (idString in example_dict) {
+      newRow[newRow.length - 1].push({ id: idString, name: example_dict[idString]});
+    }
+    else {
+      newRow[newRow.length - 1].push({ id: idString, name: existance_number});
+    }
     setRows(newRow);
   };
 
   const deleteElement = (rowIndex, elementIndex) => {
     const newRow = [...rows];
     newRow[rowIndex].splice(elementIndex, 1);
+    
     for (let i = rowIndex + 1; i < newRow.length; i++) {
       if (newRow[i].length > 0) {
         newRow[i - 1].push(newRow[i].shift());
@@ -51,42 +65,50 @@ function DynamicTable() {
     return rows.reduce((total, row) => total + row.length, 0);
   };
 
+  const test_component = () => {
+    return (
+      <>
+        <div id="video_window"></div>
+        <div id="analytics_window">
+          <table>
+            <tbody>
+              <tr>
+                <td id="analytics_window_row">
+                  <div id="analytics_window_circle_red"></div>
+                </td>
+                <td>
+                  <h3>Dangerous - <br />10:54:26 to 10:59:50</h3>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="analytics_window_circle_purple"></div>
+                </td>
+                <td>
+                  <h3>Potential Threat - <br />10:54:26 to 10:59:50</h3>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div>
-      <button onClick={addElement} style={{fontSize: "20px", fontFamily: 'OCR A Std, monospace', borderRadius: "10px", backgroundColor: "black", color: "white"}}>Add Element</button>
+      <button onClick={addElement} class="unique_button">Add Element</button>
       <p>Total Elements: {getTotalElements()}</p>
       <table>
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((element, elementIndex) => (
-                <td key={element.id} style={{border: '1px solid black', borderRadius: '5px!important', padding: '2px 40px 25px 40px'}}>
-                  <h2>{"Camera " + element.id + ": " + element.name}</h2>
+                <td key={element.id} id="dynamic_table_row">
                   <center>
-                    <div style={{border: '1px solid black', borderRadius: '5px!important', backgroundColor: "#D9D9D9", height: "230px", width: "260px"}}></div>
-                    <div style={{padding: '0px 40px 0px 0px'}}>
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td style={{padding: '0px 10px 0px 0px'}}>
-                              <div style={{display: "flex", justifyContent: "center", alignItems: "center", width: "25px", height: "25px", borderRadius: "50%", backgroundColor: "red"}}></div>
-                            </td>
-                            <td>
-                              <h3>Dangerous - <br/>10:54:26 to 10:59:50</h3>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div style={{display: "flex", justifyContent: "center", alignItems: "center", width: "25px", height: "25px", borderRadius: "50%", backgroundColor: "purple"}}></div>
-                            </td>
-                            <td>
-                              <h3>Potential Threat - <br/>10:54:26 to 10:59:50</h3>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <button onClick={() => deleteElement(rowIndex, elementIndex)} style={{fontSize: "20px", fontFamily: 'OCR A Std, monospace', borderRadius: "10px", backgroundColor: "black", color: "white"}}>
+                  <h2>{"Camera " + element.id + ": " + element.name}</h2>
+                    {test_component()}
+                    <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
                     </button>
                   </center>
@@ -105,8 +127,8 @@ function DynamicTable() {
 
 function RecordingsPage() {
   return (
-    <div style={{backgroundImage: 'url("https://gifdb.com/images/high/black-background-star-constellation-9yh7ozd1p01cctby.gif")', backgroundSize: 'cover', fontFamily: 'OCR A Std, monospace' ,overflow: "auto", position: "fixed", border: '1px solid black', borderRadius: '5px!important', padding: '2px 40px 25px 75px', height: "100%", width: "100%", backgroundColor: "gray", color: "white"}}> 
-      <h1>Saved Recordings: </h1>
+    <div id="recording_page_container"> 
+      <h1><strong>Saved Recordings: </strong></h1>
       <DynamicTable />
     </div>
   );
