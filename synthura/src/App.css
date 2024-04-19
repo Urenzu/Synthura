@@ -5,16 +5,21 @@ body{
   transform: translateY(+40%);
 }
 
-body h1,h2,p{
+body h1,h2,h3,p{
   color:white;
   text-align: center;
 }
 
-body h2{
+body h2, h3{
   size: 40px;
 }
 
 .button2{
   text-align: center;
+}
+
+.google-auth{
+  text-align: center;
+  width: 50%;
 }
 
