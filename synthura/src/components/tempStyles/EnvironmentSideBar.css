@@ -19,10 +19,46 @@
     align-items: center;
     padding: 15px;
     background-color: var(--background-dark2);
-    display: none; /* hide sidebar by default */
+    transition: transform 0.3s ease;
+}
+
+.hide-side-bar {
+    transform: translateX(-400px);
+}
+.show-side-bar {
+    transform: translateX(0);
 }
 
 /* container for environment and cluster buttons */
 .environment {
     width: 100%;
+}
+
+/* styling for environment button */
+#add-environment-btn {
+    width: calc(100% - 30px);
+    padding: 10px;
+    margin: 10px 0;
+    background-color: var(--accent-dark);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    position: absolute;
+    bottom: 10px;
+}
+
+
+/* hamburger sidebar icon */
+#side-bar-icon {
+    position: fixed;
+    left: 20px;
+    top: 30px;
+    width: 25px;
+    height: 20px;
+    fill: snow;
+    cursor: pointer;
+    z-index: 10;
 }

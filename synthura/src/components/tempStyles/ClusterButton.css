@@ -7,6 +7,7 @@
     position: relative;
     font-size: 16px;
     font-weight: 600;
+    cursor: pointer;
 }
 .cluster-camera-icon {
     width: 20px;
