@@ -1,22 +1,33 @@
+// node object that stores camera identifier, video Component, and next node in list
 class Node {
-  constructor(camNum, camComponent) {
-    this.camNum = camNum;
-    this.camComponent = camComponent;
-    this.next = null;
-  }
+    constructor(camNum, camComponent) {
+      this.id = camNum;
+      this.camComponent = camComponent;
+      this.next = null;
+    }
 } 
-
+  
 class LinkedList {
+
     constructor() {
         this.head = null;
-        this.size = 0;
     }
 
-    append(camNum, camComponent) {
-        if(this.isPresent(camNum)) {
-            return console.log('Camera already exists');
+    // check if a node with camNum is present in the list
+    isPresent(camNum) {
+    let current = this.head;
+    while(current) {
+        if(current.id === camNum) {
+            return true;
         }
-        console.log("appending camera " + camNum);
+        current = current.next;
+    }
+    return false;
+    }
+
+
+    // add a new node to the end of the list
+    append(camNum, camComponent) {
         let node = new Node(camNum, camComponent);
         let current;
         if (this.head === null) {
@@ -24,33 +35,20 @@ class LinkedList {
         } else {
             current = this.head;
             while (current.next) {
-                current = current.next;
+            current = current.next;
             }
             current.next = node;
         }
-        this.size++;
     }
-
-    isPresent(camNum) {
-        let current = this.head;
-        while(current) {
-            if(current.camNum === camNum) {
-                return true;
-            }
-            current = current.next;
-        }
-        return false;
-    }
-
+    
+    // remove node specified by camNum from list
     remove(camNum) {
-        console.log(`removing camera ${camNum}`);
-        if(this.size === 0) return console.log('List is empty');
         let current = this.head;
         let previous;
-        if (current.camNum === camNum) {
+        if (current.id === camNum) {
             this.head = current.next;
         } else {
-            while (current && (current.camNum !== camNum)) {
+            while (current && (current.id !== camNum)) {
                 previous = current;
                 current = current.next;
             }
@@ -59,9 +57,9 @@ class LinkedList {
             }
             previous.next = current.next;
         }
-        this.size--;
     }
-
+    
+    // return an array of camera components
     render() {
         const camList = [];
         let current = this.head;
@@ -71,23 +69,23 @@ class LinkedList {
         }
         return camList;
     }
-}
-
-export { Node, LinkedList };
-
-// Very brief test
-
-// const myList = new LinkedList();
-
-// myList.append(1, 'hi');
-// myList.append(2, 'yo');
-// myList.append(3, 'howdy');
-// myList.append(4, 'check');
-// myList.append(5, 'why');
-
-// console.log(myList.render()); // [1, 2, 3, 4]
-
-// myList.remove(1);
-// console.log(myList.render()); // [1, 2, 3]
-// myList.remove(3);
-// console.log(myList.render()); // [1, 2, 3, 4]
+  }
+  
+  export { Node, LinkedList };
+  
+  // Very brief test
+  
+  // const myList = new LinkedList();
+  
+  // myList.append(1, 'hi');
+  // myList.append(2, 'yo');
+  // myList.append(3, 'howdy');
+  // myList.append(4, 'check');
+  // myList.append(5, 'why');
+  
+  // console.log(myList.render()); // [1, 2, 3, 4]
+  
+  // myList.remove(1);
+  // console.log(myList.render()); // [1, 2, 3]
+  // myList.remove(3);
+  // console.log(myList.render()); // [1, 2, 3, 4]

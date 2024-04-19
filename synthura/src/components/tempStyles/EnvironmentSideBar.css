@@ -23,7 +23,7 @@
 }
 /* animate sidebar to slide in/out of frame */
 .hide-side-bar {
-    transform: translateX(-400px);
+    transform: translateX(-100%);
 }
 .show-side-bar {
     transform: translateX(0);

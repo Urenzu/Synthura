@@ -25,14 +25,21 @@ const CameraGrid = () => {
     if (url) {
         // Setup the video stream
         if (url.startsWith('https')) {
-          // If the URL is direct video stream
+            // Add a new video frame to the grid, check if camera already exists first
             setCamList(prevList => {
               const updatedList = new LinkedList();
               Object.assign(updatedList, prevList); // Copy previous state
-              updatedList.append(id, <VideoFrame key={id} type="liveVideo" srcFeed={url} camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
+              if(updatedList.isPresent(id)) {
+                console.log('Camera already exists');
+              }
+              else {
+                console.log("appending camera");
+                updatedList.append(id, <VideoFrame key={id} srcFeed={url} camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
+                setId(id+1);
+              }
               return updatedList; // Return updated list
             });
-            setId(id+1);
+            
         } else {
             // Use WebRTC or other technologies to set up the stream
             console.error('Invalid URL or setup required for WebRTC or similar technology');
@@ -65,7 +72,7 @@ const CameraGrid = () => {
 
   return (
     <section id="camera-grid-container">
-      <h2>Live Stream Inputs</h2>
+      <h2>Enter Device IP Address</h2>
       <div id="input-url-container">
         <input type="text" id="streamUrl" placeholder="Enter Stream URL" onChange={handleInputChange} />
         <button id="add-camera-btn" onClick={handleAddCamera}>

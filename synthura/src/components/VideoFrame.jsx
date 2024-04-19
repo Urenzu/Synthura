@@ -2,17 +2,14 @@
 
 Contributor(s): Owen Arnst
 
-Description: This component is a video frame that displays a live feed from a camera, saved video playback, or an add camera
-button depending on the 'type' prop. See accepted propTypes below component function.
+Description: This component is a frame that displays videos specified by srcFeed. See accepted propTypes below component function.
 
 */}
 
 import './tempStyles/VideoFrame.css';
 import PropTypes from 'prop-types';
 
-const VideoFrame = ( {srcFeed, type, camNum, handleRemoveCamera} ) => {
-
-  const renderLiveFeed = () => {
+const VideoFrame = ( {srcFeed, camNum, handleRemoveCamera} ) => {
 
     return (
       <div className="video-frame ">
@@ -27,28 +24,15 @@ const VideoFrame = ( {srcFeed, type, camNum, handleRemoveCamera} ) => {
           </button>
         </div>
         <div className="live-video-container">
-          <video src={srcFeed} autoPlay="true" />
+          <video src={srcFeed} autoPlay={true} />
         </div>
       </div>
     );
-  };
 
-  const renderSavedVideo = () => (
-    <>
-        <div className="video-frame">
-            <video src={srcFeed} controls />
-        </div>
-    </>
-  );
-
-  return type==="liveVideo" ? renderLiveFeed() : 
-         renderSavedVideo();
-   
-}
+};
 
 VideoFrame.propTypes = {
   srcFeed: PropTypes.string.isRequired, 
-  type: PropTypes.string.isRequired,
   camNum: PropTypes.number.isRequired,
   handleRemoveCamera: PropTypes.func.isRequired
 };
