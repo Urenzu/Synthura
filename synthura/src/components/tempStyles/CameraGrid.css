@@ -18,12 +18,15 @@
 }
 #camera-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     width: 100%;
     border: 2px solid var(--accent-light);
     border-radius: 3px;
-    height: 80%;
+    height: 85%;
     margin: 10px;
+    gap: 10px;
+    padding: 10px;
+    overflow-y: auto;
 }
 
 h2 {
@@ -32,7 +35,7 @@ h2 {
     color: snow;
     font-family: 'Roboto', sans-serif;
     letter-spacing: 1px;
-    height: 4%;
+    height: 5%;
 }
 
 /* styling of input field and button container */
@@ -46,7 +49,8 @@ h2 {
     border-radius: 20px;
     padding: 0 0 0 10px;
     width: 50%;
-    height: 6%;
+    height: 5%;
+    margin-bottom: 10px;
 }
 /* styling of input field */
 #streamUrl {
