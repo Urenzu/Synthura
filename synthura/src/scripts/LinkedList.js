@@ -13,6 +13,9 @@ class LinkedList {
     }
 
     append(camNum, camComponent) {
+        if(this.isPresent(camNum)) {
+            return console.log('Camera already exists');
+        }
         console.log("appending camera " + camNum);
         let node = new Node(camNum, camComponent);
         let current;
@@ -26,6 +29,17 @@ class LinkedList {
             current.next = node;
         }
         this.size++;
+    }
+
+    isPresent(camNum) {
+        let current = this.head;
+        while(current) {
+            if(current.camNum === camNum) {
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
     }
 
     remove(camNum) {

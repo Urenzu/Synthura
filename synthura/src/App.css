@@ -1,8 +1,9 @@
 /* global variables */
 :root {
   --background-dark1: #1e1e1e;
+  --background-dark2: #252526;
   --accent-dark: #2d2d30;
-  --accent-light: #4f4f55;
+  --accent-light: #5c5c63;
   --border-color: #3e3e42;
 }
 
