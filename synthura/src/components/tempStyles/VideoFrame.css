@@ -13,7 +13,8 @@
     background-color: var(--background-dark2);
     border: var(--border-color) solid 5px;
     border-radius: 1%;
-    height: 24rem;
+    height: 48%;
+    width: 23.9%;
 }
 
 /* Live video feed styling */

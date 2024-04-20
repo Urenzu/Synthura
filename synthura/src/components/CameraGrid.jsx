@@ -74,7 +74,7 @@ const CameraGrid = () => {
     <section id="camera-grid-container">
       <h2>Enter Device IP Address</h2>
       <div id="input-url-container">
-        <input type="text" id="streamUrl" placeholder="Enter Stream URL" onChange={handleInputChange} />
+        <input type="text" id="streamUrl" placeholder="Enter Stream URL" autoComplete="off" onChange={handleInputChange} />
         <button id="add-camera-btn" onClick={handleAddCamera}>
           <svg id="plus-sign" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 
