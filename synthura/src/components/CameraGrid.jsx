@@ -5,6 +5,10 @@ Contributor(s): Owen Arnst
 Description: This component is a grid of video frames that display live feeds from cameras. The user can add 
 cameras to the grid by clicking the plus sign nested in an empty video frame.
 
+Parent Component(s): EnvironmentPage
+
+Child Component(s): VideoFrame
+
 */}
 
 import { useState, useEffect } from 'react';

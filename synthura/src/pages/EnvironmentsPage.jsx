@@ -1,3 +1,15 @@
+/* 
+
+Contributor(s): Owen Arnst
+
+Description: This component encompasses the entire Environments page, including the CameraGrid and EnvironmentSideBar components.
+
+Parent Component(s): App
+
+Child Component(s): EnvironmentSideBar, CameraGrid
+
+*/
+
 import CameraGrid from '../components/CameraGrid';
 import EnvironmentSideBar from '../components/EnvironmentSideBar';
 import { useState } from "react";

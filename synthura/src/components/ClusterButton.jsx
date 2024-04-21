@@ -1,3 +1,15 @@
+/* 
+
+Contributor(s): Owen Arnst
+
+Description: This component represents a cluster of cameras within an environment.
+
+Parent Component(s): EnvironmentContainer
+
+Child Component(s): none
+
+*/
+
 import "./tempStyles/ClusterButton.css"
 
 const ClusterButton = () => {

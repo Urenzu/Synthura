@@ -6,11 +6,14 @@ Description: This component is a button that represents an environment and manag
 
 Parent Component(s): EnvironmentContainer
 
+Child Component(s): none
+
 */
 
 import "./tempStyles/EnvironmentButton.css"
 
 const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
+
   return (
     <>
        <button className="environment-dropdown-btn">

@@ -6,6 +6,8 @@ Description: This component contains a single environment. Separates environment
 
 Parent Component(s): EnvironmentSideBar
 
+Child Component(s): EnvironmentButton, ClusterButton
+
 */
 
 import EnvironmentButton from "./EnvironmentButton"
@@ -13,11 +15,15 @@ import ClusterButton from "./ClusterButton"
 import "./tempStyles/EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {id, handleDeleteEnvironment} ) => {
+
+  const [clustersList, setClustersList] = useState(new LinkedList());
+  const [activeClusters, setActiveClusters] = useState([]);
+
   return (
     <div>
       <EnvironmentButton id={id} handleDeleteEnvironment={handleDeleteEnvironment} />
       <div className="cluster">
-        <ClusterButton />
+        {activeClusters}
       </div>
     </div>
   )

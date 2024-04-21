@@ -6,6 +6,8 @@ Description: This component is a frame that displays videos specified by srcFeed
 
 Parent Component(s): CameraGrid
 
+Child Component(s): None
+
 */}
 
 import './tempStyles/VideoFrame.css';

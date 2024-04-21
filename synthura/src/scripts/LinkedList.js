@@ -1,3 +1,4 @@
+
 // node object that stores camera identifier, video Component, and next node in list
 class Node {
     constructor(camNum, camComponent) {
@@ -6,7 +7,8 @@ class Node {
       this.next = null;
     }
 } 
-  
+
+// linked list object for efficiently managing camera components
 class LinkedList {
 
     constructor() {
@@ -71,21 +73,5 @@ class LinkedList {
     }
   }
   
-  export { Node, LinkedList };
+  export { LinkedList };
   
-  // Very brief test
-  
-  // const myList = new LinkedList();
-  
-  // myList.append(1, 'hi');
-  // myList.append(2, 'yo');
-  // myList.append(3, 'howdy');
-  // myList.append(4, 'check');
-  // myList.append(5, 'why');
-  
-  // console.log(myList.render()); // [1, 2, 3, 4]
-  
-  // myList.remove(1);
-  // console.log(myList.render()); // [1, 2, 3]
-  // myList.remove(3);
-  // console.log(myList.render()); // [1, 2, 3, 4]

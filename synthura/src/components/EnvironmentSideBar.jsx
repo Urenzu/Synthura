@@ -1,3 +1,15 @@
+/* 
+
+Contributor(s): Owen Arnst
+
+Description: This component is a sidebar that facilitates the management of environments and clusters.
+
+Parent Component(s): EnvironmentPage
+
+Child Component(s): EnvironmentContainer
+
+*/
+
 import "./tempStyles/EnvironmentSideBar.css"
 import EnvironmentContainer from "./EnvironmentContainer"
 import { LinkedList } from '../scripts/LinkedList';
