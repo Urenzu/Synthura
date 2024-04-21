@@ -29,11 +29,7 @@ const CameraGrid = () => {
             setCamList(prevList => {
               const updatedList = new LinkedList();
               Object.assign(updatedList, prevList); // Copy previous state
-              if(updatedList.isPresent(id)) {
-                console.log('Camera already exists');
-              }
-              else {
-                console.log("appending camera");
+              if(!updatedList.isPresent(id)) {
                 updatedList.append(id, <VideoFrame key={id} srcFeed={url} camNum={id} handleRemoveCamera={handleRemoveCamera} />); // Append new data
                 setId(id+1);
               }
@@ -52,7 +48,6 @@ const CameraGrid = () => {
 
   // will run when camList updates, renders updated grid of cameras
   useEffect(() => { 
-    console.log("camList updated");
     setActiveCameras(camList.render());
   }, [camList]);
 

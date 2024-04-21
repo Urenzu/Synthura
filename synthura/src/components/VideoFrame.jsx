@@ -4,6 +4,8 @@ Contributor(s): Owen Arnst
 
 Description: This component is a frame that displays videos specified by srcFeed. See accepted propTypes below component function.
 
+Parent Component(s): CameraGrid
+
 */}
 
 import './tempStyles/VideoFrame.css';

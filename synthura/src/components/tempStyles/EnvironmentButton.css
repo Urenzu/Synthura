@@ -25,7 +25,6 @@
     padding: 10px;
 }
 .environment-dropdown-btn:hover {
-    cursor: pointer;
     transition: background-color 0.3s ease-out;
     background-color: var(--accent-light);
 }
@@ -33,8 +32,9 @@
     /* CSS properties to transition */
     transition: bottom 0.3s ease-out;
     bottom: -3px;
-    
 }
+
+/* down arrow icon */
 .environment-dropdown-icon {
     width: 16px;
     height: 16px;
@@ -42,4 +42,12 @@
     position: relative;
     bottom: 2px;
     margin-left: 3px;
+}
+
+/* close environment icon */
+#close-env-icon {
+    fill: white;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
