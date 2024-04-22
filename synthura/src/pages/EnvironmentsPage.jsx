@@ -36,4 +36,4 @@ const EnvironmentsPage = () => {
   );
 }
 
-export default EnvironmentsPage;
+

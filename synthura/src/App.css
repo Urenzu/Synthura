@@ -7,6 +7,31 @@
   --border-color: #3e3e42;
 }
 
+body{
+  margin: 0; /* Reset default margin to ensure full background coverage */
+  height: 100vh; /* Ensure the body covers the full viewport height */
+  background: linear-gradient(rgb(0, 0, 0), rgb(255, 255, 255));
+  transform: translateY(+40%);
+}
+
+body h1,h2,h3,p {
+  color:white;
+  text-align: center;
+}
+
+body h2, h3{
+  size: 40px;
+}
+
+.button2{
+  text-align: center;
+}
+
+.google-auth{
+  text-align: center;
+  width: 50%;
+}
+
 body {
   background-color: var(--background-dark1);
   margin: 0;
@@ -23,3 +48,68 @@ main {
   position: relative;
   box-sizing: border-box;
 }
+
+.unique_button {
+  font-size: 20px; 
+  font-family: OCR A Std, monospace;
+  border-color: rgb(255, 255, 255); 
+  border-radius: 10px; 
+  background-color: rgb(0, 0, 0);
+  color: white;
+}
+
+#analytics_window {
+  padding: 0px 15px 0px 0px;
+}
+
+#analytics_window_circle_red {
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  width: 25px;
+  height: 25px; 
+  border-radius: 50%;
+  background-color: red;
+}
+
+#analytics_window_circle_purple {
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  width: 25px;
+  height: 25px; 
+  border-radius: 50%;
+  background-color: purple;
+}
+
+#analytics_window_row {
+  padding: 0px 15px 0px 0px;
+}
+
+#dynamic_table_row {
+  border: 5px solid white;
+  border-radius: 5px;
+  padding: 2px 40px 25px 40px;
+}
+
+#video_window {
+  background-color: #D9D9D9;
+  border-radius: 5px;
+  height: 230px;
+  width: 260px
+}
+
+#recording_page_container {
+  background-image: url("https://gifdb.com/images/high/black-background-star-constellation-9yh7ozd1p01cctby.gif");
+  background-size: cover; 
+  font-family: OCR A Std, monospace; 
+  overflow-x: auto;
+  overflow-y: auto;
+  position: fixed;
+  padding: 2px 40px 25px 75px; 
+  height: 100%;
+  width: 100%;
+  color: white
+}
+/*recording page styling end*/
+
