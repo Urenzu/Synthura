@@ -10,20 +10,14 @@ Currently, two official plugins are available:
 # Setting up HTTPS for local development
 
 1. Install mkcert  
-- For Mac/Linux  
-  `curl -L -o mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-darwin-amd64`  
-  `chmod +x mkcert`  
-  `sudo mv mkcert /usr/local/bin/`  
-  `mkcert -install`  
-- For Windows  
-  `curl -L -o mkcert.exe https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-windows-amd64.exe`  
-  copy mkcert.exe to a directory already included in PATH or add the directory containing mkcert to PATH  
-  `mkcert -install`  
+- Follow ReadMe of this git repo: https://github.com/FiloSottile/mkcert
+  
 2. Generate certificate for localhost  
-  `mkcert localhost`  
+- `mkcert localhost`
+  
 3. Use certificates in server  
-  Navigate to vite.config.js  
-  Paste following code:
+- Navigate to vite.config.js  
+- Paste following code:
 ```
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -41,5 +35,6 @@ export default defineConfig({
   }
 })
 ```
-*Where "path" is the absolute path to your certificates*    
+*Where "path" is the absolute path to your certificates*
+
 4. Run the server with `npm run dev`
