@@ -15,13 +15,13 @@ Currently, two official plugins are available:
 `chmod +x mkcert`  
 `sudo mv mkcert /usr/local/bin/`  
 `mkcert -install`  
-- For Windows
+- For Windows  
 `curl -L -o mkcert.exe https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-windows-amd64.exe`  
 copy mkcert.exe to a directory already included in PATH or add the directory containing mkcert to PATH  
 `mkcert -install`
-2. Generate certificate for localhost
-`mkcert localhost'
-3. Use certificates in server
+2. Generate certificate for localhost  
+`mkcert localhost`
+3. Use certificates in server  
 Navigate to vite.config.js  
 Paste following code:
 ```
@@ -41,5 +41,5 @@ export default defineConfig({
   }
 })
 ```
-*Where "path" is the absolute path to your certificates*
+*Where "path" is the absolute path to your certificates*  
 4. Run the server with `npm run dev`
