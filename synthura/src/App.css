@@ -1,5 +1,17 @@
-body{
-  margin: 0; /* Reset default margin to ensure full background coverage */
-  height: 100vh; /* Ensure the body covers the full viewport height */
-  background: linear-gradient(rgb(0, 0, 0), rgb(255, 255, 255));
+/* global variables */
+:root {
+  --background-dark1: #1e1e1e;
+  --background-dark2: #252526;
+  --accent-dark: #2d2d30;
+  --accent-light: #5c5c63;
+  --border-color: #3e3e42;
+}
+
+body {
+  background-color: var(--background-dark1);
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
 }
