@@ -14,6 +14,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
     background-color: var(--background-dark2);
     color: snow;
     font-size: 16px;
@@ -47,6 +48,8 @@
 /* close environment icon */
 #close-env-icon {
     fill: white;
+    position: absolute;
+    left: 10px;
     width: 16px;
     height: 16px;
     cursor: pointer;
