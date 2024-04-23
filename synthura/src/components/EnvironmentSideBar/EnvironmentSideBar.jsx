@@ -10,9 +10,9 @@ Child Component(s): EnvironmentContainer
 
 */
 
-import "./tempStyles/EnvironmentSideBar.css"
-import EnvironmentContainer from "./EnvironmentContainer"
-import { LinkedList } from '../scripts/LinkedList';
+import "./EnvironmentSideBar.css"
+import EnvironmentContainer from "../EnvironmentContainer/EnvironmentContainer"
+import { LinkedList } from '../../scripts/LinkedList';
 import { useState, useEffect } from 'react';
 
 const EnvironmentSideBar = ({showSideBar}) => {

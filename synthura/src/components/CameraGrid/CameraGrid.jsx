@@ -12,9 +12,9 @@ Child Component(s): VideoFrame
 */}
 
 import { useState, useEffect } from 'react';
-import VideoFrame from './VideoFrame';
-import './tempStyles/CameraGrid.css';
-import { LinkedList } from '../scripts/LinkedList';
+import VideoFrame from '../VideoFrame/VideoFrame';
+import './CameraGrid.css';
+import { LinkedList } from '../../scripts/LinkedList';
 
 
 const CameraGrid = () => {

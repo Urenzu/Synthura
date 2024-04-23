@@ -10,9 +10,11 @@ Child Component(s): EnvironmentButton, ClusterButton
 
 */
 
-import EnvironmentButton from "./EnvironmentButton"
-import ClusterButton from "./ClusterButton"
-import "./tempStyles/EnvironmentContainer.css"
+import { useState } from "react"
+import { LinkedList } from "../../scripts/LinkedList"
+import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
+import ClusterButton from "../ClusterButton/ClusterButton"
+import "./EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {id, handleDeleteEnvironment} ) => {
 
@@ -24,6 +26,7 @@ const EnvironmentContainer = ( {id, handleDeleteEnvironment} ) => {
       <EnvironmentButton id={id} handleDeleteEnvironment={handleDeleteEnvironment} />
       <div className="cluster">
         {activeClusters}
+        <button className="add-cluster-btn">Add Cluster</button>
       </div>
     </div>
   )

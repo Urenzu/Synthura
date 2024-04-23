@@ -1,3 +1,4 @@
+import './RecordingsPage.css';
 import React, { useState } from 'react';
 
 let camera_number = 0;
@@ -97,7 +98,7 @@ function DynamicTable() {
 
   return (
     <div>
-      <button onClick={addElement} class="unique_button">Add Element</button>
+      <button onClick={addElement} className="unique_button">Add Element</button>
       <p>Total Elements: {getTotalElements()}</p>
       <table>
         <tbody>
@@ -128,7 +129,7 @@ function DynamicTable() {
 function RecordingsPage() {
   return (
     <div id="recording_page_container"> 
-      <h1><strong>Saved Recordings: </strong></h1>
+      <h1>Saved Recordings:</h1>
       <DynamicTable />
     </div>
   );

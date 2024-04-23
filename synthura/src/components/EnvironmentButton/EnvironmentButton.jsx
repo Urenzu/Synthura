@@ -10,7 +10,7 @@ Child Component(s): none
 
 */
 
-import "./tempStyles/EnvironmentButton.css"
+import "./EnvironmentButton.css"
 
 const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
 

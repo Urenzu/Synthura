@@ -35,9 +35,10 @@
     width: 100%;
 }
 
-/* styling for environment button */
+/* styling for add environment button */
 #add-environment-btn {
     width: calc(100% - 30px);
+    height: 40px;
     padding: 10px;
     margin: 10px 0;
     background-color: var(--accent-dark);
@@ -47,6 +48,7 @@
     cursor: pointer;
     font-family: 'Roboto', sans-serif;
     font-weight: 600;
+    letter-spacing: 1px;
     position: absolute;
     bottom: 10px;
 }

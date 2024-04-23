@@ -10,7 +10,7 @@ Child Component(s): None
 
 */}
 
-import './tempStyles/VideoFrame.css';
+import './VideoFrame.css';
 import PropTypes from 'prop-types';
 
 const VideoFrame = ( {srcFeed, camNum, handleRemoveCamera} ) => {
