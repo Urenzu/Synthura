@@ -1,0 +1,53 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #141414;
+    --accent-dark: #2d2d30;
+    --accent-light: #4f4f55;
+    --border-color: #3e3e42;
+}
+
+/* dropdown menu button  */
+.environment-dropdown-btn {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--background-dark2);
+    color: snow;
+    font-size: 16px;
+    font-family: 'Roboto' sans-serif;
+    letter-spacing: 1px;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+.environment-dropdown-btn:hover {
+    transition: background-color 0.3s ease-out;
+    background-color: var(--accent-light);
+}
+.environment-dropdown-btn:hover > .environment-dropdown-icon {
+    /* CSS properties to transition */
+    transition: bottom 0.3s ease-out;
+    bottom: -3px;
+}
+
+/* down arrow icon */
+.environment-dropdown-icon {
+    width: 16px;
+    height: 16px;
+    fill: snow;
+    position: relative;
+    bottom: 2px;
+    margin-left: 3px;
+}
+
+/* close environment icon */
+#close-env-icon {
+    fill: white;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
