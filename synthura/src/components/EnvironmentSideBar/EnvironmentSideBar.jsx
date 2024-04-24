@@ -37,7 +37,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList); // Copy previous state
       if(!updatedList.isPresent(id)) {
-        updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} id={id} />); // Append new data
+        updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} />); // Append new data
         setId(id+1);
       }
       return updatedList; // Return updated list
