@@ -1,17 +1,34 @@
 import './RecordingsPage.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;
-var example_dict = {
-  1: "Yamato",
-  2: "Nagasaki",
-  3: "Itadori",
-  4: "Toji"
-};
 
-function DynamicTable() {
+function DynamicTable({ recordings }) {
   const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    if (recordings && recordings.length > 0) {
+      const formattedRows = [];
+      let tempRow = [];
+
+    
+      // Convert the recordings array into rows for the DynamicTable
+      recordings.forEach((recording, index) => {
+        const { title } = recording;
+        tempRow.push({ id: index + 1, name: title });
+        if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
+          formattedRows.push(tempRow);
+          tempRow = [];
+        }
+        camera_number = index + 1;
+        existance_number = camera_number;
+      });
+
+      setRows(formattedRows);
+    }
+  }, [recordings]);
 
   const addElement = () => {
     const newRow = [...rows];
@@ -23,15 +40,10 @@ function DynamicTable() {
       newRow.push([]);
     }
 
-    if (idString in example_dict) {
-      newRow[newRow.length - 1].push({ id: idString, name: example_dict[idString]});
-    }
-    else {
-      newRow[newRow.length - 1].push({ id: idString, name: existance_number});
-    }
+    newRow[newRow.length - 1].push({ id: idString, name: existance_number});
     setRows(newRow);
   };
-
+  
   const deleteElement = (rowIndex, elementIndex) => {
     const newRow = [...rows];
     newRow[rowIndex].splice(elementIndex, 1);
@@ -60,7 +72,7 @@ function DynamicTable() {
     }
     setRows(newRow.filter(row => row.length > 0));
   };
-
+  
   // Function to calculate the total number of elements
   const getTotalElements = () => {
     return rows.reduce((total, row) => total + row.length, 0);
@@ -99,7 +111,6 @@ function DynamicTable() {
   return (
     <div>
       <button onClick={addElement} className="unique_button">Add Element</button>
-      <p>Total Elements: {getTotalElements()}</p>
       <table>
         <tbody>
           {rows.map((row, rowIndex) => (
@@ -127,10 +138,25 @@ function DynamicTable() {
 }
 
 function RecordingsPage() {
+  const [recordings, setRecordings] = useState([]);
+
+  useEffect(() => {
+    const fetchRecordings = async () => {
+      try {
+        const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/book'); // Fetch recordings from MongoDB Realm endpoint
+        setRecordings(response.data);
+      } catch (error) {
+        console.error('Error fetching recordings:', error);
+      }
+    };
+
+    fetchRecordings();
+  }, []);
+
   return (
-    <div id="recording_page_container"> 
+    <div id="recording_page_container">
       <h1>Saved Recordings:</h1>
-      <DynamicTable />
+      <DynamicTable recordings={recordings} />
     </div>
   );
 }
