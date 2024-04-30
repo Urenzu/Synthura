@@ -7,6 +7,7 @@ from pydantic import BaseModel
 import asyncio
 from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 import logging
+from fastapi.middleware.cors import CORSMiddleware
 from av import VideoFrame
 
 """
@@ -31,6 +32,19 @@ To run: uvicorn backend:app --reload
 """
 
 app = FastAPI()
+
+origins = [
+    "https://localhost:5173/",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
