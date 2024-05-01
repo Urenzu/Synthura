@@ -9,13 +9,16 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 import logging
 from av import VideoFrame
 from urllib.parse import unquote
+from pydantic import BaseModel
+from aiortc import VideoStreamTrack
+from av import VideoFrame
 
 """
 Backend environment setup (2 approaches):
 
 Python virtual environment approach (Current):
 python -m venv synthura
-synthura\Scripts\activate (In base synthura directory)
+synthura\backend\Scripts\activate (In base synthura directory)
 pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets
 To run: uvicorn backend:app --reload
 
@@ -165,6 +168,28 @@ class SynthuraSecuritySystem:
                 break
 
 security_system = SynthuraSecuritySystem()
+
+class CameraIP(BaseModel):
+    camera_ip: str
+
+class VideoTransformTrack(VideoStreamTrack):
+    def __init__(self, camera_ip, security_system):
+        super().__init__()
+        self.camera_ip = camera_ip
+        self.security_system = security_system
+
+    async def recv(self):
+        pts, time_base = await self.next_timestamp()
+        results = self.security_system.get_camera_results(self.camera_ip)
+
+        if results is not None:
+            annotated_frame = self.security_system.frame_annotation(results.orig_img, results)
+            frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
+            frame.pts = pts
+            frame.time_base = time_base
+            return frame
+        else:
+            return None
 
 @app.websocket("/api/video_feed/{camera_ip}/ws")
 async def video_feed_websocket(websocket: WebSocket, camera_ip: str):
