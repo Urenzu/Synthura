@@ -2,13 +2,14 @@ import cv2
 from ultralytics import YOLO
 from threading import Thread, Event
 import os
-from fastapi import FastAPI, Body, Query, HTTPException
+from fastapi import FastAPI, Body, Query, HTTPException, WebSocket
 from pydantic import BaseModel
 import asyncio
 from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 from av import VideoFrame
+from models import CameraIP, VideoTransformTrack
 
 """
 Backend environment setup (2 approaches):
@@ -237,28 +238,6 @@ class SynthuraSecuritySystem:
         logger.info("Security system stopped.")
 
 security_system = SynthuraSecuritySystem()
-
-class CameraIP(BaseModel):
-    camera_ip: str
-
-class VideoTransformTrack(VideoStreamTrack):
-    def __init__(self, camera_ip, security_system):
-        super().__init__()
-        self.camera_ip = camera_ip
-        self.security_system = security_system
-
-    async def recv(self):
-        pts, time_base = await self.next_timestamp()
-        results = self.security_system.get_camera_results(self.camera_ip)
-
-        if results is not None:
-            annotated_frame = self.security_system.frame_annotation(results.orig_img, results)
-            frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
-            frame.pts = pts
-            frame.time_base = time_base
-            return frame
-        else:
-            return None
 
 @app.post("/api/video_feed/{camera_ip}/offer")
 async def video_feed_offer(camera_ip: str, offer: RTCSessionDescription):
