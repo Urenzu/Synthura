@@ -18,8 +18,8 @@ Backend environment setup (2 approaches):
 
 Python virtual environment approach (Current):
 python -m venv synthura
-pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets
 synthura\Scripts\activate (In base backend directory)
+pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets
 To run: uvicorn backend:app --reload
 
 Anaconda approach (Outdated):
