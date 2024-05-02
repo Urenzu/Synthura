@@ -11,7 +11,11 @@ from av import VideoFrame
 from urllib.parse import unquote
 from pydantic import BaseModel
 from aiortc import VideoStreamTrack
-from av import VideoFrame
+
+import numpy
+import httpx
+import json
+from fastapi.middleware.cors import CORSMiddleware
 
 """
 Backend environment setup (2 approaches):
@@ -38,6 +42,15 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+    expose_headers=["Content-Disposition"],
+)
+
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
@@ -49,16 +62,18 @@ class SynthuraSecuritySystem:
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         return YOLO(model_path)
 
-    def add_camera(self, camera_ip):
+    def add_camera(self, camera_ip, camera_url):
+
         if camera_ip in self.camera_ips:
             logger.warning(f"Camera {camera_ip} is already added.")
             return
 
         stop_event = Event()
-        task = asyncio.create_task(self.camera_processing(camera_ip, stop_event))
+        task = asyncio.create_task(self.camera_processing(camera_ip, stop_event, camera_url))
         self.camera_tasks[camera_ip] = (task, stop_event)
         self.camera_ips.append(camera_ip)
         logger.info(f"Camera {camera_ip} added successfully.")
+
 
     async def camera_processing(self, camera_ip, stop_event):
         try:
@@ -140,32 +155,81 @@ class SynthuraSecuritySystem:
         cv2.destroyAllWindows()
         logger.info("Security system stopped.")
 
-    async def handle_websocket(self, websocket: WebSocket, camera_ip: str):
-        decoded_camera_ip = unquote(camera_ip)
+    # TODO: Store PeerConnection objects for each camera
+    async def handle_websocket(self, websocket: WebSocket):
+
         await websocket.accept()
-        self.add_camera(decoded_camera_ip)
+        pc = None
+        decoded_camera_ip = ""
 
         while True:
+            data = await websocket.receive_text()
             try:
-                offer = await websocket.receive_text()
-                offer = RTCSessionDescription(sdp=offer, type='offer')
+                json_data = json.loads(data)
+                type = json_data.get("type")
 
-                pc = RTCPeerConnection()
-                video_transform_track = VideoTransformTrack(decoded_camera_ip, self)
-                pc.addTrack(video_transform_track)
+                # add camera to security and create/send offer
+                if type == "camera_url":
+                    # retrieve camera ip and add to security system
+                    camera_ip = json_data.get("camera_ip")
+                    decoded_camera_ip = unquote(camera_ip)
+                    camera_id = json_data.get("camera_id")
 
-                await pc.setRemoteDescription(offer)
-                answer = await pc.createAnswer()
-                await pc.setLocalDescription(answer)
+                    logger.info(decoded_camera_ip)
 
-                await websocket.send_text(pc.localDescription.sdp)
+                    # TODO: Tweak add_camera to process video from link
+                    #self.add_camera(camera_id, decoded_camera_ip)
+                    
+                    # Initiate webrtc connection
+                    pc = RTCPeerConnection()
 
-                while True:
-                    message = await websocket.receive_text()
+                    # Add video track to peer connection
+                    cap = cv2.VideoCapture(decoded_camera_ip)
+                    track = MyVideoStreamTrack(cap)
+                    pc.addTrack(track)
+
+                    # TODO: Tweak add_camera to process video from link 
+                    # video_transform_track = VideoTransformTrack(decoded_camera_ip, self)
+
+                    # Generate and send offer to client
+                    offer = await pc.createOffer()
+                    await pc.setLocalDescription(offer)
+                    await websocket.send_text(pc.localDescription.sdp)
+
+                # process answer from client
+                else:
+                    logging.info("Received Answer")
+                    # set remote description to answer
+                    await pc.setRemoteDescription(RTCSessionDescription(type="answer", sdp=json_data["sdp"]))
 
             except WebSocketDisconnect:
-                self.remove_camera(decoded_camera_ip)
+                logging.info("Websocket disconnected")
+                await pc.close()
                 break
+
+# temp class to test video streaming
+class MyVideoStreamTrack(VideoStreamTrack):
+    def __init__(self, cap):
+        super().__init__()  # Initialize parent class
+        self.cap = cap
+
+    async def recv(self):
+        while True:
+            ret, frame = self.cap.read()
+            if ret:
+                pts, time_base = await self.next_timestamp()
+                frame = VideoFrame.from_ndarray(frame, format="bgr24")
+                frame.pts = pts
+                frame.time_base = time_base
+                return frame
+            else:
+                # Create an empty frame with dimensions matching the camera's output to send something back
+                empty_frame = numpy.zeros((480, 640, 3), dtype=numpy.uint8)  # Assuming (480, 640) resolution and BGR24 format
+                pts, time_base = await self.next_timestamp()
+                empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
+                empty_frame.pts = pts
+                empty_frame.time_base = time_base
+                return empty_frame
 
 security_system = SynthuraSecuritySystem()
 
@@ -191,10 +255,10 @@ class VideoTransformTrack(VideoStreamTrack):
         else:
             return None
 
-@app.websocket("/api/video_feed/{camera_ip}/ws")
-async def video_feed_websocket(websocket: WebSocket, camera_ip: str):
-    decoded_camera_ip = unquote(camera_ip)
-    await security_system.handle_websocket(websocket, decoded_camera_ip)
+@app.websocket("/api/video_feed/ws")
+async def video_feed_websocket(websocket: WebSocket):
+    print("test")
+    await security_system.handle_websocket(websocket)
 
 @app.post("/api/add_camera")
 async def add_camera(camera_ip: CameraIP):
