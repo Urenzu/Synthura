@@ -10,24 +10,21 @@ const CameraGrid = () => {
   const [cameraIP, setCameraIP] = useState('');
 
   const handleAddCamera = () => {
-  if (cameraIP) {
-    const websocketUrl = `ws://localhost:8000/api/video_feed/${cameraIP}/ws`;
-    const websocket = new WebSocket(websocketUrl);
+    if (cameraIP) {
 
-      websocket.onopen = () => {
-        setCamList(prevList => {
-          const updatedList = new LinkedList();
-          Object.assign(updatedList, prevList);
+      setCamList(prevList => {
+        const updatedList = new LinkedList();
+        Object.assign(updatedList, prevList);
+        if (!updatedList.isPresent(id)) {
+          updatedList.append(id, <VideoFrame key={id} camNum={id} cameraIP={cameraIP} handleRemoveCamera={handleRemoveCamera} />);
+          setId(id + 1);
+        }
+        return updatedList;
+      });
 
-          if (!updatedList.isPresent(id)) {
-            updatedList.append(id, <VideoFrame key={id} websocket={websocket} camNum={id} handleRemoveCamera={handleRemoveCamera} />);
-            setId(id + 1);
-          }
+    } 
 
-          return updatedList;
-        });
-      };
-    } else {
+    else {
       console.error('No camera IP provided');
     }
   };
