@@ -4,6 +4,7 @@ import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;
+let user_id;
 
 function DynamicTable({ recordings }) {
   const [rows, setRows] = useState([]);
@@ -16,8 +17,8 @@ function DynamicTable({ recordings }) {
     
       // Convert the recordings array into rows for the DynamicTable
       recordings.forEach((recording, index) => {
-        const { title } = recording;
-        tempRow.push({ id: index + 1, name: title });
+        const { name } = recording;
+        tempRow.push({ id: index + 1, name: name });
         if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
           formattedRows.push(tempRow);
           tempRow = [];
@@ -29,7 +30,7 @@ function DynamicTable({ recordings }) {
       setRows(formattedRows);
     }
   }, [recordings]);
-
+  
   const addElement = () => {
     const newRow = [...rows];
     const lastRow = newRow[newRow.length - 1];
@@ -43,39 +44,44 @@ function DynamicTable({ recordings }) {
     newRow[newRow.length - 1].push({ id: idString, name: existance_number});
     setRows(newRow);
   };
-  
+
   const deleteElement = (rowIndex, elementIndex) => {
-    const newRow = [...rows];
-    newRow[rowIndex].splice(elementIndex, 1);
-    
-    for (let i = rowIndex + 1; i < newRow.length; i++) {
-      if (newRow[i].length > 0) {
-        newRow[i - 1].push(newRow[i].shift());
-      } else {
-        break;
-      }
-    }
-    camera_number--;
-    setRows(newRow.filter(row => row.length > 0));
-    for (let r = rowIndex; r < rows.length; r++)
-    {
-      if (r == rowIndex){
-        for (let c = elementIndex; c < rows[r].length; c++) {
-          rows[r][c].id = rows[r][c].id - 1
-        }
-      }
-      else{
-        for (let c = 0; c < rows[r].length; c++) {
-          rows[r][c].id = rows[r][c].id - 1
-        }
-      }
-    }
-    setRows(newRow.filter(row => row.length > 0));
-  };
-  
-  // Function to calculate the total number of elements
-  const getTotalElements = () => {
-    return rows.reduce((total, row) => total + row.length, 0);
+    const recordingId = recordings[(3 * rowIndex) + elementIndex]["name"]; // Ensure you have `_id` in your recordings objects
+    console.log(user_id);
+    axios.patch(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&recordingName=${recordingId}`)
+        .then(response => {
+            console.log('Deleted ObjectID:', recordingId );
+            // Proceed to update UI after successful backend deletion
+            const newRow = [...rows];
+            newRow[rowIndex].splice(elementIndex, 1);
+            
+            for (let i = rowIndex + 1; i < newRow.length; i++) {
+              if (newRow[i].length > 0) {
+                newRow[i - 1].push(newRow[i].shift());
+              } else {
+                break;
+              }
+            }
+            camera_number--;
+            setRows(newRow.filter(row => row.length > 0));
+            for (let r = rowIndex; r < rows.length; r++)
+            {
+              if (r == rowIndex){
+                for (let c = elementIndex; c < rows[r].length; c++) {
+                  rows[r][c].id = rows[r][c].id - 1
+                }
+              }
+              else{
+                for (let c = 0; c < rows[r].length; c++) {
+                  rows[r][c].id = rows[r][c].id - 1
+                }
+              }
+            }
+            setRows(newRow.filter(row => row.length > 0));
+        })
+        .catch(error => {
+            console.error('Error deleting recording:', error);
+        });
   };
 
   const test_component = () => {
@@ -110,7 +116,6 @@ function DynamicTable({ recordings }) {
 
   return (
     <div>
-      <button onClick={addElement} className="unique_button">Add Element</button>
       <table>
         <tbody>
           {rows.map((row, rowIndex) => (
@@ -143,8 +148,9 @@ function RecordingsPage() {
   useEffect(() => {
     const fetchRecordings = async () => {
       try {
-        const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/book'); // Fetch recordings from MongoDB Realm endpoint
-        setRecordings(response.data);
+        const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Nam'); // Fetch recordings from MongoDB Realm endpoint
+        setRecordings(response.data[0]["recordings"]);
+        user_id = response.data[0]["_id"]
       } catch (error) {
         console.error('Error fetching recordings:', error);
       }
