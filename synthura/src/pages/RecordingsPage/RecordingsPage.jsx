@@ -48,7 +48,8 @@ function DynamicTable({ recordings }) {
   const deleteElement = (rowIndex, elementIndex) => {
     const recordingId = recordings[(3 * rowIndex) + elementIndex]["name"]; // Ensure you have `_id` in your recordings objects
     console.log(user_id);
-    axios.patch(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&recordingName=${recordingId}`)
+    console.log(recordingId);
+    axios.delete(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&recordingName=${recordingId}`)
         .then(response => {
             console.log('Deleted ObjectID:', recordingId );
             // Proceed to update UI after successful backend deletion
@@ -150,7 +151,7 @@ function RecordingsPage() {
       try {
         const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Nam'); // Fetch recordings from MongoDB Realm endpoint
         setRecordings(response.data[0]["recordings"]);
-        user_id = response.data[0]["_id"]
+        user_id = response.data[0]["user"]
       } catch (error) {
         console.error('Error fetching recordings:', error);
       }
