@@ -1,12 +1,12 @@
 import './RecordingsPage.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;
 let user_id;
 
-function DynamicTable({ recordings }) {
+function DynamicTable({ recordings, setRecordings }) {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
@@ -53,6 +53,10 @@ function DynamicTable({ recordings }) {
         .then(response => {
             console.log('Deleted ObjectID:', recordingId );
             // Proceed to update UI after successful backend deletion
+            const newRecordings = [...recordings];
+            newRecordings.splice((3 * rowIndex) + elementIndex, 1);
+            setRecordings(newRecordings);
+
             const newRow = [...rows];
             newRow[rowIndex].splice(elementIndex, 1);
             
@@ -85,10 +89,22 @@ function DynamicTable({ recordings }) {
         });
   };
 
-  const test_component = () => {
+  function VideoPlayer({source}) {
+    const [videoSrc, setVideoSrc] = useState("");
+  
+    useEffect(() => {
+      import(/* @vite-ignore */ source)
+        .then(video => setVideoSrc(video.default))
+        .catch(err => console.error('Failed to load video', err));
+    }, []);
+  
+    return (<video id="video_window" controls src={videoSrc} />);
+  }
+
+  const test_component = (videoSource) => {
     return (
       <>
-        <div id="video_window"></div>
+        <VideoPlayer source={videoSource} />;
         <div id="analytics_window">
           <table>
             <tbody>
@@ -125,7 +141,7 @@ function DynamicTable({ recordings }) {
                 <td key={element.id} id="dynamic_table_row">
                   <center>
                   <h2>{"Camera " + element.id + ": " + element.name}</h2>
-                    {test_component()}
+                    {test_component('./sample_thunder.mp4')}
                     <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
                     </button>
@@ -163,7 +179,9 @@ function RecordingsPage() {
   return (
     <div id="recording_page_container">
       <h1>Saved Recordings:</h1>
-      <DynamicTable recordings={recordings} />
+      <center>
+        <DynamicTable recordings={recordings} setRecordings={setRecordings} />
+      </center>
     </div>
   );
 }
