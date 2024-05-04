@@ -4,19 +4,20 @@ import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
 
 const CameraGrid = () => {
+
   const [activeCameras, setActiveCameras] = useState([]);
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
-  const [cameraIP, setCameraIP] = useState('');
+  const [cameraURL, setCameraURL] = useState('');
 
   const handleAddCamera = () => {
-    if (cameraIP) {
+    if (cameraURL) {
 
       setCamList(prevList => {
         const updatedList = new LinkedList();
         Object.assign(updatedList, prevList);
         if (!updatedList.isPresent(id)) {
-          updatedList.append(id, <VideoFrame key={id} camNum={id} cameraIP={cameraIP} handleRemoveCamera={handleRemoveCamera} />);
+          updatedList.append(id, <VideoFrame key={id} camNum={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />);
           setId(id + 1);
         }
         return updatedList;
@@ -25,21 +26,43 @@ const CameraGrid = () => {
     } 
 
     else {
-      console.error('No camera IP provided');
+      console.error('No URL provided');
     }
+
   };
 
   useEffect(() => {
     setActiveCameras(camList.render());
   }, [camList]);
 
-  const handleRemoveCamera = (rem) => {
+  const handleRemoveCamera = (id) => {
+
+    fetch(`http://localhost:8000/api/remove_camera/${id}`, {
+      method: 'GET'
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to remove camera');
+        }
+        else {
+          console.log("Camera connection closed")
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+
     setCamList(prevList => {
+
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList);
-      updatedList.remove(rem);
+      updatedList.remove(id);
+      if (updatedList.getSize() === 0) {
+        setId(1);
+      }
       return updatedList;
     });
+
   };
 
   return (
@@ -51,7 +74,7 @@ const CameraGrid = () => {
           id="cameraIP"
           placeholder="Enter Camera IP"
           autoComplete="off"
-          onChange={(e) => setCameraIP(e.target.value)}
+          onChange={(e) => setCameraURL(e.target.value)}
         />
         <button id="add-camera-btn" onClick={handleAddCamera}>
           <svg id="plus-sign" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">

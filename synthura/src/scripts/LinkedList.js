@@ -13,18 +13,19 @@ class LinkedList {
 
     constructor() {
         this.head = null;
+        this.size = 0;
     }
 
     // check if a node with camNum is present in the list
     isPresent(camNum) {
-    let current = this.head;
-    while(current) {
-        if(current.id === camNum) {
-            return true;
+        let current = this.head;
+        while(current) {
+            if(current.id === camNum) {
+                return true;
+            }
+            current = current.next;
         }
-        current = current.next;
-    }
-    return false;
+        return false;
     }
 
 
@@ -41,6 +42,7 @@ class LinkedList {
             }
             current.next = node;
         }
+        this.size++;
     }
     
     // remove node specified by camNum from list
@@ -59,6 +61,12 @@ class LinkedList {
             }
             previous.next = current.next;
         }
+        this.size--;
+    }
+
+    // return the size of the list
+    getSize() {
+        return this.size;
     }
     
     // return an array of camera components

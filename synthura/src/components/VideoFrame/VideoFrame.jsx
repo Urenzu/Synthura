@@ -2,7 +2,7 @@ import './VideoFrame.css';
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 
-const VideoFrame = ({ camNum, handleRemoveCamera, cameraIP }) => {
+const VideoFrame = ({ camNum, handleRemoveCamera, cameraURL }) => {
 
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
@@ -15,15 +15,16 @@ const VideoFrame = ({ camNum, handleRemoveCamera, cameraIP }) => {
     }
     initializedRef.current = true;
 
-
     const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
     const websocket = new WebSocket(websocketUrl);
 
     // Create peer connection and configure ICE server(s)
-    const config = {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    };
-    const pc = new RTCPeerConnection(config);
+    // const config = {
+    //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    // };
+    // const pc = new RTCPeerConnection(config);
+
+    const pc = new RTCPeerConnection();
 
     // Stream video track from server to video element
     pc.ontrack = (event) => {
@@ -37,9 +38,9 @@ const VideoFrame = ({ camNum, handleRemoveCamera, cameraIP }) => {
 
       // Send camera IP to server
       websocket.send(JSON.stringify({ 
-        type: 'camera_url',
-        camera_id: camNum,
-        camera_ip: cameraIP
+        type: 'camera_info',
+        camera_url: cameraURL,
+        camera_id: camNum
       }));
 
       // Handle incoming offer from server

@@ -41,32 +41,33 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Allow all origins, methods, and headers (not recommended for production)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True,
-    expose_headers=["Content-Disposition"],
 )
 
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
-        self.camera_ips = []
-        self.camera_peer_connections = {}
+        # data stored as "camera_id: [camera_url, pc, websocket]"
+        self.camera_connections = {}
+        self.camera_urls = []
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         return YOLO(model_path)
 
-    def add_camera(self, camera_ip):
+    def add_camera(self, camera_id, camera_url, websocket, pc):
 
-        if camera_ip in self.camera_ips:
-            logger.warning(f"Camera {camera_ip} is already added.")
+        if camera_url in self.camera_urls:
+            logger.warning(f"Camera {camera_url} is already added.")
             return
-        self.camera_ips.append(camera_ip)
-        logger.info(f"Camera {camera_ip} added successfully.")
+        self.camera_connections[camera_id] = [camera_url, websocket, pc]
+        self.camera_urls.append(camera_url)
+        logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
         return self.model(frame)
@@ -74,52 +75,56 @@ class SynthuraSecuritySystem:
     def frame_annotation(self, results):
         return results[0].plot()
 
-    def remove_camera(self, camera_ip):
-        if camera_ip not in self.camera_ips:
-            logger.warning(f"Camera {camera_ip} is not found.")
+    async def remove_camera(self, camera_id):
+
+        logger.info(self.camera_connections)
+
+        if camera_id not in list(self.camera_connections.keys()):
+            logger.warning(f"Camera {camera_id} is not found.")
             return
 
-        self.camera_ips.remove(camera_ip)
+        self.camera_urls.remove(self.camera_connections[camera_id][0])
+        await self.camera_connections[camera_id][1].close(1000)
+        await self.camera_connections[camera_id][2].close()
+        self.camera_connections.pop(camera_id)
 
-        logger.info(f"Camera {camera_ip} removed successfully.")
+        logger.info(f"Camera {camera_id} removed successfully.")
 
     def stop(self):
-        for camera_ip in list(self.camera_tasks.keys()):
-            self.stop_camera_processing(camera_ip)
-        
+        for camera_id in list(self.camera_connections.keys()):
+            self.remove_camera(camera_id)
         cv2.destroyAllWindows()
         logger.info("Security system stopped.")
 
-    # TODO: Store PeerConnection objects for each camera
     async def handle_websocket(self, websocket: WebSocket):
 
         await websocket.accept()
         pc = None
-        decoded_camera_ip = ""
+        decoded_camera_url = ""
+        camera_id = None
 
         while True:
-            data = await websocket.receive_text()
+
             try:
+                
+                data = await websocket.receive_text()
                 json_data = json.loads(data)
                 type = json_data.get("type")
 
                 # add camera to security and create/send offer
-                if type == "camera_url":
+                if type == "camera_info":
                     # retrieve camera ip and add to security system
-                    camera_ip = json_data.get("camera_ip")
+                    camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
-                    decoded_camera_ip = unquote(camera_ip)
-
-
-                    # TODO: Tweak add_camera to process video from link
-                    #self.add_camera(camera_id, decoded_camera_ip)
+                    decoded_camera_url = unquote(camera_url)
                     
                     # Initiate webrtc connection
                     pc = RTCPeerConnection()
-                    self.camera_peer_connections[camera_id] = pc
+
+                    self.add_camera(camera_id, decoded_camera_url, websocket, pc)
 
                     # Add video track to peer connection
-                    cap = cv2.VideoCapture(decoded_camera_ip)
+                    cap = cv2.VideoCapture(decoded_camera_url)
                     track = MyVideoStreamTrack(cap, self)
                     pc.addTrack(track)
 
@@ -136,7 +141,6 @@ class SynthuraSecuritySystem:
 
             except WebSocketDisconnect:
                 logging.info("Websocket disconnected")
-                await self.camera_peer_connections[camera_id].close()
                 break
 
 # temp class to test video streaming
@@ -172,17 +176,11 @@ class CameraIP(BaseModel):
 
 @app.websocket("/api/video_feed/ws")
 async def video_feed_websocket(websocket: WebSocket):
-    print("test")
     await security_system.handle_websocket(websocket)
-
-@app.post("/api/add_camera")
-async def add_camera(camera_ip: CameraIP):
-    security_system.add_camera(camera_ip.camera_ip)
-    return {"message": "Camera added successfully"}
-
-@app.post("/api/remove_camera")
-async def remove_camera(camera_ip: CameraIP):
-    security_system.remove_camera(camera_ip.camera_ip)
+ 
+@app.get("/api/remove_camera/{camera_id}")
+async def remove_camera(camera_id: int):
+    await security_system.remove_camera(camera_id)
     return {"message": "Camera removed successfully"}
 
 @app.get("/api/get_camera_urls")
