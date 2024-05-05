@@ -6,6 +6,46 @@ let camera_number = 0;
 let existance_number = 0;
 let user_id;
 
+function RecordingPlayer({ filename }) {
+  const [videoUrl, setVideoUrl] = useState('');
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      try {
+        const response = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/playRecording?user=Nam&filename=${filename}`, 
+        {
+          responseType: 'blob',
+          headers: {
+            Range: 'bytes=0-'
+          }
+        });
+        
+        // Check if response is successful
+        if (response.status !== 200) {
+          throw new Error('Failed to fetch recording');
+        }
+
+        // Create a blob URL for the response data
+        const blob = new Blob([response.data]);
+        const url = URL.createObjectURL(blob);
+        setVideoUrl(url);
+
+      } catch (error) {
+        console.error('Error fetching recording:', error);
+      }
+    };
+
+
+    fetchVideo();
+  }, [filename]);
+  
+  return (
+    <div>
+      <video id="video_window" controls src="/src/pages/RecordingsPage/fish.mp4" />
+    </div>
+  );
+}
+
 function DynamicTable({ recordings, setRecordings }) {
   const [rows, setRows] = useState([]);
 
@@ -17,8 +57,8 @@ function DynamicTable({ recordings, setRecordings }) {
     
       // Convert the recordings array into rows for the DynamicTable
       recordings.forEach((recording, index) => {
-        const { name } = recording;
-        tempRow.push({ id: index + 1, name: name });
+        const { filename } = recording;
+        tempRow.push({ id: index + 1, name: filename });
         if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
           formattedRows.push(tempRow);
           tempRow = [];
@@ -46,7 +86,7 @@ function DynamicTable({ recordings, setRecordings }) {
   };
 
   const deleteElement = (rowIndex, elementIndex) => {
-    const recordingId = recordings[(3 * rowIndex) + elementIndex]["name"]; // Ensure you have `_id` in your recordings objects
+    const recordingId = recordings[(3 * rowIndex) + elementIndex]["filename"]; // Ensure you have `_id` in your recordings objects
     console.log(user_id);
     console.log(recordingId);
     axios.delete(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&recordingName=${recordingId}`)
@@ -89,22 +129,10 @@ function DynamicTable({ recordings, setRecordings }) {
         });
   };
 
-  function VideoPlayer({source}) {
-    const [videoSrc, setVideoSrc] = useState("");
-  
-    useEffect(() => {
-      import(/* @vite-ignore */ source)
-        .then(video => setVideoSrc(video.default))
-        .catch(err => console.error('Failed to load video', err));
-    }, []);
-  
-    return (<video id="video_window" controls src={videoSrc} />);
-  }
-
   const test_component = (videoSource) => {
     return (
       <>
-        <VideoPlayer source={videoSource} />;
+        <RecordingPlayer filename={videoSource} />
         <div id="analytics_window">
           <table>
             <tbody>
@@ -141,7 +169,7 @@ function DynamicTable({ recordings, setRecordings }) {
                 <td key={element.id} id="dynamic_table_row">
                   <center>
                   <h2>{"Camera " + element.id + ": " + element.name}</h2>
-                    {test_component('./sample_thunder.mp4')}
+                    {test_component(element.name)}
                     <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
                     </button>
