@@ -14,7 +14,7 @@
     border: var(--border-color) solid 5px;
     border-radius: 1%;
     height: 48%;
-    width: 23.9%;
+    width: 32.3%;
 }
 
 /* Live video feed styling */
@@ -22,8 +22,15 @@
 /* styling for frame of live video feed */
 .live-video-container {
     position: relative;
-    top: calc(2rem - 5px);
-    transform: scaleX(-1);
+    top: 2.5rem;
+    height: calc(100% - 2.5rem);
+    box-sizing: border-box;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* styling for live video bar */
@@ -32,11 +39,10 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 2rem;
+    height: 2.5rem;
     background-color: var(--background-dark1);
     box-sizing: border-box;
     padding: 0 10px;
-    border-radius: 3px;
     display: flex;
     justify-content: space-between;
     align-items: center;

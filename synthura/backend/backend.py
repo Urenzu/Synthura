@@ -1,23 +1,28 @@
 import cv2
 from ultralytics import YOLO
-from threading import Thread, Event
+from threading import Event
 import os
-from fastapi import FastAPI, Body, Query, HTTPException, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 import asyncio
 from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 import logging
-from fastapi.middleware.cors import CORSMiddleware
 from av import VideoFrame
-from models import CameraIP, VideoTransformTrack
+from urllib.parse import unquote
+from pydantic import BaseModel
+from aiortc import VideoStreamTrack
+
+import numpy
+import json
+from fastapi.middleware.cors import CORSMiddleware
 
 """
 Backend environment setup (2 approaches):
 
 Python virtual environment approach (Current):
 python -m venv synthura
-synthura\Scripts\activate
-pip install opencv-python ultralytics fastapi uvicorn aiortc av
+synthura\Scripts\activate (In base backend directory)
+pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets
 To run: uvicorn backend:app --reload
 
 Anaconda approach (Outdated):
@@ -33,238 +38,149 @@ To run: uvicorn backend:app --reload
 """
 
 app = FastAPI()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-origins = [
-    "https://localhost:5173/",
-]
-
+# Allow all origins, methods, and headers (not recommended for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
-        """
-        Initialize the Synthura Security System.        
-        Args:
-            model_path (str): Path to the YOLOv8 model file.
-        """
         self.model = self.load_model(model_path)
-        self.camera_threads = []
-        self.camera_results = {}
-        self.camera_ips = []
-        self.camera_tasks = {}
+        # data stored as "camera_id: [camera_url, pc, websocket]"
+        self.camera_connections = {}
+        self.camera_urls = []
 
     def load_model(self, model_path):
-        """
-        Load the YOLOv8 model.
-        
-        Args:
-            model_path (str): Path to the YOLOv8 model file.
-        
-        Returns:
-            model (YOLO): Loaded YOLOv8 model.
-        """
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         return YOLO(model_path)
 
-    def add_camera(self, camera_ip):
-        """
-        Add a new camera to the security system.
-        Args:
-            camera_ip (str): IP address of the camera.
-        """
-        
-        if camera_ip in self.camera_ips:
-            logger.warning(f"Camera {camera_ip} is already added.")
+    def add_camera(self, camera_id, camera_url, websocket, pc):
+
+        if camera_url in self.camera_urls:
+            logger.warning(f"Camera {camera_url} is already added.")
             return
-
-        stop_event = Event()
-        task = asyncio.create_task(self.camera_processing(camera_ip, stop_event))
-        self.camera_tasks[camera_ip] = (task, stop_event)
-        self.camera_ips.append(camera_ip)
-        logger.info(f"Camera {camera_ip} added successfully.")
-
-    async def camera_processing(self, camera_ip, stop_event):
-        """
-        Process the camera feed and perform object detection.
-        
-        Args:
-            camera_ip (str): IP address of the camera.
-            stop_event (Event): E        """
-        try:
-            pc = RTCPeerConnection()
-
-            offer = await pc.createOffer()
-            await pc.setLocalDescription(offer)
-
-            await pc.setRemoteDescription(RTCSessionDescription(
-                sdp=f"v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=-\r\nc=IN IP4 {camera_ip}\r\nt=0 0\r\nm=video 9 UDP/TLS/RTP/SAVPF 96\r\na=rtpmap:96 H264/90000\r\na=fmtp:96 packetization-mode=1\r\n",
-                type='offer'
-            ))
-
-            video_track = None
-            @pc.on('track')
-            def on_track(track):
-                nonlocal video_track
-                if track.kind == 'video':
-                    video_track = track
-
-            while not stop_event.is_set():
-                if video_track is None:
-                    await asyncio.sleep(0.1)
-                    continue
-
-                frame = await video_track.recv()
-                img = cv2.imdecode(frame.data, cv2.IMREAD_COLOR)
-
-                results = self.object_detection(img)
-                annotated_frame = self.frame_annotation(img, results)
-                
-                self.camera_results[camera_ip] = results
-                
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            
-            await pc.close()
-            cv2.destroyAllWindows()
-            logger.info(f"Camera {camera_ip} processing stopped.")
-
-        except Exception as e:
-            logger.error(f"Error processing camera {camera_ip}: {str(e)}")
-
-    def stop_camera_processing(self, camera_ip):
-        """
-        Stop the camera processing for a specific camera.
-        
-        Args:
-            camera_ip (str): IP address of the camera to stop.
-        """
-        if camera_ip in self.camera_tasks:
-            task, stop_event = self.camera_tasks[camera_ip]
-            stop_event.set()
-            task.cancel()
-            del self.camera_tasks[camera_ip]
-            logger.info(f"Camera {camera_ip} processing stopped.")
-        else:
-            logger.warning(f"Camera {camera_ip} is not found.")
+        self.camera_connections[camera_id] = [camera_url, websocket, pc]
+        self.camera_urls.append(camera_url)
+        logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
-        """
-        Perform object detection on a frame using the YOLOv8 model.
-        
-        Args:
-            frame (numpy.ndarray): Input frame.
-        
-        Returns:
-            results (list): List of detected objects.
-        """
         return self.model(frame)
 
-    def frame_annotation(self, frame, results):
-        """
-        Annotate the frame with detected objects.
-        
-        Args:
-            frame (numpy.ndarray): Input frame.
-            results (list): List of detected objects.
-        
-        Returns:
-            annotated_frame (numpy.ndarray): Annotated frame.
-        """
+    def frame_annotation(self, results):
         return results[0].plot()
 
-    def get_camera_results(self, camera_ip):
-        """
-        Get the object detection results for a specific camera.
-        
-        Args:
-            camera_ip (str): IP address of the camera.
-        
-        Returns:
-            results (list): List of object detection results for the specified camera.
-        """
-        results = self.camera_results.get(camera_ip)
-        if results is None:
-            logger.warning(f"No results found for camera {camera_ip}")
-        return results
+    async def remove_camera(self, camera_id):
 
-    def add_camera_ips(self, camera_ips):
-        """
-        Add camera IP addresses to the security system.
-        
-        Args:
-            camera_ips (list): List of camera IP addresses.
-        """
-        for camera_ip in camera_ips:
-            self.add_camera(camera_ip)
+        logger.info(self.camera_connections)
 
-    def remove_camera(self, camera_ip):
-        """
-        Remove a camera from the security system.
-        
-        Args:
-            camera_ip (str): IP address of the camera to remove.
-        """
-
-        if camera_ip not in self.camera_ips:
-            logger.warning(f"Camera {camera_ip} is not found.")
+        if camera_id not in list(self.camera_connections.keys()):
+            logger.warning(f"Camera {camera_id} is not found.")
             return
 
-        self.camera_ips.remove(camera_ip)
-        
-        self.stop_camera_processing(camera_ip)
-        
-        if camera_ip in self.camera_results:
-            del self.camera_results[camera_ip]
+        self.camera_urls.remove(self.camera_connections[camera_id][0])
+        await self.camera_connections[camera_id][1].close(1000)
+        await self.camera_connections[camera_id][2].close()
+        self.camera_connections.pop(camera_id)
 
-        logger.info(f"Camera {camera_ip} removed successfully.")
+        logger.info(f"Camera {camera_id} removed successfully.")
 
     def stop(self):
-        """
-        Stop the security system and release resources.
-        """
-        for camera_ip in list(self.camera_tasks.keys()):
-            self.stop_camera_processing(camera_ip)
-        
+        for camera_id in list(self.camera_connections.keys()):
+            self.remove_camera(camera_id)
         cv2.destroyAllWindows()
         logger.info("Security system stopped.")
 
+    async def handle_websocket(self, websocket: WebSocket):
+
+        await websocket.accept()
+        pc = None
+        decoded_camera_url = ""
+        camera_id = None
+
+        while True:
+
+            try:
+                
+                data = await websocket.receive_text()
+                json_data = json.loads(data)
+                type = json_data.get("type")
+
+                # add camera to security and create/send offer
+                if type == "camera_info":
+                    # retrieve camera ip and add to security system
+                    camera_url = json_data.get("camera_url")
+                    camera_id = json_data.get("camera_id")
+                    decoded_camera_url = unquote(camera_url)
+                    
+                    # Initiate webrtc connection
+                    pc = RTCPeerConnection()
+
+                    self.add_camera(camera_id, decoded_camera_url, websocket, pc)
+
+                    # Add video track to peer connection
+                    cap = cv2.VideoCapture(decoded_camera_url)
+                    track = MyVideoStreamTrack(cap, self)
+                    pc.addTrack(track)
+
+                    # Generate and send offer to client
+                    offer = await pc.createOffer()
+                    await pc.setLocalDescription(offer)
+                    await websocket.send_text(pc.localDescription.sdp)
+
+                # process answer from client
+                else:
+                    logging.info("Received Answer")
+                    # set remote description to answer
+                    await pc.setRemoteDescription(RTCSessionDescription(type="answer", sdp=json_data["sdp"]))
+
+            except WebSocketDisconnect:
+                logging.info("Websocket disconnected")
+                break
+
+# temp class to test video streaming
+class MyVideoStreamTrack(VideoStreamTrack):
+    def __init__(self, cap, security_system):
+        super().__init__()  # Initialize parent class
+        self.cap = cap
+        self.security_system = security_system
+
+    async def recv(self):
+        ret, frame = self.cap.read()
+        if ret:
+            # results = self.security_system.object_detection(frame)
+            # annotated_frame = self.security_system.frame_annotation(results)
+            pts, time_base = await self.next_timestamp()
+            finished_frame = VideoFrame.from_ndarray(frame, format="bgr24")
+            finished_frame.pts = pts
+            finished_frame.time_base = time_base
+            return finished_frame
+        else:
+            # Create an empty frame with dimensions matching the camera's output to send something back
+            empty_frame = numpy.zeros((480, 640, 3), dtype=numpy.uint8)  # Assuming (480, 640) resolution and BGR24 format
+            pts, time_base = await self.next_timestamp()
+            empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
+            empty_frame.pts = pts
+            empty_frame.time_base = time_base
+            return empty_frame
+
 security_system = SynthuraSecuritySystem()
 
-@app.post("/api/video_feed/{camera_ip}/offer")
-async def video_feed_offer(camera_ip: str, offer: RTCSessionDescription):
-    pc = RTCPeerConnection()
-    video_transform_track = VideoTransformTrack(camera_ip, security_system)
-    pc.addTrack(video_transform_track)
+class CameraIP(BaseModel):
+    camera_ip: str
 
-    @pc.on("iceconnectionstatechange")
-    async def on_iceconnectionstatechange():
-        if pc.iceConnectionState == "failed":
-            await pc.close()
-
-    await pc.setRemoteDescription(offer)
-
-    answer = await pc.createAnswer()
-    await pc.setLocalDescription(answer)
-
-    return {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
-
-@app.post("/api/add_camera")
-async def add_camera(camera_ip: CameraIP):
-    security_system.add_camera(camera_ip.camera_ip)
-    return {"message": "Camera added successfully"}
-
-@app.post("/api/remove_camera")
-async def remove_camera(camera_ip: CameraIP):
-    security_system.remove_camera(camera_ip.camera_ip)
+@app.websocket("/api/video_feed/ws")
+async def video_feed_websocket(websocket: WebSocket):
+    await security_system.handle_websocket(websocket)
+ 
+@app.get("/api/remove_camera/{camera_id}")
+async def remove_camera(camera_id: int):
+    await security_system.remove_camera(camera_id)
     return {"message": "Camera removed successfully"}
 
 @app.get("/api/get_camera_urls")
@@ -281,11 +197,6 @@ async def get_camera_results(camera_ip: str):
 async def stop_system():
     security_system.stop()
     return {"message": "Security system stopped successfully"}
-
-@app.get("/api/video_feed/{camera_ip}")
-async def video_feed(camera_ip: str):
-    results = security_system.get_camera_results(camera_ip)
-    return {"video_feed": results}
 
 if __name__ == "__main__":
     import uvicorn

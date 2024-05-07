@@ -54,7 +54,7 @@ h2 {
     margin-bottom: 10px;
 }
 /* styling of input field */
-#streamUrl {
+#cameraIP {
     width: 100%;
     height: 50px;
     outline: none;
