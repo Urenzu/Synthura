@@ -6,45 +6,65 @@ let camera_number = 0;
 let existance_number = 0;
 let user_id;
 
-function RecordingPlayer({ filename }) {
-  const [videoUrl, setVideoUrl] = useState('');
+const MongoDBVideoPlayer = ({ fileId }) => {
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchVideo = async () => {
+    const fetchFile = async () => {
       try {
-        const response = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/playRecording?user=Nam&filename=${filename}`, 
-        {
-          responseType: 'blob',
-          headers: {
-            Range: 'bytes=0-'
-          }
-        });
-        
-        // Check if response is successful
-        if (response.status !== 200) {
-          throw new Error('Failed to fetch recording');
+        setError(null);
+
+        const fileMetadataResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getFileMetaData?fileID=${fileId}`);
+        const totalChunksResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getTotalChunkCount?fileID=${fileId}`);
+        const totalChunks = totalChunksResponse.data;
+
+        let fileData = '';
+        for (let i = 0; i < totalChunks; i++) {
+          const chunkResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getChunkData?fileID=${fileId}&chunkNumber=${i}`);
+          fileData += chunkResponse.data.data.Data;
         }
 
-        // Create a blob URL for the response data
-        const blob = new Blob([response.data]);
+        const binaryString = atob(fileData);
+        const arrayBuffer = new ArrayBuffer(binaryString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < binaryString.length; i++) {
+          uint8Array[i] = binaryString.charCodeAt(i);
+        }
+
+        const blob = new Blob([arrayBuffer], { type: fileMetadataResponse.data.contentType });
         const url = URL.createObjectURL(blob);
         setVideoUrl(url);
-
       } catch (error) {
-        console.error('Error fetching recording:', error);
+        setError(error.message || 'Error fetching file');
       }
     };
 
+    fetchFile();
 
-    fetchVideo();
-  }, [filename]);
-  
+    return () => {
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+  }, [fileId]);
+
+  if (!videoUrl) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div>
-      <video id="video_window" controls src="/src/pages/RecordingsPage/fish.mp4" />
+      {error && <p>{error}</p>}
+      {videoUrl && (
+        <video id="video_window" controls>
+          <source src={videoUrl} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
     </div>
   );
-}
+};
 
 function DynamicTable({ recordings, setRecordings }) {
   const [rows, setRows] = useState([]);
@@ -57,8 +77,8 @@ function DynamicTable({ recordings, setRecordings }) {
     
       // Convert the recordings array into rows for the DynamicTable
       recordings.forEach((recording, index) => {
-        const { filename } = recording;
-        tempRow.push({ id: index + 1, name: filename });
+        const { filename, _id } = recording;
+        tempRow.push({ id: index + 1, name: filename, file_id: _id.$oid});
         if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
           formattedRows.push(tempRow);
           tempRow = [];
@@ -132,7 +152,7 @@ function DynamicTable({ recordings, setRecordings }) {
   const test_component = (videoSource) => {
     return (
       <>
-        <RecordingPlayer filename={videoSource} />
+        <MongoDBVideoPlayer fileId={videoSource} />
         <div id="analytics_window">
           <table>
             <tbody>
@@ -169,7 +189,7 @@ function DynamicTable({ recordings, setRecordings }) {
                 <td key={element.id} id="dynamic_table_row">
                   <center>
                   <h2>{"Camera " + element.id + ": " + element.name}</h2>
-                    {test_component(element.name)}
+                    {test_component(element.file_id)}
                     <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
                     </button>
