@@ -32,7 +32,7 @@ test('VideoFrame renders upon button click', async () => {
 
   const inputElement = getByTestId('cameraIP-test');
   fireEvent.change(inputElement, { target: { value: 'mock-url' } });
-  const button = getByTestId('add-camera-btn-test');
+  const button = getByTestId('add-camera-btn-1');
   fireEvent.click(button);
 
   // Assert -----------------
@@ -54,15 +54,14 @@ test('VideoFrame unrenders upon button click', async () => {
   // Add a video frame
   const inputElement = getByTestId('cameraIP-test');
   fireEvent.change(inputElement, { target: { value: 'mock-url' } });
-  const add_btn = getByTestId('add-camera-btn-test');
+  const add_btn = getByTestId('add-camera-btn-1');
   fireEvent.click(add_btn);
 
   // Remove the video frame
-  const remove_btn = getByTestId('close-camera-button-1');
+  const remove_btn = getByTestId('close-camera-btn-1');
   fireEvent.click(remove_btn);
 
   // Assert -----------------
-
   expect(queryByTestId("1")).toBeFalsy();
 
 });

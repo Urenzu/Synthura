@@ -52,7 +52,7 @@ video {
     color: #cccccc;
 }
 
-#close-camera-button {
+.close-camera-button {
     background: transparent;
     outline: none;
     border: none;
@@ -62,7 +62,7 @@ video {
     position: relative; /* Positioning for the icon */
 }
 
-#close-camera-button:hover::before {
+.close-camera-button:hover::before {
     content: ""; /* Create a pseudo-element to overlay the background */
     position: absolute;
     top: 0;
@@ -78,17 +78,6 @@ video {
     fill: white;
     width: 100%;
     height: 100%;
-}
-
-/* styling for add camera frame  */
-
-/* styling for add camera button  */
-#add-camera-button {
-    background: transparent;
-    border: none;
-    outline: none;
-    width: 5rem;
-    height: 5rem;
 }
 
 
