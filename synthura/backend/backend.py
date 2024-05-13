@@ -52,6 +52,11 @@ app.add_middleware(
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
+
+        # Convert YOLOv8 model to OpenVINO format
+        self.model.export(format='openvino')
+        self.ov_model = self.load_model('yolov8n_openvino_model/')
+
         # data stored as "camera_id: [camera_url, pc, websocket]"
         self.camera_connections = {}
         self.camera_urls = []
@@ -70,7 +75,7 @@ class SynthuraSecuritySystem:
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
-        return self.model(frame)
+        return self.ov_model(frame)
 
     def frame_annotation(self, results):
         return results[0].plot()
@@ -153,10 +158,10 @@ class MyVideoStreamTrack(VideoStreamTrack):
     async def recv(self):
         ret, frame = self.cap.read()
         if ret:
-            # results = self.security_system.object_detection(frame)
-            # annotated_frame = self.security_system.frame_annotation(results)
+            results = self.security_system.object_detection(frame)
+            annotated_frame = self.security_system.frame_annotation(results)
             pts, time_base = await self.next_timestamp()
-            finished_frame = VideoFrame.from_ndarray(frame, format="bgr24")
+            finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
             finished_frame.pts = pts
             finished_frame.time_base = time_base
             return finished_frame
