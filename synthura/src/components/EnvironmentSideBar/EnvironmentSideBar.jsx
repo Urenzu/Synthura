@@ -52,7 +52,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
   return (
     <section id="side-bar" className={showSideBar ? "show-side-bar" : "hide-side-bar"} >
       <h2>Manage Environments</h2>
-        <div className="environment">
+        <div id="environments">
           {activeEnvironments}
         </div>
       <button id="add-environment-btn" onClick={handleCreateEnvironment} >Add Environment</button>

@@ -19,7 +19,7 @@
     align-items: center;
     padding: 15px;
     background-color: var(--background-dark2);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease-out;
     z-index: 5;
 }
 /* animate sidebar to slide in/out of frame */
@@ -31,7 +31,7 @@
 }
 
 /* container for environment and cluster buttons */
-.environment {
+#environments {
     width: 100%;
 }
 
