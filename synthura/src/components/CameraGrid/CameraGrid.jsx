@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
+import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
 
@@ -10,6 +11,7 @@ const CameraGrid = () => {
   const [id, setId] = useState(1);
   const [cameraURL, setCameraURL] = useState('');
 
+  // add a live feed to the camera grid. this includes a video frame and an analytics feed Component.
   const handleAddCamera = () => {
     if (cameraURL) {
 
@@ -17,24 +19,28 @@ const CameraGrid = () => {
         const updatedList = new LinkedList();
         Object.assign(updatedList, prevList);
         if (!updatedList.isPresent(id)) {
-          updatedList.append(id, <VideoFrame key={id} id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />);
-          setId(id + 1);
+          updatedList.append(id, <div className="live-feed" >
+                                  <VideoFrame key={id} id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
+                                  <AnalyticsFeed key={id+1} />
+                                 </div>);
+          setId(id + 2);
         }
         return updatedList;
       });
 
     } 
-
     else {
       console.error('No URL provided');
     }
 
   };
 
+  // update active cameras the moment camList changes
   useEffect(() => {
     setActiveCameras(camList.render());
   }, [camList]);
 
+  // remove a live feed from the camera grid
   const handleRemoveCamera = (id) => {
 
     fetch(`http://localhost:8000/api/remove_camera/${id}`, {

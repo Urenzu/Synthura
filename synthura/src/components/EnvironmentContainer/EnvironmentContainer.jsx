@@ -10,7 +10,7 @@ Child Component(s): EnvironmentButton, ClusterButton
 
 */
 
-import { useState, useEffect } from "react"
+import { React, useState, useEffect } from "react"
 import { LinkedList } from "../../scripts/LinkedList"
 import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"

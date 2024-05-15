@@ -1,6 +1,8 @@
+import React from 'react'
 import './VideoFrame.css';
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 
 const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
 

@@ -11,6 +11,7 @@ Child Component(s): EnvironmentContainer
 */
 
 import "./EnvironmentSideBar.css"
+import React from 'react'
 import EnvironmentContainer from "../EnvironmentContainer/EnvironmentContainer"
 import { LinkedList } from '../../scripts/LinkedList';
 import { useState, useEffect } from 'react';
