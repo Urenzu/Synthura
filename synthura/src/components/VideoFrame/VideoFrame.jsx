@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 
-const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
+const VideoFrame = ({ id, handleRemoveCamera, cameraURL, websocket }) => {
 
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
@@ -17,8 +17,6 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
     }
     initializedRef.current = true;
 
-    const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
-    const websocket = new WebSocket(websocketUrl);
 
     // Create peer connection and configure ICE server(s)
     // const config = {

@@ -1,5 +1,10 @@
 .analytics-feed {
     width: 100%;
     height: 33%;
-    border: solid red;
+    box-sizing: border-box;
+}
+
+p {
+    color: snow;
+    font-family: 'Roboto', sans-serif;
 }

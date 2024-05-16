@@ -4,7 +4,7 @@ import './AnalyticsFeed.css';
 const AnalyticsFeed = () => {
   return (
     <div className="analytics-feed" >
-      
+      <p>Objects: </p>
     </div>
   )
 }
