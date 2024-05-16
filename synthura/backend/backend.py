@@ -1,6 +1,7 @@
 import cv2
 from ultralytics import YOLO
-from threading import Event
+from threading import Event, Thread
+from queue import Queue
 import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -13,6 +14,7 @@ from pydantic import BaseModel
 from aiortc import VideoStreamTrack
 import numpy
 import json
+import torch
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -21,7 +23,7 @@ Backend environment setup:
 
 1. python -m venv synthura
 2. synthura\Scripts\activate (In base backend directory)
-3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets
+3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
 4. To run: uvicorn backend:app --reload
 5. Enter url: http://<ip>:<port>/video
 
@@ -125,37 +127,66 @@ class SynthuraSecuritySystem:
                 break
 
 #----------------------------------------------------------------------------------------------------#
+"""
+Buffer sizes: 1, 5, 10, 20, 30, 40, 50
+Explanation: 
+Smaller buffer sizes reduce latency between capturing frames and processing them. This results in lower camera delay.
+Although if the buffer is too small it may lead to dropped frames since the processing cannot kepp up with the frame capture rate.
 
+Larger buffer sizes will increase latency between capturing frames and processing them resulting in higher camera delay.
+However larger buffer sizes can help smooth out any temporary processing delays leading to more stable streams and a reduction in the likelihood of dropped frames.
+
+Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768
+"""
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system, camera_id):
+    def __init__(self, cap, security_system, camera_id, frame_width=416, frame_height=416, buffer_size=15):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
         self.camera_id = camera_id
+        self.resize_width = frame_width
+        self.resize_height = frame_height
+        self.frame_buffer = Queue(maxsize=buffer_size)
+        self.capture_thread = Thread(target=self.capture_frames)
+        self.capture_thread.daemon = True
+        self.capture_thread.start()
+
+    def capture_frames(self):
+        while True:
+            ret, frame = self.cap.read()
+            if ret:
+                resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
+                if not self.frame_buffer.full():
+                    self.frame_buffer.put(resized_frame)
 
     async def recv(self):
-        ret, frame = self.cap.read()
-        if ret:
-            results = self.security_system.object_detection(frame)
-            annotated_frame = self.security_system.frame_annotation(results)
-            
-            detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
-            self.security_system.detected_objects[self.camera_id] = detected_objects
-            
-            logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
-            
+        if not self.frame_buffer.empty():
+            frame = self.frame_buffer.get()
+            annotated_frame = await self.process_frame(frame)
+
             pts, time_base = await self.next_timestamp()
             finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
             finished_frame.pts = pts
             finished_frame.time_base = time_base
             return finished_frame
         else:
-            empty_frame = numpy.zeros((480, 640, 3), dtype=numpy.uint8)
+            empty_frame = numpy.zeros((self.resize_height, self.resize_width, 3), dtype=numpy.uint8)
             pts, time_base = await self.next_timestamp()
             empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
             empty_frame.pts = pts
             empty_frame.time_base = time_base
             return empty_frame
+
+    async def process_frame(self, frame):
+        results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+
+        detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
+        self.security_system.detected_objects[self.camera_id] = detected_objects
+
+        logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
+
+        return annotated_frame
 
 #----------------------------------------------------------------------------------------------------#
 
