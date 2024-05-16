@@ -128,7 +128,7 @@ class SynthuraSecuritySystem:
 
 #----------------------------------------------------------------------------------------------------#
 """
-Buffer sizes: 1, 5, 10, 20, 30, 40, 50
+Buffer sizes: 1, 3, 5, 10, 20, 30, 40, 50
 Explanation: 
 Smaller buffer sizes reduce latency between capturing frames and processing them. This results in lower camera delay.
 Although if the buffer is too small it may lead to dropped frames since the processing cannot kepp up with the frame capture rate.
