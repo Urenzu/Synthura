@@ -40,18 +40,19 @@ class SynthuraSecuritySystem:
         self.model = self.load_model(model_path)
         self.camera_connections = {}
         self.camera_urls = []
+        self.detected_objects = {}
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         return YOLO(model_path)
 
     def add_camera(self, camera_id, camera_url, websocket, pc):
-
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
         self.camera_connections[camera_id] = [camera_url, websocket, pc]
         self.camera_urls.append(camera_url)
+        self.detected_objects[camera_id] = []  # Add this line
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -61,7 +62,6 @@ class SynthuraSecuritySystem:
         return results[0].plot()
 
     async def remove_camera(self, camera_id):
-
         logger.info(self.camera_connections)
 
         if camera_id not in list(self.camera_connections.keys()):
@@ -72,6 +72,7 @@ class SynthuraSecuritySystem:
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
         self.camera_connections.pop(camera_id)
+        self.detected_objects.pop(camera_id)  # Add this line
 
         logger.info(f"Camera {camera_id} removed successfully.")
 
@@ -108,7 +109,7 @@ class SynthuraSecuritySystem:
                     self.add_camera(camera_id, decoded_camera_url, websocket, pc)
 
                     cap = cv2.VideoCapture(decoded_camera_url)
-                    track = MyVideoStreamTrack(cap, self)
+                    track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
                     offer = await pc.createOffer()
@@ -126,16 +127,23 @@ class SynthuraSecuritySystem:
 #----------------------------------------------------------------------------------------------------#
 
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system):
+    def __init__(self, cap, security_system, camera_id):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
+        self.camera_id = camera_id
 
     async def recv(self):
         ret, frame = self.cap.read()
         if ret:
             results = self.security_system.object_detection(frame)
             annotated_frame = self.security_system.frame_annotation(results)
+            
+            detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
+            self.security_system.detected_objects[self.camera_id] = detected_objects
+            
+            logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
+            
             pts, time_base = await self.next_timestamp()
             finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
             finished_frame.pts = pts
