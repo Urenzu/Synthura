@@ -11,7 +11,6 @@ from av import VideoFrame
 from urllib.parse import unquote
 from pydantic import BaseModel
 from aiortc import VideoStreamTrack
-
 import numpy
 import json
 
