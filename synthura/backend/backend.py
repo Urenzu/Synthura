@@ -136,10 +136,10 @@ Although if the buffer is too small it may lead to dropped frames since the proc
 Larger buffer sizes will increase latency between capturing frames and processing them resulting in higher camera delay.
 However larger buffer sizes can help smooth out any temporary processing delays leading to more stable streams and a reduction in the likelihood of dropped frames.
 
-Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768
+Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768, 1920x1080
 """
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system, camera_id, frame_width=416, frame_height=416, buffer_size=15):
+    def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=3):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
