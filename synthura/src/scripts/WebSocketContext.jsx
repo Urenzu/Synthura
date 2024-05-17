@@ -31,13 +31,17 @@ export const WebSocketProvider = ({ children }) => {
         };
 
         ws.current.onmessage = (event) => {
-            console.log(event.data);
-            if (event.data.type === 'analytics') {
-                const parsedMsg = JSON.parse(event.data);
-                setDetectedObjects([parsedMsg.detected_objects]);
-            }
-            else {
-                setOffer(event.data.sdp);
+            try {
+                console.log(event.data);
+                const data = JSON.parse(event.data);
+                if (data.type === 'offer') {
+                    setOffer(data.sdp);
+                }
+                else {
+                    setDetectedObjects(data.detected_objects);
+                }
+            } catch (err) {
+                console.error('Error parsing Websocket message as JSON data:', err);
             }
         };
 

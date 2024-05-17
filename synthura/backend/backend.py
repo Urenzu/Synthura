@@ -16,6 +16,7 @@ import numpy
 import json
 import torch
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict, List
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -50,8 +51,7 @@ app.add_middleware(
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
-        # data stored as "camera_id: [camera_url, pc, websocket]"
-        self.camera_connections = {}
+        self.camera_connections: Dict[int, List[str, WebSocket, RTCPeerConnection]] = {}
         self.camera_urls = []
         self.detected_objects = {}
 
@@ -87,6 +87,9 @@ class SynthuraSecuritySystem:
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
 
+        await self.analytics_connections[camera_id].close(1000)
+        self.analytics_connections.pop(camera_id)
+
         logger.info(f"Camera {camera_id} removed successfully.")
 
     def stop(self):
@@ -113,6 +116,9 @@ class SynthuraSecuritySystem:
                 type = json_data.get("type")
 
                 if type == "camera_info":
+
+                    logger.info("Received camera info")
+
                     camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
                     decoded_camera_url = unquote(camera_url)
@@ -135,6 +141,7 @@ class SynthuraSecuritySystem:
                     logger.info(f"sent offer")
                 
                 elif type == "analytics":
+            
                     detected_objects = self.detected_objects.get(camera_id)
                     await websocket.send_json({
                         "type": "analytics",

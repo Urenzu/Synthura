@@ -10,61 +10,66 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
   const initializedRef = useRef(false);
   const { offer, sendMessage } = useWebSocket();
 
+  const establishWebRTCConnection = async () => {
+      
+    // const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
+    // const websocket = getWebSocket(websocketUrl);
+
+    // Create peer connection and configure ICE server(s)
+    // const config = {
+    //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    // };
+    // const pc = new RTCPeerConnection(config);
+
+    const pc = new RTCPeerConnection();
+
+    // Stream video track from server to video element
+    pc.ontrack = (event) => {
+      if(event.track.kind === 'video') {
+        console.log("streaming video");
+        videoRef.current.srcObject = event.streams[0];
+      }
+    }
+
+    const offerDescription = {
+      type: 'offer',
+      sdp: offer
+    }
   
+    // Set remote description of peer connection
+    await pc.setRemoteDescription(offerDescription);
+
+    // Create answer and set local description
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    // Send answer to server
+    sendMessage(JSON.stringify({
+      type: 'answer',
+      sdp: pc.localDescription.sdp
+    }));
+  }
 
   useEffect(() => {
 
-    // Prevent multiple initializations
+    // Prevent multiple connections
     if (initializedRef.current) {
       return;
     }
-    initializedRef.current = true;
 
-    const establishWebRTCConnection = async () => {
-      
-      // const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
-      // const websocket = getWebSocket(websocketUrl);
-
-      // Create peer connection and configure ICE server(s)
-      // const config = {
-      //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      // };
-      // const pc = new RTCPeerConnection(config);
-      
+    // wait for offer to be set
+    if (!offer) {
       // Send camera IP to server
       sendMessage(JSON.stringify({ 
         type: 'camera_info',
         camera_url: cameraURL,
         camera_id: id
       }));
-
-      console.log(offer);
-
-      const pc = new RTCPeerConnection();
-
-      // Stream video track from server to video element
-      pc.ontrack = (event) => {
-        if(event.track.kind === 'video') {
-          console.log("streaming video");
-          videoRef.current.srcObject = event.streams[0];
-        }
-      }
-    
-      // Set remote description of peer connection
-      await pc.setRemoteDescription(offer);
-
-      // Create answer and set local description
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      // Send answer to server
-      sendMessage(JSON.stringify({
-        type: 'answer',
-        sdp: pc.localDescription.sdp
-      }));
     }
-
-    establishWebRTCConnection();
+    else {
+      establishWebRTCConnection();
+      initializedRef.current = true;
+    }
       
   }, [offer] );
 

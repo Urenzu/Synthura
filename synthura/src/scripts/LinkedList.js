@@ -51,6 +51,7 @@ class LinkedList {
         let previous;
         if (current.id === camNum) {
             this.head = current.next;
+            current = null;
         } else {
             while (current && (current.id !== camNum)) {
                 previous = current;
@@ -60,6 +61,7 @@ class LinkedList {
                 return;
             }
             previous.next = current.next;
+            current = null;
         }
         this.size--;
     }

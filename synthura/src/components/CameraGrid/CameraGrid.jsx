@@ -2,7 +2,7 @@ import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import ErrorBoundary from '../ErrorBoundary';
-import { WebSocketProvider } from '../../scripts/WebSocketContext';
+
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
 
@@ -23,10 +23,8 @@ const CameraGrid = () => {
         if (!updatedList.isPresent(id)) {
           updatedList.append(id, <div key={id} className="live-feed" >
                                   <ErrorBoundary>
-                                    <WebSocketProvider>
                                       <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
                                       <AnalyticsFeed id={id} />
-                                    </WebSocketProvider>
                                   </ErrorBoundary>
                                  </div>);
           setId(id + 2);
