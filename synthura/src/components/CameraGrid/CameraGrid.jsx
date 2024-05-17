@@ -1,6 +1,8 @@
 import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
+import ErrorBoundary from '../ErrorBoundary';
+import { WebSocketProvider } from '../../scripts/WebSocketContext';
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
 
@@ -14,15 +16,18 @@ const CameraGrid = () => {
   // add a live feed to the camera grid. this includes a video frame and an analytics feed Component.
   const handleAddCamera = () => {
     if (cameraURL) {
-      const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
-      const websocket = new WebSocket(websocketUrl);
+      
       setCamList(prevList => {
         const updatedList = new LinkedList();
         Object.assign(updatedList, prevList);
         if (!updatedList.isPresent(id)) {
-          updatedList.append(id, <div className="live-feed" >
-                                  <VideoFrame key={id} id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} websocket={websocket} />
-                                  <AnalyticsFeed key={id+1} />
+          updatedList.append(id, <div key={id} className="live-feed" >
+                                  <ErrorBoundary>
+                                    <WebSocketProvider>
+                                      <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
+                                      <AnalyticsFeed id={id} />
+                                    </WebSocketProvider>
+                                  </ErrorBoundary>
                                  </div>);
           setId(id + 2);
         }
