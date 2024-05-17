@@ -1,3 +1,11 @@
+/* 
+
+Description: Establishes a WebRTC connection with the server to stream video from a camera.
+
+Parent Component(s): CameraGrid
+
+*/
+
 import React from 'react'
 import './VideoFrame.css';
 import PropTypes from 'prop-types';
@@ -8,7 +16,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
 
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
-  const { offer, sendMessage } = useWebSocket();
+  const { status, offer, sendMessage } = useWebSocket();
 
   const establishWebRTCConnection = async () => {
       
@@ -52,26 +60,32 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
 
   useEffect(() => {
 
-    // Prevent multiple connections
-    if (initializedRef.current) {
+    // Wait for websocket connection to be established
+    if(status === 'disconnected') {
       return;
     }
 
-    // wait for offer to be set
+    // Return if WebRTC connection has already been established
+    if (initializedRef.current) {
+      return;
+    }
+    
+    // Send camera info and initiate WebRTC connection process
     if (!offer) {
-      // Send camera IP to server
       sendMessage(JSON.stringify({ 
         type: 'camera_info',
         camera_url: cameraURL,
         camera_id: id
       }));
+
     }
+    // Establish WebRTC connection
     else {
       establishWebRTCConnection();
       initializedRef.current = true;
     }
       
-  }, [offer] );
+  }, [offer, status] );
 
   return (
     <div data-testid={id} className="video-frame">

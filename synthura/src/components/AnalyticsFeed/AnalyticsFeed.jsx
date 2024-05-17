@@ -1,21 +1,28 @@
+/* 
+
+Description: Fetches object data from server and displays it in a list format.
+
+Parent Component(s): CameraGrid
+
+*/
+
 import { React, useEffect, useRef } from 'react'
 import { useWebSocket } from '../../scripts/WebSocketContext';
 import './AnalyticsFeed.css';
 
 const AnalyticsFeed = (id) => {
 
-  const initializedRef = useRef(false);
-  const intervalRef = useRef(null); // To store the interval ID
-  const { status, detectedObjects, sendMessage } = useWebSocket();
+  const intervalRef = useRef(null);
+  const { offer, status, detectedObjects, sendMessage } = useWebSocket();
 
   useEffect(() => {
 
-    // Prevent multiple initializations
-    if (initializedRef.current) {
+    // Wait for pc connection to be established
+    if(!offer) {
       return;
     }
-    initializedRef.current = true;
 
+    // Send analytics request to server every second
     intervalRef.current = setInterval(() => {
       console.log(status);
       if(status === 'connected') {
@@ -37,11 +44,16 @@ const AnalyticsFeed = (id) => {
       }
     };
 
-  }, [sendMessage]);
+  }, [sendMessage, offer, status]);
   
   return (
     <div className="analytics-feed" >
-      <p>Objects: {detectedObjects}</p>
+      <p>Objects: </p>
+      <ul>
+        {detectedObjects.map((object, index) => (
+          <li key={index}>{object}</li>
+        ))}
+      </ul>
     </div>
   )
 }

@@ -16,7 +16,6 @@ import numpy
 import json
 import torch
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, List
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -51,7 +50,7 @@ app.add_middleware(
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
-        self.camera_connections: Dict[int, List[str, WebSocket, RTCPeerConnection]] = {}
+        self.camera_connections = {}
         self.camera_urls = []
         self.detected_objects = {}
 
@@ -59,11 +58,11 @@ class SynthuraSecuritySystem:
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         return YOLO(model_path)
 
-    def add_camera(self, camera_id, camera_url, websocket, pc):
+    def add_camera(self, camera_id, camera_url, websocket, pc, cap):
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
-        self.camera_connections[camera_id] = [camera_url, websocket, pc]
+        self.camera_connections[camera_id] = [camera_url, websocket, pc, cap]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
         logger.info(f"Camera {camera_url} added successfully.")
@@ -84,11 +83,9 @@ class SynthuraSecuritySystem:
         self.camera_urls.remove(self.camera_connections[camera_id][0])
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
+        self.camera_connections[camera_id][3].release()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
-
-        await self.analytics_connections[camera_id].close(1000)
-        self.analytics_connections.pop(camera_id)
 
         logger.info(f"Camera {camera_id} removed successfully.")
 
@@ -117,19 +114,17 @@ class SynthuraSecuritySystem:
 
                 if type == "camera_info":
 
-                    logger.info("Received camera info")
-
                     camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
                     decoded_camera_url = unquote(camera_url)
                     
                     pc = RTCPeerConnection()
 
-                    self.add_camera(camera_id, decoded_camera_url, websocket, pc)
-
                     cap = cv2.VideoCapture(decoded_camera_url)
                     track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
+
+                    self.add_camera(camera_id, decoded_camera_url, websocket, pc, cap)
 
                     offer = await pc.createOffer()
                     await pc.setLocalDescription(offer)
@@ -208,8 +203,15 @@ class MyVideoStreamTrack(VideoStreamTrack):
             return empty_frame
 
     async def process_frame(self, frame):
-        results = await asyncio.to_thread(self.security_system.object_detection, frame)
-        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+
+        # python 3.8
+
+        loop = asyncio.get_event_loop()
+        results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
+        annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
+
+        # results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        # annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects

@@ -12,7 +12,7 @@ import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
 import { useState } from "react";
 import './EnvironmentsPage.css';
-import { WebSocketProvider } from '../../scripts/WebSocketContext';
+
 
 const EnvironmentsPage = () => {
 
@@ -31,9 +31,7 @@ const EnvironmentsPage = () => {
           0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
         </svg>
         <EnvironmentSideBar showSideBar={showSideBar} />
-        <WebSocketProvider>
-          <CameraGrid />
-        </WebSocketProvider>
+        <CameraGrid />
       </section>
   );
 }

@@ -1,3 +1,10 @@
+/* 
+
+Description: Component to manage the WebSocket connection to the backend server. Utilizes React context so child
+             components can access the WebSocket connection. Every instance of this component is a new WebSocket connection.
+
+*/
+
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 const WebSocketContext = createContext(null);
@@ -22,12 +29,10 @@ export const WebSocketProvider = ({ children }) => {
         
         ws.current.onopen = () => {
             setStatus('connected');
-            console.log("connected to socket");
         };
 
         ws.current.onclose = () => {
             setStatus('disconnected');
-            console.log("disconnected from socket");
         };
 
         ws.current.onmessage = (event) => {

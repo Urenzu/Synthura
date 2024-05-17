@@ -4,7 +4,9 @@
     box-sizing: border-box;
 }
 
-p {
+.analytics-feed p, li {
     color: snow;
     font-family: 'Roboto', sans-serif;
 }
+
+

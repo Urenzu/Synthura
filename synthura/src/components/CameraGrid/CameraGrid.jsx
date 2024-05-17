@@ -1,7 +1,17 @@
+/* 
+
+Description: Displays live video feeds and analytics feeds for each camera. Handles adding and removing cameras from the grid.
+
+Parent Component(s): EnvironmentsPage
+
+Child Component(s): AnalyticsFeed, VideoFrame
+
+*/
+
 import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
-import ErrorBoundary from '../ErrorBoundary';
+import { WebSocketProvider } from '../../scripts/WebSocketContext';
 
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
@@ -22,10 +32,10 @@ const CameraGrid = () => {
         Object.assign(updatedList, prevList);
         if (!updatedList.isPresent(id)) {
           updatedList.append(id, <div key={id} className="live-feed" >
-                                  <ErrorBoundary>
-                                      <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
-                                      <AnalyticsFeed id={id} />
-                                  </ErrorBoundary>
+                                  <WebSocketProvider>
+                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
+                                    <AnalyticsFeed id={id} />
+                                  </WebSocketProvider>
                                  </div>);
           setId(id + 2);
         }
