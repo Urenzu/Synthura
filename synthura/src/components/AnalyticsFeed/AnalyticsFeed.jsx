@@ -48,12 +48,12 @@ const AnalyticsFeed = (id) => {
   
   return (
     <div className="analytics-feed" >
-      <p>Objects: </p>
-      <ul>
-        {detectedObjects.map((object, index) => (
-          <li key={index}>{object}</li>
+      <h2>Objects</h2>
+      <div className="objects-container">
+        {detectedObjects && detectedObjects.map((object, index) => (
+          <p key={index} className="objects">{object.toUpperCase()}</p>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
