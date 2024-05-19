@@ -1,98 +1,95 @@
 import './RecordingsPage.css';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;
 let user_id;
 
-const MongoDBVideoPlayer = ({ fileId }) => {
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchFile = async () => {
-      try {
-        setError(null);
-    
-        const fileMetadataResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getFileMetaData?fileID=${fileId}`);
-        const totalChunksResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getTotalChunkCount?fileID=${fileId}`);
-        const totalChunks = totalChunksResponse.data;
-    
-        const chunkRequests = [];
-        for (let i = 0; i < totalChunks; i++) {
-          chunkRequests.push(axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getChunkData?fileID=${fileId}&chunkNumber=${i}`));
-        }
-    
-        const chunkResponses = await Promise.all(chunkRequests);
-        const fileData = chunkResponses.map(response => response.data.data.Data).join('');
-    
-        const binaryString = atob(fileData);
-        const arrayBuffer = new ArrayBuffer(binaryString.length);
-        const uint8Array = new Uint8Array(arrayBuffer);
-        for (let i = 0; i < binaryString.length; i++) {
-          uint8Array[i] = binaryString.charCodeAt(i);
-        }
-    
-        const blob = new Blob([arrayBuffer], { type: fileMetadataResponse.data.contentType });
-        const url = URL.createObjectURL(blob);
-        setVideoUrl(url);
-      } catch (error) {
-        setError(error.message || 'Error fetching file');
-      }
-    };
-
-    fetchFile();
-
-    return () => {
-      if (videoUrl) {
-        URL.revokeObjectURL(videoUrl);
-      }
-    };
-  }, [fileId]);
-
-  if (!videoUrl) {
-    return <p>Loading...</p>;
-  }
-
-  return (
-    <div>
-      {error && <p>{error}</p>}
-      {videoUrl && (
-        <video id="video_window" controls>
-          <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      )}
-    </div>
-  );
-};
-
 function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
-  const [rows, setRows] = useState([]);
+  const rows = useMemo(() => {
+    if (!recordings || recordings.length === 0) return [];
 
-  useEffect(() => {
-    if (recordings && recordings.length > 0) {
-      const formattedRows = [];
-      let tempRow = [];
+    const formattedRows = [];
+    let tempRow = [];
 
-    
-      // Convert the recordings array into rows for the DynamicTable
-      recordings.forEach((recording, index) => {
-        const { filename, _id } = recording;
-        tempRow.push({ id: index + 1, name: filename, file_id: _id});
-        if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
-          formattedRows.push(tempRow);
-          tempRow = [];
-        }
-        camera_number = index + 1;
-        existance_number = camera_number;
-      });
+    // Convert the recordings array into rows for the DynamicTable
+    recordings.forEach((recording, index) => {
+      const { filename, _id } = recording;
+      tempRow.push({ id: index + 1, name: filename, file_id: _id });
+      if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
+        formattedRows.push(tempRow);
+        tempRow = [];
+      }
+      camera_number = index + 1;
+      existance_number = camera_number;
+    });
 
-      setRows(formattedRows);
-    }
+    return formattedRows;
   }, [recordings]);
+
+  const MongoDBVideoPlayer = ({ fileId }) => {
+    const [videoUrl, setVideoUrl] = useState(null);
+    const [error, setError] = useState(null);
   
+    useEffect(() => {
+      const fetchFile = async () => {
+        try {
+          setError(null);
+      
+          const fileMetadataResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getFileMetaData?fileID=${fileId}`);
+          const totalChunksResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getTotalChunkCount?fileID=${fileId}`);
+          const totalChunks = totalChunksResponse.data;
+      
+          const chunkRequests = [];
+          for (let i = 0; i < totalChunks; i++) {
+            chunkRequests.push(axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getChunkData?fileID=${fileId}&chunkNumber=${i}`));
+          }
+      
+          const chunkResponses = await Promise.all(chunkRequests);
+          const fileData = chunkResponses.map(response => response.data.data.Data).join('');
+      
+          const binaryString = atob(fileData);
+          const arrayBuffer = new ArrayBuffer(binaryString.length);
+          const uint8Array = new Uint8Array(arrayBuffer);
+          for (let i = 0; i < binaryString.length; i++) {
+            uint8Array[i] = binaryString.charCodeAt(i);
+          }
+      
+          const blob = new Blob([arrayBuffer], { type: fileMetadataResponse.data.contentType });
+          const url = URL.createObjectURL(blob);
+          setVideoUrl(url);
+        } catch (error) {
+          setError(error.message || 'Error fetching file');
+        }
+      };
+  
+      fetchFile();
+  
+      return () => {
+        if (videoUrl) {
+          URL.revokeObjectURL(videoUrl);
+        }
+      };
+    }, [fileId]);
+  
+    if (!videoUrl) {
+      return <p>Loading...</p>;
+    }
+  
+    return (
+      <div>
+        {error && <p>{error}</p>}
+        {videoUrl && (
+          <video id="video_window" controls>
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        )}
+      </div>
+    );
+  };
+
   const addElement = () => {
     const newRow = [...rows];
     const lastRow = newRow[newRow.length - 1];
@@ -103,7 +100,7 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
       newRow.push([]);
     }
 
-    newRow[newRow.length - 1].push({ id: idString, name: existance_number});
+    newRow[newRow.length - 1].push({ id: idString, name: existance_number });
     setRows(newRow);
   };
 
@@ -114,7 +111,6 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
     axios.delete(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&_id=${_id}`)
         .then(response => {
           console.log('Deleted ObjectID:', _id );
-          window.location.reload();
           // Proceed to update UI after successful backend deletion
           const newRecordings = [...recordings];
           newRecordings.splice((3 * rowIndex) + elementIndex, 1);
@@ -131,7 +127,6 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
             }
           }
           camera_number--;
-          setRows(newRow.filter(row => row.length > 0));
           for (let r = rowIndex; r < rows.length; r++)
           {
             if (r == rowIndex){
@@ -145,12 +140,11 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
               }
             }
           }
-          setRows(newRow.filter(row => row.length > 0));
         })
         .catch(error => {
             console.error('Error deleting recording:', error);
         });
-};
+  };
 
   const test_component = (videoSource) => {
     return (
@@ -191,7 +185,7 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
               {row.map((element, elementIndex) => (
                 <td key={element.id} id="dynamic_table_row">
                   <center>
-                  <h2>{"Camera " + element.id + ": " + element.name}</h2>
+                    <h2>{"Camera " + element.id + ": " + element.name}</h2>
                     {test_component(element.file_id)}
                     <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
@@ -238,12 +232,11 @@ function RecordingsPage() {
       {isLoading ? ( // Display loading message if recordings are being fetched
         <p>Loading recordings...</p>
       ) : (
-          <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
+        <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
       )}
       </center>
     </div>
   );
 }
-
 
 export default RecordingsPage;

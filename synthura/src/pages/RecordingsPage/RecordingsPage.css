@@ -56,4 +56,9 @@
   width: 100vw;
   color: snow;
 }
-  
+
+.centered-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
