@@ -103,7 +103,9 @@ const CameraGrid = () => {
           </svg>
         </button>
       </div>
-      <div id="camera-grid">{activeCameras}</div>
+      <div id="camera-grid">
+        {activeCameras}
+      </div>
     </section>
   );
 };
