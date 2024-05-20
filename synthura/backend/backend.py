@@ -79,11 +79,14 @@ class SynthuraSecuritySystem:
         if camera_id not in list(self.camera_connections.keys()):
             logger.warning(f"Camera {camera_id} is not found.")
             return
+        
+        
 
         self.camera_urls.remove(self.camera_connections[camera_id][0])
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
-        self.camera_connections[camera_id][3].release()
+        # Stop trying to capture frames from device
+        self.camera_connections[camera_id][3].stop()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
 
@@ -124,7 +127,7 @@ class SynthuraSecuritySystem:
                     track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
-                    self.add_camera(camera_id, decoded_camera_url, websocket, pc, cap)
+                    self.add_camera(camera_id, decoded_camera_url, websocket, pc, track)
 
                     offer = await pc.createOffer()
                     await pc.setLocalDescription(offer)
@@ -174,15 +177,21 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.frame_buffer = Queue(maxsize=buffer_size)
         self.capture_thread = Thread(target=self.capture_frames)
         self.capture_thread.daemon = True
+        self.running = True
         self.capture_thread.start()
 
     def capture_frames(self):
-        while True:
+        while self.running:
             ret, frame = self.cap.read()
             if ret:
                 resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
                 if not self.frame_buffer.full():
                     self.frame_buffer.put(resized_frame)
+    
+    def stop(self):
+        self.running = False
+        self.capture_thread.join()
+        self.cap.release()
 
     async def recv(self):
         if not self.frame_buffer.empty():

@@ -42,7 +42,6 @@ const AnalyticsFeed = (id) => {
 
     // Send analytics request to server every second
     intervalRef.current = setInterval(() => {
-      console.log(status);
       if(status === 'connected') {
         sendMessage(JSON.stringify({
           type: 'analytics',

@@ -28,10 +28,12 @@ export const WebSocketProvider = ({ children }) => {
         ws.current = new WebSocket(`ws://localhost:8000/api/video_feed/ws`);
         
         ws.current.onopen = () => {
+            console.log('WebSocket connection established');
             setStatus('connected');
         };
 
         ws.current.onclose = () => {
+            console.log('WebSocket connection established');
             setStatus('disconnected');
         };
 
