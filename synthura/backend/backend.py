@@ -1,5 +1,6 @@
 import cv2
 from ultralytics import YOLO
+from openvino.runtime import Core
 from threading import Event
 import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -12,7 +13,7 @@ from urllib.parse import unquote
 from pydantic import BaseModel
 from aiortc import VideoStreamTrack
 
-import numpy
+import numpy as np
 import json
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -56,6 +57,25 @@ class SynthuraSecuritySystem:
         # Convert YOLOv8 model to OpenVINO format
         self.model.export(format='openvino')
         self.ov_model = self.load_model('yolov8n_openvino_model/')
+        self.ov_model_path = os.path.join(os.path.dirname(__file__), 'yolov8n_openvino_model', 'yolov8n.xml')
+
+        # Initialize the OpenVINO Runtime
+        self.ie = Core()
+        
+        # Load the YOLOv8 network model in IR format from the specified XML file
+        self.net = self.ie.read_model(model=self.ov_model_path)
+        
+        # Load the network model onto the CPU device for inference
+        self.exec_net = self.ie.compile_model(model=self.net, device_name="GPU")
+        
+        # Create an inference request object to handle the execution of the model inference
+        self.infer_request = self.exec_net.create_infer_request()
+
+        # Get the input tensor name
+        self.input_tensor_name = self.exec_net.inputs[0].get_any_name()
+
+        # Get the output tensor name
+        self.output_tensor = self.exec_net.outputs[0]
 
         # data stored as "camera_id: [camera_url, pc, websocket]"
         self.camera_connections = {}
@@ -74,11 +94,69 @@ class SynthuraSecuritySystem:
         self.camera_urls.append(camera_url)
         logger.info(f"Camera {camera_url} added successfully.")
 
-    def object_detection(self, frame):
-        return self.ov_model(frame)
+    def preprocess_frame(self, frame):
+        # Resize the frame to 640x640
+        self.original_frame_size = frame.shape[1], frame.shape[0]
+        resized_frame = cv2.resize(frame, (640, 640))
 
-    def frame_annotation(self, results):
-        return results[0].plot()
+        # Convert the frame from HWC to CHW format
+        chw_frame = resized_frame.transpose(2, 0, 1)
+
+        # Add batch dimension and normalize the image
+        input_blob = np.expand_dims(chw_frame, axis=0).astype(np.float32) / 255.0
+
+        return input_blob
+    
+    def postprocess_results(self, results):
+        # Convert results to a list of tuples (x_min, y_min, x_max, y_max, confidence)
+        processed_results = []
+        for detection in results[0]:
+            x_center, y_center, width, height, confidence = detection[:5]
+            
+            # Convert normalized coordinates to absolute pixel values
+            x_center = int(x_center * 640)
+            y_center = int(y_center * 640)
+            width = int(width * 640)
+            height = int(height * 640)
+
+            # Calculate bounding box coordinates
+            x_min = int((x_center - width / 2) / 640 * self.original_frame_size[0])
+            x_max = int((x_center + width / 2) / 640 * self.original_frame_size[0])
+            y_min = int((y_center - height / 2) / 640 * self.original_frame_size[1])
+            y_max = int((y_center + height / 2) / 640 * self.original_frame_size[1])
+
+            processed_results.append((x_min, y_min, x_max, y_max, float(confidence)))
+        return processed_results
+
+    def object_detection(self, frame):
+        preprocessed_frame = self.preprocess_frame(frame)
+
+        # Start asynchronous inference
+        self.infer_request.start_async(inputs={self.input_tensor_name: preprocessed_frame})
+        
+        # Wait for the inference result
+        self.infer_request.wait()
+        
+        # Get the results from the inference request
+        results = self.infer_request.get_tensor(self.output_tensor).data
+
+        return self.postprocess_results(results)
+
+    def frame_annotation(self, frame, results):
+        # Post-process and annotate the frame with the results
+        for result in results:
+            # Assuming result contains bounding box coordinates and confidence score
+            x_min, y_min, x_max, y_max, confidence = result
+            
+            label = f"Confidence: {confidence:.2f}"
+            
+            # Draw bounding box
+            cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            
+            # Draw label
+            cv2.putText(frame, label, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+        return frame
 
     async def remove_camera(self, camera_id):
 
@@ -159,7 +237,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
         ret, frame = self.cap.read()
         if ret:
             results = self.security_system.object_detection(frame)
-            annotated_frame = self.security_system.frame_annotation(results)
+            annotated_frame = self.security_system.frame_annotation(frame, results)
             pts, time_base = await self.next_timestamp()
             finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
             finished_frame.pts = pts
@@ -167,7 +245,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
             return finished_frame
         else:
             # Create an empty frame with dimensions matching the camera's output to send something back
-            empty_frame = numpy.zeros((480, 640, 3), dtype=numpy.uint8)  # Assuming (480, 640) resolution and BGR24 format
+            empty_frame = np.zeros((480, 640, 3), dtype=np.uint8)  # Assuming (480, 640) resolution and BGR24 format
             pts, time_base = await self.next_timestamp()
             empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
             empty_frame.pts = pts
