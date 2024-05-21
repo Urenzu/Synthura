@@ -15,6 +15,7 @@ from aiortc import VideoStreamTrack
 import numpy
 import json
 import torch
+import time
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -194,6 +195,10 @@ class MyVideoStreamTrack(VideoStreamTrack):
                 resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
                 if not self.frame_buffer.full():
                     self.frame_buffer.put(resized_frame)
+                else:
+                    continue
+            else:
+                time.sleep(0.01)
 
     async def recv(self):
         if not self.frame_buffer.empty():
