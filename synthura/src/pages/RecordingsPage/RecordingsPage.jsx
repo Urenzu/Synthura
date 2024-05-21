@@ -1,6 +1,5 @@
 import './RecordingsPage.css';
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;

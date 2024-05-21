@@ -73,13 +73,14 @@ class SynthuraSecuritySystem:
         print(f"Model loaded on device: {model.device}")
         return model
 
-    def add_camera(self, camera_id, camera_url, websocket, pc):
+    def add_camera(self, camera_id, camera_url, websocket, pc, cap):
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
         self.camera_connections[camera_id] = [camera_url, websocket, pc, cap]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
+        self.motion_status[camera_id] = []
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -250,14 +251,25 @@ class MyVideoStreamTrack(VideoStreamTrack):
             return empty_frame
 
     async def process_frame(self, frame):
-        
-        results = await asyncio.to_thread(self.security_system.object_detection, frame)
-        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+
+        # python 3.8
+
+        loop = asyncio.get_event_loop()
+        results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
+        annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
+
+        # python 3.9
+        # results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        # annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects
 
-        motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+        # python 3.8
+        motion_detected = await loop.run_in_executor(None, self.detect_motion, frame)
+
+        # python 3.9
+        # motion_detected = await asyncio.to_thread(self.detect_motion, frame)
 
         if motion_detected:
             if 'motion' not in self.security_system.motion_status[self.camera_id]:
