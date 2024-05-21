@@ -8,8 +8,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     https: {
-      key: fs.readFileSync('/home/owenhustles/certs/localhost-key.pem'),
-      cert: fs.readFileSync('/home/owenhustles/certs/localhost.pem')
+      key: fs.readFileSync('C:/Windows/system32/localhost-key.pem'),
+      cert: fs.readFileSync('C:/Windows/system32/localhost.pem')
     }
   }
 })

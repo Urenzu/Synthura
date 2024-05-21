@@ -10,12 +10,11 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 import logging
 from av import VideoFrame
 from urllib.parse import unquote
-from pydantic import BaseModel
-from aiortc import VideoStreamTrack
-
-import numpy as np
 import json
-from fastapi.middleware.cors import CORSMiddleware
+import torch
+import numpy
+
+#----------------------------------------------------------------------------------------------------#
 
 """
 Backend environment setup (2 approaches):
@@ -83,7 +82,15 @@ class SynthuraSecuritySystem:
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
-        return YOLO(model_path)
+        model = YOLO(model_path)
+        # Load the model onto the GPU if available
+        if torch.cuda.is_available():
+            model = model.cuda()
+
+        print(f"Cuda available: {torch.cuda.is_available()}")
+        print(f"Cuda version: {torch.version.cuda}")
+        print(f"Model loaded on device: {model.device}")
+        return model
 
     def add_camera(self, camera_id, camera_url, websocket, pc):
 
@@ -94,10 +101,26 @@ class SynthuraSecuritySystem:
         self.camera_urls.append(camera_url)
         logger.info(f"Camera {camera_url} added successfully.")
 
-    def preprocess_frame(self, frame):
-        # Resize the frame to 640x640
-        self.original_frame_size = frame.shape[1], frame.shape[0]
-        resized_frame = cv2.resize(frame, (640, 640))
+    def object_detection(self, frame):
+        frame = torch.from_numpy(frame)
+        
+        # Convert frame to float32 and add batch dimension
+        frame = frame.permute(2, 0, 1).unsqueeze(0).float()  # Convert HWC to CHW and add batch dimension
+        
+        # Normalize the frame
+        frame /= 255.0
+
+        # Resize frame to dimensions divisible by 32
+        height, width = frame.shape[2], frame.shape[3]
+        new_height = (height // 32) * 32
+        new_width = (width // 32) * 32
+        frame = torch.nn.functional.interpolate(frame, size=(new_height, new_width), mode='bilinear', align_corners=False)
+        
+        # Move frame to GPU if available
+        if torch.cuda.is_available():
+            frame = frame.cuda()
+        
+        return self.model(frame)
 
         # Convert the frame from HWC to CHW format
         chw_frame = resized_frame.transpose(2, 0, 1)
@@ -228,8 +251,8 @@ class SynthuraSecuritySystem:
 
 # temp class to test video streaming
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system):
-        super().__init__()  # Initialize parent class
+    def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=10):
+        super().__init__()
         self.cap = cap
         self.security_system = security_system
 
@@ -251,6 +274,21 @@ class MyVideoStreamTrack(VideoStreamTrack):
             empty_frame.pts = pts
             empty_frame.time_base = time_base
             return empty_frame
+    
+    async def process_frame(self, frame):
+        # if torch.cuda.is_available():
+        #     frame = torch.from_numpy(frame).cuda()
+        results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+
+        detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
+        self.security_system.detected_objects[self.camera_id] = detected_objects
+
+        logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
+
+        return annotated_frame
+
+#----------------------------------------------------------------------------------------------------#
 
 security_system = SynthuraSecuritySystem()
 
