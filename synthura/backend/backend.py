@@ -219,6 +219,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
         results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
         annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
 
+        # python 3.9
         # results = await asyncio.to_thread(self.security_system.object_detection, frame)
         # annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
