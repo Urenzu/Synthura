@@ -81,7 +81,6 @@ class SynthuraSecuritySystem:
             return
         
         
-
         self.camera_urls.remove(self.camera_connections[camera_id][0])
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
