@@ -43,6 +43,7 @@ class SynthuraSecuritySystem:
         self.camera_connections = {}
         self.camera_urls = []
         self.detected_objects = {}
+        self.motion_status = {}
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
@@ -55,6 +56,8 @@ class SynthuraSecuritySystem:
         self.camera_connections[camera_id] = [camera_url, websocket, pc]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
+        self.motion_status[camera_id] = []
+
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -139,7 +142,7 @@ However larger buffer sizes can help smooth out any temporary processing delays 
 Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768, 1920x1080
 """
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=3):
+    def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=1):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
@@ -150,6 +153,12 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.capture_thread = Thread(target=self.capture_frames)
         self.capture_thread.daemon = True
         self.capture_thread.start()
+
+        # Motion detection attributes #
+        self.background = None
+        self.background = None
+        self.frame_count = 0
+        self.background_update_interval = 50
 
     def capture_frames(self):
         while True:
@@ -184,9 +193,50 @@ class MyVideoStreamTrack(VideoStreamTrack):
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects
 
+        motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+
+        if motion_detected:
+            if 'motion' not in self.security_system.motion_status[self.camera_id]:
+                self.security_system.motion_status[self.camera_id].append('motion')
+        else:
+            if 'motion' in self.security_system.motion_status[self.camera_id]:
+                self.security_system.motion_status[self.camera_id].remove('motion')
+
         logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
+        logger.info(f"Camera {self.camera_id} motion status: {self.security_system.motion_status[self.camera_id]}")
 
         return annotated_frame
+    
+    """
+    Background subtraction motion detection implementation.
+    """
+    def detect_motion(self, frame):
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        resized_gray = cv2.resize(gray, (self.resize_width // 2, self.resize_height // 2))
+        blurred = cv2.GaussianBlur(resized_gray, (5, 5), 0)
+
+        if self.frame_count % self.background_update_interval == 0:
+            self.background = blurred.copy()
+
+        frame_delta = cv2.absdiff(self.background, blurred)
+
+        thresh = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)[1]
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        min_area = (self.resize_width // 2) * (self.resize_height // 2) * 0.005
+        significant_contours = [c for c in contours if cv2.contourArea(c) > min_area]
+
+        if len(significant_contours) > 0:
+            self.frame_count += 1
+            return True
+        else:
+            self.frame_count += 1
+            return False
 
 #----------------------------------------------------------------------------------------------------#
 
