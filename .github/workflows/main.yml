@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Navigate to synthura directory
+        run: cd Synthura/synthura
+
       - name: Install dependencies
         run: npm install
 
