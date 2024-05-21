@@ -7,7 +7,7 @@
     --border-color: #3e3e42;
 }
 .cluster-btn {
-    background-color: #a6a6b2;
+    background-color: #b9b9c9;
     width: 100%;
     height: 50px;
     display: flex;
@@ -21,18 +21,26 @@
     border-radius: 5px;
     margin-top: 1px;
 }
-.cluster-btn:hover {
-    background-color: snow;
-}
 .cluster-camera-icon {
     width: 20px;
     height: 20px;
 }
-.close-cluster-icon {
+#close-cluster-icon {
     fill: var(--background-dark2);
     position: absolute;
     left: 10px;
     width: 16px;
     height: 16px;
+    cursor: pointer;
+}
+#close-cluster-icon:hover::before {
+    content: ""; /* Create a pseudo-element to overlay the background */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--background-dark1); /* Light up the background color on hover */
+    border-radius: 5px; /* Ensure pseudo-element has same rounded corners as button */
     cursor: pointer;
 }

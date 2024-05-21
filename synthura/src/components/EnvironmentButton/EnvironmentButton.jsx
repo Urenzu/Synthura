@@ -11,7 +11,6 @@ Child Component(s): none
 */
 
 import "./EnvironmentButton.css"
-import React from 'react'
 
 const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
 

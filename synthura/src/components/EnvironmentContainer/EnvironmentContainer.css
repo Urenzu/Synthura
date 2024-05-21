@@ -6,26 +6,12 @@
     --accent-light: #4f4f55;
     --border-color: #3e3e42;
 }
-
-/* styling of a self-contained environment */
 .environment {
     margin-bottom: 10px;
 }
-.environment:hover > .cluster {
-    max-height: 188px;
-    opacity: 1;
-}
-
-/* styling of the clusters */
-.active-clusters {
+.cluster {
     max-height: 153px;
     overflow-y: auto;
-}
-.cluster {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
 }
 .add-cluster-btn {
     width: 100%;
@@ -37,7 +23,6 @@
     background-color: snow;
     border: none;
     border-radius: 5px;
-    margin-top: 1px;
 }
 #add-cluster-icon {
     fill: var(--background-dark2);

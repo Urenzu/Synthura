@@ -1,17 +1,94 @@
 import './RecordingsPage.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 
 let camera_number = 0;
 let existance_number = 0;
-var example_dict = {
-  1: "Yamato",
-  2: "Nagasaki",
-  3: "Itadori",
-  4: "Toji"
-};
+let user_id;
 
-function DynamicTable() {
-  const [rows, setRows] = useState([]);
+function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
+  const rows = useMemo(() => {
+    if (!recordings || recordings.length === 0) return [];
+
+    const formattedRows = [];
+    let tempRow = [];
+
+    // Convert the recordings array into rows for the DynamicTable
+    recordings.forEach((recording, index) => {
+      const { filename, _id } = recording;
+      tempRow.push({ id: index + 1, name: filename, file_id: _id });
+      if ((index + 1) % 3 === 0 || index === recordings.length - 1) {
+        formattedRows.push(tempRow);
+        tempRow = [];
+      }
+      camera_number = index + 1;
+      existance_number = camera_number;
+    });
+
+    return formattedRows;
+  }, [recordings]);
+
+  const MongoDBVideoPlayer = ({ fileId }) => {
+    const [videoUrl, setVideoUrl] = useState(null);
+    const [error, setError] = useState(null);
+  
+    useEffect(() => {
+      const fetchFile = async () => {
+        try {
+          setError(null);
+      
+          const fileMetadataResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getFileMetaData?fileID=${fileId}`);
+          const totalChunksResponse = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getTotalChunkCount?fileID=${fileId}`);
+          const totalChunks = totalChunksResponse.data;
+      
+          const chunkRequests = [];
+          for (let i = 0; i < totalChunks; i++) {
+            chunkRequests.push(axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getChunkData?fileID=${fileId}&chunkNumber=${i}`));
+          }
+      
+          const chunkResponses = await Promise.all(chunkRequests);
+          const fileData = chunkResponses.map(response => response.data.data.Data).join('');
+      
+          const binaryString = atob(fileData);
+          const arrayBuffer = new ArrayBuffer(binaryString.length);
+          const uint8Array = new Uint8Array(arrayBuffer);
+          for (let i = 0; i < binaryString.length; i++) {
+            uint8Array[i] = binaryString.charCodeAt(i);
+          }
+      
+          const blob = new Blob([arrayBuffer], { type: fileMetadataResponse.data.contentType });
+          const url = URL.createObjectURL(blob);
+          setVideoUrl(url);
+        } catch (error) {
+          setError(error.message || 'Error fetching file');
+        }
+      };
+  
+      fetchFile();
+  
+      return () => {
+        if (videoUrl) {
+          URL.revokeObjectURL(videoUrl);
+        }
+      };
+    }, [fileId]);
+  
+    if (!videoUrl) {
+      return <p>Loading...</p>;
+    }
+  
+    return (
+      <div>
+        {error && <p>{error}</p>}
+        {videoUrl && (
+          <video id="video_window" controls>
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        )}
+      </div>
+    );
+  };
 
   const addElement = () => {
     const newRow = [...rows];
@@ -23,53 +100,56 @@ function DynamicTable() {
       newRow.push([]);
     }
 
-    if (idString in example_dict) {
-      newRow[newRow.length - 1].push({ id: idString, name: example_dict[idString]});
-    }
-    else {
-      newRow[newRow.length - 1].push({ id: idString, name: existance_number});
-    }
+    newRow[newRow.length - 1].push({ id: idString, name: existance_number });
     setRows(newRow);
   };
 
   const deleteElement = (rowIndex, elementIndex) => {
-    const newRow = [...rows];
-    newRow[rowIndex].splice(elementIndex, 1);
-    
-    for (let i = rowIndex + 1; i < newRow.length; i++) {
-      if (newRow[i].length > 0) {
-        newRow[i - 1].push(newRow[i].shift());
-      } else {
-        break;
-      }
-    }
-    camera_number--;
-    setRows(newRow.filter(row => row.length > 0));
-    for (let r = rowIndex; r < rows.length; r++)
-    {
-      if (r == rowIndex){
-        for (let c = elementIndex; c < rows[r].length; c++) {
-          rows[r][c].id = rows[r][c].id - 1
-        }
-      }
-      else{
-        for (let c = 0; c < rows[r].length; c++) {
-          rows[r][c].id = rows[r][c].id - 1
-        }
-      }
-    }
-    setRows(newRow.filter(row => row.length > 0));
+    const _id = recordings[(3 * rowIndex) + elementIndex]._id; // Ensure you have `_id` in your recordings objects
+    console.log(user_id);
+    console.log(_id);
+    axios.delete(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/deleteRecording?username=${user_id}&_id=${_id}`)
+        .then(response => {
+          console.log('Deleted ObjectID:', _id );
+          // Proceed to update UI after successful backend deletion
+          const newRecordings = [...recordings];
+          newRecordings.splice((3 * rowIndex) + elementIndex, 1);
+          setRecordings(newRecordings);
+
+          const newRow = [...rows];
+          newRow[rowIndex].splice(elementIndex, 1);
+          
+          for (let i = rowIndex + 1; i < newRow.length; i++) {
+            if (newRow[i].length > 0) {
+              newRow[i - 1].push(newRow[i].shift());
+            } else {
+              break;
+            }
+          }
+          camera_number--;
+          for (let r = rowIndex; r < rows.length; r++)
+          {
+            if (r == rowIndex){
+              for (let c = elementIndex; c < rows[r].length; c++) {
+                rows[r][c].id = rows[r][c].id - 1
+              }
+            }
+            else{
+              for (let c = 0; c < rows[r].length; c++) {
+                rows[r][c].id = rows[r][c].id - 1
+              }
+            }
+          }
+        })
+        .catch(error => {
+            console.error('Error deleting recording:', error);
+        });
   };
 
-  // Function to calculate the total number of elements
-  const getTotalElements = () => {
-    return rows.reduce((total, row) => total + row.length, 0);
-  };
-
-  const test_component = () => {
+  const test_component = (videoSource) => {
     return (
       <>
-        <div id="video_window"></div>
+        <MongoDBVideoPlayer fileId={videoSource} />
         <div id="analytics_window">
           <table>
             <tbody>
@@ -98,8 +178,6 @@ function DynamicTable() {
 
   return (
     <div>
-      <button onClick={addElement} className="unique_button">Add Element</button>
-      <p>Total Elements: {getTotalElements()}</p>
       <table>
         <tbody>
           {rows.map((row, rowIndex) => (
@@ -107,8 +185,8 @@ function DynamicTable() {
               {row.map((element, elementIndex) => (
                 <td key={element.id} id="dynamic_table_row">
                   <center>
-                  <h2>{"Camera " + element.id + ": " + element.name}</h2>
-                    {test_component()}
+                    <h2>{"Camera " + element.id + ": " + element.name}</h2>
+                    {test_component(element.file_id)}
                     <button onClick={() => deleteElement(rowIndex, elementIndex)} className="unique_button">
                       Delete Recording
                     </button>
@@ -127,10 +205,36 @@ function DynamicTable() {
 }
 
 function RecordingsPage() {
+  const [recordings, setRecordings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRecordings = async () => {
+    try {
+      setIsLoading(true); // Set loading to true before fetching recordings
+      const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Nam');
+      setRecordings(response.data[0]["recordings"]);
+      user_id = response.data[0]["user"];
+    } catch (error) {
+      console.error('Error fetching recordings:', error);
+    } finally {
+      setIsLoading(false); // Mark loading as complete whether successful or not
+    }
+  };
+
+  useEffect(() => {
+    fetchRecordings();
+  }, []);
+
   return (
-    <div id="recording_page_container"> 
+    <div id="recording_page_container">
       <h1>Saved Recordings:</h1>
-      <DynamicTable />
+      <center>
+      {isLoading ? ( // Display loading message if recordings are being fetched
+        <p>Loading recordings...</p>
+      ) : (
+        <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
+      )}
+      </center>
     </div>
   );
 }

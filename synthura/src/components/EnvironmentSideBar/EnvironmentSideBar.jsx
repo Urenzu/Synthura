@@ -11,7 +11,6 @@ Child Component(s): EnvironmentContainer
 */
 
 import "./EnvironmentSideBar.css"
-import React from 'react'
 import EnvironmentContainer from "../EnvironmentContainer/EnvironmentContainer"
 import { LinkedList } from '../../scripts/LinkedList';
 import { useState, useEffect } from 'react';
@@ -53,7 +52,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
   return (
     <section id="side-bar" className={showSideBar ? "show-side-bar" : "hide-side-bar"} >
       <h2>Manage Environments</h2>
-        <div id="environments">
+        <div className="environment">
           {activeEnvironments}
         </div>
       <button id="add-environment-btn" onClick={handleCreateEnvironment} >Add Environment</button>
