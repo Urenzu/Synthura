@@ -1,7 +1,7 @@
 import cv2
 from ultralytics import YOLO
-from openvino.runtime import Core
-from threading import Event
+from threading import Event, Thread
+from queue import Queue
 import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -17,68 +17,30 @@ import numpy
 #----------------------------------------------------------------------------------------------------#
 
 """
-Backend environment setup (2 approaches):
+Backend environment setup:
 
-Python virtual environment approach (Current):
-python -m venv synthura
-synthura\Scripts\activate (In base backend directory)
-pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets openvino-dev
-To run: uvicorn backend:app --reload
+1. python -m venv synthura
+2. synthura\Scripts\activate (In base backend directory)
+3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
+4. To run: uvicorn backend:app --reload
+5. Enter url: http://<ip>:<port>/video
 
-Anaconda approach (Outdated):
-For python backend.py (command)
-1. conda create --name synthura python=3.9
-2. conda activate synthura
-3. pip install ultralytics
-4. pip install fastapi
-5. pip install uvicorn
-6. pip install aiortc
-
-To run: uvicorn backend:app --reload
 """
+
+#----------------------------------------------------------------------------------------------------#
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Allow all origins, methods, and headers (not recommended for production)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+#----------------------------------------------------------------------------------------------------#
 
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
-
-        # Convert YOLOv8 model to OpenVINO format
-        self.model.export(format='openvino')
-        self.ov_model = self.load_model('yolov8n_openvino_model/')
-        self.ov_model_path = os.path.join(os.path.dirname(__file__), 'yolov8n_openvino_model', 'yolov8n.xml')
-
-        # Initialize the OpenVINO Runtime
-        self.ie = Core()
-        
-        # Load the YOLOv8 network model in IR format from the specified XML file
-        self.net = self.ie.read_model(model=self.ov_model_path)
-        
-        # Load the network model onto the CPU device for inference
-        self.exec_net = self.ie.compile_model(model=self.net, device_name="GPU")
-        
-        # Create an inference request object to handle the execution of the model inference
-        self.infer_request = self.exec_net.create_infer_request()
-
-        # Get the input tensor name
-        self.input_tensor_name = self.exec_net.inputs[0].get_any_name()
-
-        # Get the output tensor name
-        self.output_tensor = self.exec_net.outputs[0]
-
-        # data stored as "camera_id: [camera_url, pc, websocket]"
         self.camera_connections = {}
         self.camera_urls = []
+        self.detected_objects = {}
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
@@ -93,12 +55,12 @@ class SynthuraSecuritySystem:
         return model
 
     def add_camera(self, camera_id, camera_url, websocket, pc):
-
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
         self.camera_connections[camera_id] = [camera_url, websocket, pc]
         self.camera_urls.append(camera_url)
+        self.detected_objects[camera_id] = []
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -122,67 +84,10 @@ class SynthuraSecuritySystem:
         
         return self.model(frame)
 
-        # Convert the frame from HWC to CHW format
-        chw_frame = resized_frame.transpose(2, 0, 1)
-
-        # Add batch dimension and normalize the image
-        input_blob = np.expand_dims(chw_frame, axis=0).astype(np.float32) / 255.0
-
-        return input_blob
-    
-    def postprocess_results(self, results):
-        # Convert results to a list of tuples (x_min, y_min, x_max, y_max, confidence)
-        processed_results = []
-        for detection in results[0]:
-            x_center, y_center, width, height, confidence = detection[:5]
-            
-            # Convert normalized coordinates to absolute pixel values
-            x_center = int(x_center * 640)
-            y_center = int(y_center * 640)
-            width = int(width * 640)
-            height = int(height * 640)
-
-            # Calculate bounding box coordinates
-            x_min = int((x_center - width / 2) / 640 * self.original_frame_size[0])
-            x_max = int((x_center + width / 2) / 640 * self.original_frame_size[0])
-            y_min = int((y_center - height / 2) / 640 * self.original_frame_size[1])
-            y_max = int((y_center + height / 2) / 640 * self.original_frame_size[1])
-
-            processed_results.append((x_min, y_min, x_max, y_max, float(confidence)))
-        return processed_results
-
-    def object_detection(self, frame):
-        preprocessed_frame = self.preprocess_frame(frame)
-
-        # Start asynchronous inference
-        self.infer_request.start_async(inputs={self.input_tensor_name: preprocessed_frame})
-        
-        # Wait for the inference result
-        self.infer_request.wait()
-        
-        # Get the results from the inference request
-        results = self.infer_request.get_tensor(self.output_tensor).data
-
-        return self.postprocess_results(results)
-
-    def frame_annotation(self, frame, results):
-        # Post-process and annotate the frame with the results
-        for result in results:
-            # Assuming result contains bounding box coordinates and confidence score
-            x_min, y_min, x_max, y_max, confidence = result
-            
-            label = f"Confidence: {confidence:.2f}"
-            
-            # Draw bounding box
-            cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-            
-            # Draw label
-            cv2.putText(frame, label, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-        return frame
+    def frame_annotation(self, results):
+        return results[0].plot()
 
     async def remove_camera(self, camera_id):
-
         logger.info(self.camera_connections)
 
         if camera_id not in list(self.camera_connections.keys()):
@@ -193,6 +98,7 @@ class SynthuraSecuritySystem:
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
         self.camera_connections.pop(camera_id)
+        self.detected_objects.pop(camera_id)
 
         logger.info(f"Camera {camera_id} removed successfully.")
 
@@ -201,6 +107,8 @@ class SynthuraSecuritySystem:
             self.remove_camera(camera_id)
         cv2.destroyAllWindows()
         logger.info("Security system stopped.")
+
+#----------------------------------------------------------------------------------------------------#
 
     async def handle_websocket(self, websocket: WebSocket):
 
@@ -217,58 +125,76 @@ class SynthuraSecuritySystem:
                 json_data = json.loads(data)
                 type = json_data.get("type")
 
-                # add camera to security and create/send offer
                 if type == "camera_info":
-                    # retrieve camera ip and add to security system
                     camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
                     decoded_camera_url = unquote(camera_url)
                     
-                    # Initiate webrtc connection
                     pc = RTCPeerConnection()
 
                     self.add_camera(camera_id, decoded_camera_url, websocket, pc)
 
-                    # Add video track to peer connection
                     cap = cv2.VideoCapture(decoded_camera_url)
-                    track = MyVideoStreamTrack(cap, self)
+                    track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
-                    # Generate and send offer to client
                     offer = await pc.createOffer()
                     await pc.setLocalDescription(offer)
                     await websocket.send_text(pc.localDescription.sdp)
 
-                # process answer from client
                 else:
                     logging.info("Received Answer")
-                    # set remote description to answer
                     await pc.setRemoteDescription(RTCSessionDescription(type="answer", sdp=json_data["sdp"]))
 
             except WebSocketDisconnect:
                 logging.info("Websocket disconnected")
                 break
 
-# temp class to test video streaming
+#----------------------------------------------------------------------------------------------------#
+"""
+Buffer sizes: 1, 3, 5, 10, 20, 30, 40, 50
+Explanation: 
+Smaller buffer sizes reduce latency between capturing frames and processing them. This results in lower camera delay.
+Although if the buffer is too small it may lead to dropped frames since the processing cannot kepp up with the frame capture rate.
+
+Larger buffer sizes will increase latency between capturing frames and processing them resulting in higher camera delay.
+However larger buffer sizes can help smooth out any temporary processing delays leading to more stable streams and a reduction in the likelihood of dropped frames.
+
+Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768, 1920x1080
+"""
 class MyVideoStreamTrack(VideoStreamTrack):
     def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=10):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
+        self.camera_id = camera_id
+        self.resize_width = frame_width
+        self.resize_height = frame_height
+        self.frame_buffer = Queue(maxsize=buffer_size)
+        self.capture_thread = Thread(target=self.capture_frames)
+        self.capture_thread.daemon = True
+        self.capture_thread.start()
+
+    def capture_frames(self):
+        while True:
+            ret, frame = self.cap.read()
+            if ret:
+                resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
+                if not self.frame_buffer.full():
+                    self.frame_buffer.put(resized_frame)
 
     async def recv(self):
-        ret, frame = self.cap.read()
-        if ret:
-            results = self.security_system.object_detection(frame)
-            annotated_frame = self.security_system.frame_annotation(frame, results)
+        if not self.frame_buffer.empty():
+            frame = self.frame_buffer.get()
+            annotated_frame = await self.process_frame(frame)
+
             pts, time_base = await self.next_timestamp()
             finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
             finished_frame.pts = pts
             finished_frame.time_base = time_base
             return finished_frame
         else:
-            # Create an empty frame with dimensions matching the camera's output to send something back
-            empty_frame = np.zeros((480, 640, 3), dtype=np.uint8)  # Assuming (480, 640) resolution and BGR24 format
+            empty_frame = numpy.zeros((self.resize_height, self.resize_width, 3), dtype=numpy.uint8)
             pts, time_base = await self.next_timestamp()
             empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
             empty_frame.pts = pts
@@ -294,6 +220,8 @@ security_system = SynthuraSecuritySystem()
 
 class CameraIP(BaseModel):
     camera_ip: str
+
+#----------------------------------------------------------------------------------------------------#
 
 @app.websocket("/api/video_feed/ws")
 async def video_feed_websocket(websocket: WebSocket):
