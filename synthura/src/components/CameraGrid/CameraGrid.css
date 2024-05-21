@@ -19,23 +19,15 @@
 #camera-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: start;
+    justify-content: flex-start;
     width: 100%;
     border: 2px solid var(--accent-light);
     border-radius: 3px;
     height: 85%;
     margin: 20px;
+    gap: 10px;
     padding: 10px;
-    gap: 16px;
     overflow-y: auto;
-}
-.live-feed {
-    width: 32.7%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 h2 {
