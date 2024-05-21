@@ -1,0 +1,41 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #252526;
+    --accent-dark: #2d2d30;
+    --accent-light: #5c5c63;
+    --border-color: #3e3e42;
+}
+
+.analytics-feed {
+    width: 100%;
+    height: 33%;
+    box-sizing: border-box;
+    margin-top: 5px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.objects-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.analytics-feed h2 {
+    color: snow;
+}
+
+.analytics-feed p {
+    color: var(--background-dark1);
+    background-color: var(--accent-light);
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 5px;
+    margin: 0;
+    font-weight: 700;
+}
+
+
+
+
