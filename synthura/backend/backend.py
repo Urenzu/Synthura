@@ -16,6 +16,7 @@ import numpy
 import json
 import torch
 import time
+from fastapi.middleware.cors import CORSMiddleware
 
 #----------------------------------------------------------------------------------------------------#
 
@@ -44,6 +45,15 @@ logger = logging.getLogger(__name__)
 
 #----------------------------------------------------------------------------------------------------#
 
+# Enable CORS for all origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
+
 class SynthuraSecuritySystem:
     def __init__(self, model_path='yolov8n.pt'):
         self.model = self.load_model(model_path)
@@ -67,11 +77,9 @@ class SynthuraSecuritySystem:
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
-        self.camera_connections[camera_id] = [camera_url, websocket, pc]
+        self.camera_connections[camera_id] = [camera_url, websocket, pc, cap]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
-        self.motion_status[camera_id] = []
-
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -100,10 +108,13 @@ class SynthuraSecuritySystem:
         if camera_id not in list(self.camera_connections.keys()):
             logger.warning(f"Camera {camera_id} is not found.")
             return
-
+        
+        
         self.camera_urls.remove(self.camera_connections[camera_id][0])
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
+        # Stop trying to capture frames from device
+        self.camera_connections[camera_id][3].stop()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
 
@@ -133,21 +144,35 @@ class SynthuraSecuritySystem:
                 type = json_data.get("type")
 
                 if type == "camera_info":
+
                     camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
                     decoded_camera_url = unquote(camera_url)
                     
                     pc = RTCPeerConnection()
 
-                    self.add_camera(camera_id, decoded_camera_url, websocket, pc)
-
                     cap = cv2.VideoCapture(decoded_camera_url)
                     track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
+                    self.add_camera(camera_id, decoded_camera_url, websocket, pc, track)
+
                     offer = await pc.createOffer()
                     await pc.setLocalDescription(offer)
-                    await websocket.send_text(pc.localDescription.sdp)
+                    await websocket.send_json({
+                        "type": "offer",
+                        "sdp": pc.localDescription.sdp
+                    })
+
+                    logger.info(f"sent offer")
+                
+                elif type == "analytics":
+            
+                    detected_objects = self.detected_objects.get(camera_id)
+                    await websocket.send_json({
+                        "type": "analytics",
+                        "detected_objects": detected_objects
+                    })
 
                 else:
                     logging.info("Received Answer")
@@ -180,6 +205,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.frame_buffer = Queue(maxsize=buffer_size)
         self.capture_thread = Thread(target=self.capture_frames)
         self.capture_thread.daemon = True
+        self.running = True
         self.capture_thread.start()
 
         # Motion detection attributes #
@@ -189,7 +215,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.background_update_interval = 50
 
     def capture_frames(self):
-        while True:
+        while self.running:
             ret, frame = self.cap.read()
             if ret:
                 resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
@@ -199,6 +225,11 @@ class MyVideoStreamTrack(VideoStreamTrack):
                     continue
             else:
                 time.sleep(0.01)
+    
+    def stop(self):
+        self.running = False
+        self.capture_thread.join()
+        self.cap.release()
 
     async def recv(self):
         if not self.frame_buffer.empty():
@@ -219,6 +250,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
             return empty_frame
 
     async def process_frame(self, frame):
+        
         results = await asyncio.to_thread(self.security_system.object_detection, frame)
         annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
