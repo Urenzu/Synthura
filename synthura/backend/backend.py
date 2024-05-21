@@ -15,7 +15,6 @@ from aiortc import VideoStreamTrack
 import numpy
 import json
 import torch
-
 #----------------------------------------------------------------------------------------------------#
 
 """
@@ -27,6 +26,12 @@ Backend environment setup:
 4. To run: uvicorn backend:app --reload
 5. Enter url: http://<ip>:<port>/video
 
+Cuda environment setup:
+1. cmd: nvidia-smi
+2. Check what cuda version you would need to install (Right side).
+3. Install: Correct CUDA Toolkit. (Example Toolkit: https://developer.nvidia.com/cuda-downloads)
+4. Install: Correct torch version for your CUDA Toolkit within virtual environment from the website: https://pytorch.org/get-started/locally/
+Example command for synthura virtual environment: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 """
 
 #----------------------------------------------------------------------------------------------------#
@@ -47,7 +52,14 @@ class SynthuraSecuritySystem:
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
-        return YOLO(model_path)
+        model = YOLO(model_path)
+        if torch.cuda.is_available():
+            model = model.cuda()
+
+        print(f"Cuda available: {torch.cuda.is_available()}")
+        print(f"Cuda version: {torch.version.cuda}")
+        print(f"Model loaded on device: {model.device}")
+        return model
 
     def add_camera(self, camera_id, camera_url, websocket, pc):
         if camera_url in self.camera_urls:
@@ -61,7 +73,21 @@ class SynthuraSecuritySystem:
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
-        return self.model(frame)
+        if torch.cuda.is_available():
+            frame = torch.from_numpy(frame)
+            frame = frame.permute(2, 0, 1).unsqueeze(0).float()
+            frame /= 255.0
+
+            height, width = frame.shape[2], frame.shape[3]
+            new_height = (height // 32) * 32
+            new_width = (width // 32) * 32
+            frame = torch.nn.functional.interpolate(frame, size=(new_height, new_width), mode='bilinear', align_corners=False)
+            
+            frame = frame.cuda()
+            
+            return self.model(frame)
+        else:
+            return self.model(frame)
 
     def frame_annotation(self, results):
         return results[0].plot()
