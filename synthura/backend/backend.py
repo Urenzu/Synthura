@@ -33,7 +33,7 @@ Cuda environment setup:
 1. cmd: nvidia-smi
 2. Check what cuda version you would need to install (Right side).
 3. Install: Correct CUDA Toolkit. (Example Toolkit: https://developer.nvidia.com/cuda-downloads)
-4. Install: Correct torch version for your CUDA Toolkit within virtual environment from the website: https://pytorch.org/get-started/locally/
+4. Install: Correct torch version for your CUDA Toolkit within virtual environment from the website: https://pytorch.org/get-started/locally/ (Make sure to 'pip unistall torch torchvision torchaudio' first)
 Example command for synthura virtual environment: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 """
 
@@ -55,12 +55,14 @@ app.add_middleware(
 )
 
 class SynthuraSecuritySystem:
-    def __init__(self, model_path='yolov8n.pt'):
+    def __init__(self, model_path='yolov8n.pt', frame_width=640, frame_height=480):
         self.model = self.load_model(model_path)
         self.camera_connections = {}
         self.camera_urls = []
         self.detected_objects = {}
         self.motion_status = {}
+        self.frame_width = frame_width
+        self.frame_height = frame_height
 
     def load_model(self, model_path):
         model_path = os.path.join(os.path.dirname(__file__), model_path)
@@ -110,16 +112,13 @@ class SynthuraSecuritySystem:
             logger.warning(f"Camera {camera_id} is not found.")
             return
         
-        
         self.camera_urls.remove(self.camera_connections[camera_id][0])
         await self.camera_connections[camera_id][1].close(1000)
         await self.camera_connections[camera_id][2].close()
-        # Stop trying to capture frames from device
         self.camera_connections[camera_id][3].stop()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
         self.motion_status.pop(camera_id)
-
         logger.info(f"Camera {camera_id} removed successfully.")
 
     def stop(self):
@@ -194,22 +193,21 @@ Although if the buffer is too small it may lead to dropped frames since the proc
 
 Larger buffer sizes will increase latency between capturing frames and processing them resulting in higher camera delay.
 However larger buffer sizes can help smooth out any temporary processing delays leading to more stable streams and a reduction in the likelihood of dropped frames.
-
-Width x Height sizes: 320x240, 416x416, 480x360, 640x480, 800x600, 1024x768, 1920x1080
 """
 class MyVideoStreamTrack(VideoStreamTrack):
-    def __init__(self, cap, security_system, camera_id, frame_width=1920, frame_height=1080, buffer_size=1):
+    def __init__(self, cap, security_system, camera_id, buffer_size=1):
         super().__init__()
         self.cap = cap
         self.security_system = security_system
         self.camera_id = camera_id
-        self.resize_width = frame_width
-        self.resize_height = frame_height
+        self.resize_width = security_system.frame_width
+        self.resize_height = security_system.frame_height
         self.frame_buffer = Queue(maxsize=buffer_size)
         self.capture_thread = Thread(target=self.capture_frames)
         self.capture_thread.daemon = True
         self.running = True
         self.capture_thread.start()
+        self.last_annotated_frame = None
 
         # Motion detection attributes #
         self.background = None
@@ -238,40 +236,28 @@ class MyVideoStreamTrack(VideoStreamTrack):
         if not self.frame_buffer.empty():
             frame = self.frame_buffer.get()
             annotated_frame = await self.process_frame(frame)
-
-            pts, time_base = await self.next_timestamp()
-            finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
-            finished_frame.pts = pts
-            finished_frame.time_base = time_base
-            return finished_frame
+            self.last_annotated_frame = annotated_frame
         else:
-            empty_frame = numpy.zeros((self.resize_height, self.resize_width, 3), dtype=numpy.uint8)
-            pts, time_base = await self.next_timestamp()
-            empty_frame = VideoFrame.from_ndarray(empty_frame, format="bgr24")
-            empty_frame.pts = pts
-            empty_frame.time_base = time_base
-            return empty_frame
+            if self.last_annotated_frame is not None:
+                annotated_frame = self.last_annotated_frame
+            else:
+                annotated_frame = numpy.zeros((self.resize_height, self.resize_width, 3), dtype=numpy.uint8)
+
+        pts, time_base = await self.next_timestamp()
+        finished_frame = VideoFrame.from_ndarray(annotated_frame, format="bgr24")
+        finished_frame.pts = pts
+        finished_frame.time_base = time_base
+        return finished_frame
 
     async def process_frame(self, frame):
-
-        # python 3.8
-
         loop = asyncio.get_event_loop()
-        results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
-        annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
 
-        # python 3.9
-        # results = await asyncio.to_thread(self.security_system.object_detection, frame)
-        # annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+        results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects
-
-        # python 3.8
-        motion_detected = await loop.run_in_executor(None, self.detect_motion, frame)
-
-        # python 3.9
-        # motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+        motion_detected = await asyncio.to_thread(self.detect_motion, frame)
 
         if motion_detected:
             self.security_system.motion_status[self.camera_id] = "motion"
