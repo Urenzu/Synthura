@@ -80,7 +80,7 @@ class SynthuraSecuritySystem:
         self.camera_connections[camera_id] = [camera_url, websocket, pc, cap]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
-        self.motion_status[camera_id] = []
+        self.motion_status[camera_id] = "no motion"
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
@@ -118,6 +118,7 @@ class SynthuraSecuritySystem:
         self.camera_connections[camera_id][3].stop()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
+        self.motion_status.pop(camera_id)
 
         logger.info(f"Camera {camera_id} removed successfully.")
 
