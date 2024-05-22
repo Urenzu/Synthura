@@ -172,7 +172,8 @@ class SynthuraSecuritySystem:
                     detected_objects = self.detected_objects.get(camera_id)
                     await websocket.send_json({
                         "type": "analytics",
-                        "detected_objects": detected_objects
+                        "detected_objects": detected_objects,
+                        "motion_status": self.motion_status.get(camera_id)
                     })
 
                 else:
@@ -272,11 +273,9 @@ class MyVideoStreamTrack(VideoStreamTrack):
         # motion_detected = await asyncio.to_thread(self.detect_motion, frame)
 
         if motion_detected:
-            if 'motion' not in self.security_system.motion_status[self.camera_id]:
-                self.security_system.motion_status[self.camera_id].append('motion')
+            self.security_system.motion_status[self.camera_id] = "motion"
         else:
-            if 'motion' in self.security_system.motion_status[self.camera_id]:
-                self.security_system.motion_status[self.camera_id].remove('motion')
+            self.security_system.motion_status[self.camera_id] = "no motion"
 
         logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
         logger.info(f"Camera {self.camera_id} motion status: {self.security_system.motion_status[self.camera_id]}")

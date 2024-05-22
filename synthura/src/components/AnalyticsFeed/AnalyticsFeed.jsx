@@ -13,7 +13,7 @@ import './AnalyticsFeed.css';
 const AnalyticsFeed = (id) => {
 
   const intervalRef = useRef(null);
-  const { offer, status, detectedObjects, sendMessage } = useWebSocket();
+  const { offer, status, detectedObjects, sendMessage, motionStatus } = useWebSocket();
   const [objectFrequency, setObjectFrequency] = useState({});
 
   // Function to get frequency of objects. Executes whenever detected objects updates.
@@ -73,6 +73,9 @@ const AnalyticsFeed = (id) => {
           ))}
         </div>
       </div>
+      <div className="status-bar" >
+          {motionStatus === "motion" ? <p className="motion">Motion Detected</p> : <p className="no-motion">No Motion Detected</p>}
+        </div>
     </div>
   )
 }

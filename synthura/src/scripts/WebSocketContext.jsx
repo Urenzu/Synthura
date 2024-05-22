@@ -15,6 +15,7 @@ export const WebSocketProvider = ({ children }) => {
     const [detectedObjects, setDetectedObjects] = useState([]);
     const [offer, setOffer] = useState(null);
     const [status, setStatus] = useState('disconnected');
+    const [motionStatus, setMotionStatus] = useState("no motion");
     const initializedRef = useRef(false);
 
     useEffect(() => {
@@ -46,6 +47,8 @@ export const WebSocketProvider = ({ children }) => {
                 }
                 else {
                     setDetectedObjects(data.detected_objects);
+                    setMotionStatus(data.motion_status);
+                    console.log(data.motion_status);
                 }
             } catch (err) {
                 console.error('Error parsing Websocket message as JSON data:', err);
@@ -61,7 +64,7 @@ export const WebSocketProvider = ({ children }) => {
     };
 
     return (
-        <WebSocketContext.Provider value={{ status, offer, detectedObjects, sendMessage }}>
+        <WebSocketContext.Provider value={{ status, offer, detectedObjects, sendMessage, motionStatus }}>
             {children}
         </WebSocketContext.Provider>
     );
