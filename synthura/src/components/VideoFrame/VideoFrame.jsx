@@ -87,6 +87,34 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       
   }, [offer, status] );
 
+  const handleDownload = async () => {
+    const stream = videoRef.current.captureStream();
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      chunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `camera_${id}_video.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    };
+
+    mediaRecorder.start();
+
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 30000); // Recording for 5 seconds, you can adjust this as per your requirement
+  };
+
   return (
     <div data-testid={id} className="video-frame">
       <div className="live-video-bar">
@@ -101,6 +129,9 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       </div>
       <div className="live-video-container">
         <video ref={videoRef} autoPlay />
+        <button className="download-button" onClick={handleDownload}>
+          Download
+        </button>
       </div>
     </div>
   );
