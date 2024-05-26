@@ -1,6 +1,6 @@
 /* 
 
-Contributor(s): Owen Arnst
+Contributor(s): Owen Arnst and Githika Annapureddy
 
 Description: This component contains a single environment. Separates environments and eases styling/event handling
 
@@ -16,7 +16,7 @@ import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"
 import "./EnvironmentContainer.css"
 
-const EnvironmentContainer = ( {env_id, handleDeleteEnvironment} ) => {
+const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Environment " + env_id} ) => {
 
   const [clustersList, setClustersList] = useState(new LinkedList());
   const [activeClusters, setActiveClusters] = useState([]);
@@ -52,7 +52,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment} ) => {
 
   return (
     <div className="environment" >
-      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} />
+      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} EnvName = {EnvName}/>
       <div className="cluster">
         {activeClusters}
       </div>
