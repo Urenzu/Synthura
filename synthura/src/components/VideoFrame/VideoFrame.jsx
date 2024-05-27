@@ -11,6 +11,7 @@ import './VideoFrame.css';
 import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
+import axios from "axios";
 
 const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
 
@@ -87,6 +88,48 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       
   }, [offer, status] );
 
+  const handleUpload = async () => {
+    const stream = videoRef.current.captureStream();
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+  
+    mediaRecorder.ondataavailable = (event) => {
+      chunks.push(event.data);
+    };
+    
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: 'video/mp4' });
+      const reader = new FileReader();
+      
+      reader.onload = async () => {
+        const base64Data = reader.result.split(',')[1]; // Extract base64 data
+        const filename = `camera_${id}_video.mp4`;
+        
+        // Add console logs to check if filename and base64Data are correctly defined
+        console.log('filename:', filename);
+        console.log('base64Data:', base64Data.substring(0, 10000))
+        const data = base64Data.substring(0, 10000);
+  
+        // Make sure filename and base64Data are correctly defined
+        if (filename && base64Data) {
+          const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`);
+          console.log(response);
+        } else {
+          console.error('Filename or base64Data is undefined');
+        }
+      };
+      
+      reader.readAsDataURL(blob);
+    };
+  
+    mediaRecorder.start();
+  
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 30000); // Recording for 30 seconds
+  };
+  
+
   const handleDownload = async () => {
     const stream = videoRef.current.captureStream();
     const mediaRecorder = new MediaRecorder(stream);
@@ -100,6 +143,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       const blob = new Blob(chunks, { type: 'video/mp4' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
+      
       a.href = url;
       a.download = `camera_${id}_video.mp4`;
       document.body.appendChild(a);
@@ -129,8 +173,8 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       </div>
       <div className="live-video-container">
         <video ref={videoRef} autoPlay />
-        <button className="download-button" onClick={handleDownload}>
-          Download
+        <button onClick={handleUpload}>
+          Save Video
         </button>
       </div>
     </div>
