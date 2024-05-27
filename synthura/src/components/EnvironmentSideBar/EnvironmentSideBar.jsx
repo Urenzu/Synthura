@@ -22,7 +22,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
   const EnvironmentNode = (id, name) => ({
     id,
     name,
-    EnvironmentContainer: <EnvironmentContainer key={id} env_id={id} EnvName = {name} handleDeleteEnvironment={handleDeleteEnvironment} />,
+    EnvironmentContainer: <EnvironmentContainer key={id} env_id={id} EnvName = {name} handleDeleteEnvironment={handleDeleteEnvironment} handleRenameEnvironment={handleRenameEnvironment}/>,
   });
   
 
@@ -47,30 +47,28 @@ const EnvironmentSideBar = ({showSideBar}) => {
       setId(id+1);
       const newNode = EnvironmentNode(id, "ARRAY Environment " + id);
       console.log("newNode is", newNode)
-      //updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} />); // Append new data
       console.log("updatedList is", [...prevList, newNode])
       return [...prevList, newNode]; // Return updated list
     });
   }
 
   // Rename an environment
-  // const handleRenameEnvironment= (IdRename, NewName) => {
-  //   setEnvironmentsList(prevList => {
-  //     const updatedList = new LinkedList();
-  //     Object.assign(updatedList, prevList); // Copy previous state
+  const handleRenameEnvironment= (idToRename, NewName) => {
+    setEnvironmentsList(prevList => {
+      const updatedList = [];
+      Object.assign(updatedList, prevList); // Copy previous state
+      let EnvToChange = updatedList.find((environment) => environment.id === idToRename);
 
-  //     const EnvToChange = updatedList.find(environment => environment.id === IdToRemove)
-      
-  //     // Remove specified data. should awlays exist, extra check for extra precaution
-  //     if (EnvToChange) {
-  //       // Remove the environment from the list
-  //     } else {
-  //       console.error(`Environment with ID ${IdToRemove} not found`);
-  //     }
+      if (EnvToChange) {
+        EnvToChange.name = NewName
+        console.log("Environment Name changed successfully!")
+      } else {
+        console.error(`Environment with ID ${IdToRemove} not found`);
+      }
 
-  //     return updatedList; // Return updated list
-  //   });
-  // }
+      return updatedList; // Return updated list
+    });
+  }
 
 
   return (
@@ -83,7 +81,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
             environmentsList.map((environment) => (
               <li key={environment.id}>
                 {/* Render the EnvironmentContainer component, passing props if needed */}
-                <EnvironmentContainer key={environment.id} env_id={environment.id} EnvName = {environment.name} handleDeleteEnvironment={handleDeleteEnvironment} />
+                <EnvironmentContainer key={environment.id} env_id={environment.id} EnvName = {environment.name} handleDeleteEnvironment={handleDeleteEnvironment} handleRenameEnvironment={handleRenameEnvironment}/>
               </li>
             ))
           )}

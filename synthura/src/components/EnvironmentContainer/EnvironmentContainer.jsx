@@ -16,7 +16,7 @@ import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"
 import "./EnvironmentContainer.css"
 
-const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Environment " + env_id} ) => {
+const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, handleRenameEnvironment, EnvName = "Environment " + env_id} ) => {
   console.log("in EnvironmentContainer, env_id is", env_id, "EnvName is", EnvName)
   
   const [clustersList, setClustersList] = useState(new LinkedList());
@@ -51,11 +51,6 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Envi
     });
   }
 
-  // // setsName at inital render
-  // useEffect(() => { 
-  //   setName({EnvName})
-  // }, []);
-
   // renders updated column of clusters
   useEffect(() => { 
     setActiveClusters(clustersList.render());
@@ -63,7 +58,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Envi
 
   return (
     <div className="environment" >
-      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} EnvName = {EnvName}/>
+      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} handleRenameEnvironment={handleRenameEnvironment} EnvName = {EnvName}/>
       <div className="cluster">
         {activeClusters}
       </div>
