@@ -13,6 +13,7 @@ Child Component(s): none
 import "./EnvironmentButton.css"
 
 const EnvironmentButton = ( {handleDeleteEnvironment, id, EnvName} ) => {
+  console.log("in EnvironmentButton, id is", id, "EnvName is", EnvName)
 
   return (
     <>

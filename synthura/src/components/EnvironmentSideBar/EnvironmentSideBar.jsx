@@ -21,6 +21,13 @@ const EnvironmentSideBar = ({showSideBar}) => {
   const [activeEnvironments, setActiveEnvironments] = useState([]);
   const [id, setId] = useState(1);
 
+  const EnvironmentNode = (id, name) => ({
+    id,
+    name,
+    EnvironmentContainer: <EnvironmentContainer key={id} env_id={id} EnvName = {name} handleDeleteEnvironment={handleDeleteEnvironment} />,
+  });
+  
+
   // Delete an environment
   const handleDeleteEnvironment= (IdToRemove) => {
     setEnvironmentsList(prevList => {
@@ -45,7 +52,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
         curr = curr.next
       }
       
-      // Remove specified data. should awlays exist, extra check for extra precaution
+      // Remove specified data. Should never say not found but extra check for extra precaution
       if (found === 0) {
         console.error(`Environment with ID ${IdToRemove} not found`);
       } else {
@@ -61,18 +68,19 @@ const EnvironmentSideBar = ({showSideBar}) => {
     setEnvironmentsList(prevList => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList); // Copy previous state
-      if(!updatedList.isPresent(id)) {
-        //key is for id in environmentsList, env_id id for EnvironmentContainer
-        const ThisEnvName = "This Environment " + id
-        // let curr = {
-        //   id: id,
-        //   Name: EnvName,
-        //   Environment: <EnvironmentContainer key={id} EnvName = {Name} env_id={id} handleDeleteEnvironment={handleDeleteEnvironment}/>
-        // }
-        updatedList.append(id, <EnvironmentContainer key={id} env_id={id} EnvName = {ThisEnvName} handleDeleteEnvironment={handleDeleteEnvironment}/>
-        ); // Append new data
-        setId(id+1);
+      //key is for id in environmentsList, env_id id for EnvironmentContainer
+      const ThisEnvName = "New Environment " + id
+      let curr = {
+        id: id,
+        //Name: ThisEnvName,
+        //creates an instance of EnvironmentContainer
+        Environment: <EnvironmentContainer key={id} env_id={id} handleDeleteEnvironment={handleDeleteEnvironment}/>
       }
+      console.log("curr is", curr)
+      updatedList.append(curr); // Append new data
+      //updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} />); // Append new data
+      setId(id+1);
+      console.log("updatedList is", updatedList)
       return updatedList; // Return updated list
     });
   }

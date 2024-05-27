@@ -17,10 +17,16 @@ import ClusterButton from "../ClusterButton/ClusterButton"
 import "./EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Environment " + env_id} ) => {
-
+  console.log("in EnvironmentContainer, env_id is", env_id, "EnvName is", EnvName)
+  
   const [clustersList, setClustersList] = useState(new LinkedList());
   const [activeClusters, setActiveClusters] = useState([]);
   const [id, setId] = useState(1);
+  const [ThisEnvName, setThisEnvName] = useState(EnvName);
+
+  const setName = (NewName) => {
+    setThisEnvName(NewName)
+  }
 
   // Delete a cluster
   const handleDeleteCluster = (rem) => {
