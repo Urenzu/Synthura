@@ -51,6 +51,11 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, EnvName = "Envi
     });
   }
 
+  // // setsName at inital render
+  // useEffect(() => { 
+  //   setName({EnvName})
+  // }, []);
+
   // renders updated column of clusters
   useEffect(() => { 
     setActiveClusters(clustersList.render());
