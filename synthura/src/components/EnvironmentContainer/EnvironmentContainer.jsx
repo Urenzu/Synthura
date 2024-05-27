@@ -19,48 +19,72 @@ import "./EnvironmentContainer.css"
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, handleRenameEnvironment, EnvName = "Environment " + env_id} ) => {
   console.log("in EnvironmentContainer, env_id is", env_id, "EnvName is", EnvName)
   
-  const [clustersList, setClustersList] = useState(new LinkedList());
-  const [activeClusters, setActiveClusters] = useState([]);
+  const [clusterList, setClusterList] = useState([]);
   const [id, setId] = useState(1);
-  const [ThisEnvName, setThisEnvName] = useState(EnvName);
 
-  const setName = (NewName) => {
-    setThisEnvName(NewName)
-  }
+  const ClusterNode = (id, name) => ({
+    id,
+    name,
+    ClusterButton: <ClusterButton key={id} id={id} CluName = {name} handleDeleteCluster={handleDeleteCluster} handleRenameCluster={handleRenameCluster}/>,
+  });
 
   // Delete a cluster
-  const handleDeleteCluster = (rem) => {
-    setClustersList(prevList => {
-      const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList); // Copy previous state
-      updatedList.remove(rem); // Append new data
+  const handleDeleteCluster= (idToRemove) => {
+    setClusterList(prevList => {
+      if (!prevList.some((cluster) => cluster.id === idToRemove)) {
+        console.error(`Cluster with ID ${idToRemove} not found`);
+      } else {
+        console.log("Cluster deleted successfully");
+      }
+
+      const updatedList = prevList.filter((cluster) => cluster.id !== idToRemove);
+      
       return updatedList; // Return updated list
     });
   }
 
+
   // create a new cluster
   const handleCreateCluster = () => {
-    setClustersList(prevList => {
-      const updatedList = new LinkedList();
+    setClusterList(prevList => {
+      setId(id+1);
+      const newNode = ClusterNode(id, "ARRAY Cluster " + id);
+      console.log("newNode is", newNode)
+      console.log("updatedList is", [...prevList, newNode])
+      return [...prevList, newNode]; // Return updated list
+    });
+  }
+
+  // Rename an cluster
+  const handleRenameCluster= (idToRename, NewName) => {
+    setClusterList(prevList => {
+      const updatedList = [];
       Object.assign(updatedList, prevList); // Copy previous state
-      if(!updatedList.isPresent(id)) {
-        updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} />); // Append new data
-        setId(id+1);
+      let ClusterToChange = updatedList.find((cluster) => cluster.id === idToRename);
+
+      if (ClusterToChange) {
+        ClusterToChange.name = NewName
+        console.log("Cluster Name changed successfully!")
+      } else {
+        console.error(`Cluster with ID ${IdToRemove} not found`);
       }
       return updatedList; // Return updated list
     });
   }
 
-  // renders updated column of clusters
-  useEffect(() => { 
-    setActiveClusters(clustersList.render());
-  }, [clustersList]);
-
   return (
     <div className="environment" >
       <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} handleRenameEnvironment={handleRenameEnvironment} EnvName = {EnvName}/>
       <div className="cluster">
-        {activeClusters}
+        <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+            {clusterList.length > 0 && (
+              clusterList.map((cluster) => (
+                <li key={cluster.id}>
+                  <ClusterButton key={cluster.id} id={cluster.id} CluName = {cluster.name} handleDeleteCluster={handleDeleteCluster} handleRenameCluster={handleRenameCluster}/>
+                </li>
+              ))
+            )}
+          </ul>
       </div>
       <button className="add-cluster-btn" onClick={handleCreateCluster}>
           <svg id="add-cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
