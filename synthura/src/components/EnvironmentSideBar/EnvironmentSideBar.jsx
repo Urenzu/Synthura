@@ -23,23 +23,37 @@ const EnvironmentSideBar = ({showSideBar}) => {
 
   // Delete an environment
   const handleDeleteEnvironment= (IdToRemove) => {
-    //TEMP
-    return environmentsList
-    // setEnvironmentsList(prevList => {
-    //   const updatedList = new LinkedList();
-    //   Object.assign(updatedList, prevList); // Copy previous state
-    //   const EnvToDelete = updatedList.find(environment => environment.id === IdToRemove)
+    setEnvironmentsList(prevList => {
+      const updatedList = new LinkedList();
+      Object.assign(updatedList, prevList); // Copy previous state
+
+      let curr = updatedList.head
+      let prev = null
+      let found = 0
+      while (curr) {
+        if (curr.id === IdToRemove){
+          found = 1
+          //manually remove
+          if (prev) {
+            prev.next = curr.next;
+          } else {
+            updatedList.head = curr.next; // Update head if deleting first node
+          }
+          break
+        } 
+        prev = curr
+        curr = curr.next
+      }
       
-    //   // Remove specified data. should awlays exist, extra check for extra precaution
-    //   if (EnvToDelete) {
-    //     // Remove the environment from the list
-    //     updatedList.remove(EnvToDelete);
-    //   } else {
-    //     console.error(`Environment with ID ${IdToRemove} not found`);
-    //   }
+      // Remove specified data. should awlays exist, extra check for extra precaution
+      if (found === 0) {
+        console.error(`Environment with ID ${IdToRemove} not found`);
+      } else {
+        console.log("deleted successfully")
+      }
       
-    //   return updatedList; // Return updated list
-    // });
+      return updatedList; // Return updated list
+    });
   }
 
   // create a new environment
@@ -49,13 +63,13 @@ const EnvironmentSideBar = ({showSideBar}) => {
       Object.assign(updatedList, prevList); // Copy previous state
       if(!updatedList.isPresent(id)) {
         //key is for id in environmentsList, env_id id for EnvironmentContainer
-        let EnvName = "Environment" + id
+        const ThisEnvName = "This Environment " + id
         // let curr = {
         //   id: id,
         //   Name: EnvName,
         //   Environment: <EnvironmentContainer key={id} EnvName = {Name} env_id={id} handleDeleteEnvironment={handleDeleteEnvironment}/>
         // }
-        updatedList.append(id, <EnvironmentContainer key={id} EnvName = {Name} env_id={id} handleDeleteEnvironment={handleDeleteEnvironment}/>
+        updatedList.append(id, <EnvironmentContainer key={id} env_id={id} EnvName = {ThisEnvName} handleDeleteEnvironment={handleDeleteEnvironment}/>
         ); // Append new data
         setId(id+1);
       }

@@ -22,7 +22,7 @@ const EnvironmentButton = ( {handleDeleteEnvironment, id, EnvName} ) => {
             192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
           </svg>
           <span>{EnvName}</span>
-          <svg id="three-dots" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <svg id="three-dots" onClick = {() => handleDeleteEnvironment(id)} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <circle cx="16" cy="12" r=".5"/>
             <circle cx="18" cy="12" r=".5"/>
             <circle cx="20" cy="12" r=".5" />
