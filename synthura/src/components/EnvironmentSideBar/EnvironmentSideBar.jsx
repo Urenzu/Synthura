@@ -69,15 +69,9 @@ const EnvironmentSideBar = ({showSideBar}) => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList); // Copy previous state
       //key is for id in environmentsList, env_id id for EnvironmentContainer
-      const ThisEnvName = "New Environment " + id
-      let curr = {
-        id: id,
-        //Name: ThisEnvName,
-        //creates an instance of EnvironmentContainer
-        Environment: <EnvironmentContainer key={id} env_id={id} handleDeleteEnvironment={handleDeleteEnvironment}/>
-      }
-      console.log("curr is", curr)
-      updatedList.append(curr); // Append new data
+      const newNode = EnvironmentNode(id, "TEST2 Environment " + id);
+      updatedList.append(newNode);
+      console.log("newNode is", newNode)
       //updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} />); // Append new data
       setId(id+1);
       console.log("updatedList is", updatedList)
@@ -105,22 +99,31 @@ const EnvironmentSideBar = ({showSideBar}) => {
   // }
 
   // renders updated column of environments
-  useEffect(() => { 
-    setActiveEnvironments(environmentsList.render());
-  }, [environmentsList]);
-
-
-
+  // useEffect(() => { 
+  //   setActiveEnvironments(environmentsList.render());
+  // }, [environmentsList]);
 
   return (
     <section id="side-bar" className={showSideBar ? "show-side-bar" : "hide-side-bar"} >
       <h2 style={{ marginTop: "50px" }}>Manage Environments</h2>
         <div className="environment">
-          {activeEnvironments}
+          <ul>
+            {environmentsList.head && ( // Check if there's a head node (data)
+              // Iterate through the linked list nodes
+              let currNode = environmentsList.head;
+              while (currNode) {
+                <li key={currNode.id}>
+                  {/* Render the EnvironmentContainer component from the node */}
+                  <currNode.EnvironmentContainer />
+                </li>
+                currNode = currNode.next; // Move to the next node
+              }
+            )}
+          </ul>
         </div>
       <button id="add-environment-btn" onClick={handleCreateEnvironment} >Add Environment</button>
-    </section> 
-  )
+    </section>
+  );
 }
 
 export default EnvironmentSideBar
