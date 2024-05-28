@@ -1,3 +1,12 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #252526;
+    --accent-dark: #2d2d30;
+    --accent-light: #5c5c63;
+    --border-color: #3e3e42;
+  }
+
 #environments-page {
     display: flex;
     justify-content: center;
@@ -5,4 +14,90 @@
     height: 100vh;
     position: relative;
     box-sizing: border-box;
+}
+
+/* blur rest of page and disable pointer events when naming component  */
+.environments-page-blur {
+    filter: blur(5px);
+    pointer-events: none;
+    transition: filter 0.5s ease;
+}
+
+/* styling of camera naming component */
+.name-component-field {
+    z-index: 5;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    top: 35%;
+    left: 30%;
+    width: 40%;
+    height: 30%;
+    background-color: var(--accent-light);
+    border: 2px solid var(--accent-dark);
+    border-radius: 5px;
+    opacity: 0;
+    
+}
+.name-component-field.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.name-component-field h2 {
+    color: snow;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+
+.name-component-field input {
+    height: 3rem;
+    width: 70%;
+    margin-top: 0;
+    padding: 5px;
+    font-size: 1.5rem;
+    outline: none;
+    border-radius: 5px;
+    border: 2px solid var(--accent-dark);
+}
+
+.name-component-field button {
+    width: 100px;
+    height: 50px;
+    background: var(--accent-dark);
+    color: snow;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    margin: 0 10px;
+}
+
+#error-message-naming-component {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+#error-message-naming-component span {
+    font-family: 'Roboto', sans-serif;
+    color: snow;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background-color: var(--background-dark1);
+    padding: 10px;
+    border: solid 2px var(--accent-dark);
+    border-radius: 5px;
+}
+
+#error-message-naming-component button {
+    width: 80px;
+    height: 40px;
 }

@@ -19,6 +19,10 @@ const AnalyticsFeed = (id) => {
   // Function to get frequency of objects. Executes whenever detected objects updates.
   useEffect(() => {
 
+    if(!detectedObjects) {
+      return;
+    }
+
     const frequencies = {};
     for (const item of detectedObjects) {
       if(frequencies[item]) {

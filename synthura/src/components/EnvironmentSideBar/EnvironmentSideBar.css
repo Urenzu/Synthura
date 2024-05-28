@@ -31,7 +31,7 @@
 }
 
 /* container for environment and cluster buttons */
-.environment {
+#environments {
     width: 100%;
 }
 
