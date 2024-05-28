@@ -9,7 +9,7 @@ Parent Component(s): CameraGrid
 import React from 'react'
 import './VideoFrame.css';
 import PropTypes from 'prop-types';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
 import axios from "axios";
 
@@ -18,6 +18,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
   const { status, offer, sendMessage } = useWebSocket();
+  const [isUploading, setIsUploading] = useState(false);
 
   const establishWebRTCConnection = async () => {
       
@@ -89,6 +90,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
   }, [offer, status] );
 
   const handleUpload = async () => {
+    setIsUploading(true);
     const stream = videoRef.current.captureStream();
     const mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
@@ -107,15 +109,31 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
         
         // Add console logs to check if filename and base64Data are correctly defined
         console.log('filename:', filename);
-        console.log('base64Data:', base64Data.substring(0, 10000))
+        console.log('base64Data:', base64Data)
         const data = base64Data.substring(0, 10000);
+
+        const postBodyData = {
+          data: base64Data
+        };
+        
   
         // Make sure filename and base64Data are correctly defined
         if (filename && base64Data) {
-          const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`);
-          console.log(response);
+          try {
+            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`, postBodyData, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            console.log(response);
+          } catch (error) {
+            console.error('Upload failed', error);
+          } finally {
+            setIsUploading(false);
+          }
         } else {
           console.error('Filename or base64Data is undefined');
+          setIsUploading(false);
         }
       };
       
@@ -173,8 +191,8 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
       </div>
       <div className="live-video-container">
         <video ref={videoRef} autoPlay />
-        <button onClick={handleUpload}>
-          Save Video
+        <button onClick={handleUpload} disabled={isUploading}>
+          {isUploading ? 'Uploading...' : 'Save Video'}
         </button>
       </div>
     </div>
