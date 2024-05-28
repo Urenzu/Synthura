@@ -4,7 +4,7 @@ Description: Displays live video feeds and analytics feeds for each camera. Hand
 
 Parent Component(s): EnvironmentsPage
 
-Child Component(s): AnalyticsFeed, VideoFrame
+Child Component(s): AnalyticsFeed, VideoFrame, NameComponent
 
 */
 
@@ -12,6 +12,7 @@ import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import { WebSocketProvider } from '../../scripts/WebSocketContext';
+import { useNameComponent } from '../../scripts/NameComponentContext';
 
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
@@ -22,18 +23,19 @@ const CameraGrid = () => {
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
   const [cameraURL, setCameraURL] = useState('');
+  const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
+  const [entered, setEntered] = useState(false);
 
-  // add a live feed to the camera grid. this includes a video frame and an analytics feed Component.
-  const handleAddCamera = () => {
-    if (cameraURL) {
-      
+  useEffect(() => {
+    if (!active && entered && !canceled) {
+      let temp_name = name;
       setCamList(prevList => {
         const updatedList = new LinkedList();
         Object.assign(updatedList, prevList);
         if (!updatedList.isPresent(id)) {
           updatedList.append(id, <div key={id} className="live-feed" >
                                   <WebSocketProvider>
-                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} />
+                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
                                     <AnalyticsFeed id={id} />
                                   </WebSocketProvider>
                                  </div>);
@@ -41,7 +43,21 @@ const CameraGrid = () => {
         }
         return updatedList;
       });
+      setName("");
+      setEntered(false);
+    }
+    else if (canceled) {
+      setCanceled(false);
+      setEntered(false);
+    }
+  }, [active]);
 
+  // add a live feed to the camera grid. this includes a video frame and an analytics feed Component.
+  const handleAddCamera = () => {
+    if (cameraURL) {
+      setText('Enter Camera Name');
+      setEntered(true);
+      setActive(true);
     } 
     else {
       console.error('No URL provided');

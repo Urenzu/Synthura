@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
 
-const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
+const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
 
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
@@ -90,7 +90,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL }) => {
   return (
     <div data-testid={id} className="video-frame">
       <div className="live-video-bar">
-        <span>Camera {id}</span>
+        <span>{cameraName}</span>
         <button className="close-camera-button" data-testid={`close-camera-btn-${id}`} onClick={() => handleRemoveCamera(id)}>
           <svg id="close-camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
             <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 
