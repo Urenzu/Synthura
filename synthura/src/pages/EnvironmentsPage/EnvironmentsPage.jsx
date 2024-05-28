@@ -40,10 +40,11 @@ const EnvironmentsPage = () => {
   }
 
   const handleEnter = () => {
-    if (setName) {
+    if (name) {
       setActive(false);
     }
     else {
+      console.log("Must enter");
       setError(true);
     }
   }
@@ -53,10 +54,16 @@ const EnvironmentsPage = () => {
         <div className={"name-component-field" + (active ? " show" : "")} >
           <h2>{text}</h2>
           <input value={name} onChange={handleChange} type="text" />
-          <div className="name-component-buttons">
-            <button onClick={handleCancel}>Cancel</button>
-            <button onClick={handleEnter}>Enter</button>
-          </div>
+          {error ? 
+            <div id="error-message-naming-component" >
+              <span>NAME MUST BE 1 OR MORE CHARACTERS</span>
+              <button onClick={() => setError(false) }>OK</button>
+            </div> :
+            <div className="name-component-buttons">
+              <button onClick={handleCancel}>Cancel</button>
+              <button onClick={handleEnter}>Enter</button>
+            </div>
+          }
         </div>
         <section id="environments-page" className={active ? "environments-page-blur" : ""} >
           <svg id="side-bar-icon" onClick={toggleSideBar} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
