@@ -1,0 +1,58 @@
+/* global variables */
+:root {
+    --background-dark1: #1e1e1e;
+    --background-dark2: #252526;
+    --accent-dark: #2d2d30;
+    --accent-light: #5c5c63;
+    --border-color: #3e3e42;
+}
+.cluster-btn {
+    background-color: #b9b9c9;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    border-radius: 5px;
+    margin-top: 1px;
+}
+
+#close-cluster-icon {
+    fill: var(--background-dark2);
+    position: absolute;
+    left: 10px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+#close-cluster-icon:hover::before {
+    content: ""; /* Create a pseudo-element to overlay the background */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--background-dark1); /* Light up the background color on hover */
+    border-radius: 5px; /* Ensure pseudo-element has same rounded corners as button */
+    cursor: pointer;
+}
+
+/* Style the dropdown container */
+.dropdown {
+    position: absolute;
+    z-index: 10; /* Ensures that dropdown shows up on top of other environments*/
+    top: 100%; /* Position below the button */
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    display: none; /* Initially hidden */
+    border-radius: 6px; /* Add border-radius for rounded corners */
+    color: accent-light;
+  }
+  
