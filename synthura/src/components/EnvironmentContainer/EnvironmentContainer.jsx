@@ -14,7 +14,7 @@ import { useState, useEffect } from "react"
 import { LinkedList } from "../../scripts/LinkedList"
 import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"
-import { useNameComponent } from "../../scripts/NameComponentContext";
+import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
 import "./EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_name} ) => {
@@ -22,8 +22,8 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   const [clustersList, setClustersList] = useState(new LinkedList());
   const [activeClusters, setActiveClusters] = useState([]);
   const [id, setId] = useState(1);
-  const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
-  const [entered, setEntered] = useState(false);
+  const { name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
+  const [ addingCluster, setAddingCluster ] = useState(false);
 
   // Delete a cluster
   const handleDeleteCluster = (rem) => {
@@ -33,34 +33,59 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
       updatedList.remove(rem); // Append new data
       return updatedList; // Return updated list
     });
+    setEnvironmentsMap(prevMap => {
+      const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
+      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== name); // Remove cluster name from map
+      updatedMap.set(environment_name, updatedClusterList); // Set the updated array back into the map
+      return updatedMap; // Return updated map
+    })
   }
 
+  // Add a new cluster
   useEffect(() => {
-    if (!active && entered && !canceled) {
-      let temp_name = name;
-      setClustersList(prevList => {
-        const updatedList = new LinkedList();
-        Object.assign(updatedList, prevList); // Copy previous state
-        if(!updatedList.isPresent(id)) {
-          updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
-          setId(id+1);
-        }
-        return updatedList; // Return updated list
-      });
-      setName("");
-      setEntered(false);
+    if (addingCluster) {
+      if(canceled) {
+        setCanceled(false);
+        setAddingEnvironment(false);
+        setActive(false);
+        setName("");
+      }
+      else if (environmentsMap.get(environment_name).includes(name)) {
+        setError("Error: Clusters in this environment must have unique names.");
+        setEntered(false);
+      }
+      else {
+        let temp_name = name;
+        setClustersList(prevList => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList); // Copy previous state
+          if(!updatedList.isPresent(id)) {
+            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
+            setId(id+1);
+          }
+          return updatedList; // Return updated list
+        });
+        setEnvironmentsMap(prevMap => {
+          const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
+          if (environmentsMap.get(environment_name).includes(name)) {}
+          else {
+            updatedMap.get(environment_name).push(temp_name); // Append new data
+          }
+          return updatedMap; // Return updated map
+        })
+        setEntered(false);
+        setActive(false);
+        setAddingCluster(false);
+        setName("");
+      }
     }
-    else if (canceled) {
-      setCanceled(false);
-      setEntered(false);
-    }
-  }, [active]);
+  }, [entered, canceled]);
 
   // create a new cluster
   const handleCreateCluster = () => {
-    setText("Enter Cluster Name");
-    setEntered(true);
+    setPrompt("Enter Cluster Name");
     setActive(true);
+    setAddingCluster(true);
   }
 
   // renders updated column of clusters

@@ -11,53 +11,52 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
 import { useState } from "react";
-import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
 import './EnvironmentsPage.css';
 
 
 const EnvironmentsPage = () => {
 
   const [ showSideBar, setShowSideBar ] = useState(false);
-  const [ error, setError ] = useState(false);
-  const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
+  const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {
     setShowSideBar(!showSideBar);
   };
 
+  // change the name state when the user types in the input field
   const handleChange = (e) => {
     setName(e.target.value);
     if(error) {
-      setError(false);
+      setError(null);
     }
   }
 
+  // set the canceled state to true
   const handleCancel = () => {
-    setActive(false);
     setCanceled(true);
-    setName('');
   }
 
+  // set the entered state to true
   const handleEnter = () => {
-    if (name) {
-      setActive(false);
+    if (name.trim()) {
+      setEntered(true);
     }
     else {
-      console.log("Must enter");
-      setError(true);
+      setError("Error: Name cannot be empty.");
     }
   }
 
   return (
       <>
         <div className={"name-component-field" + (active ? " show" : "")} >
-          <h2>{text}</h2>
+          <h2>{prompt}</h2>
           <input value={name} onChange={handleChange} type="text" />
           {error ? 
             <div id="error-message-naming-component" >
-              <span>NAME MUST BE 1 OR MORE CHARACTERS</span>
-              <button onClick={() => setError(false) }>OK</button>
+              <span>{error}</span>
+              <button onClick={() => setError("") }>OK</button>
             </div> :
             <div className="name-component-buttons">
               <button onClick={handleCancel}>Cancel</button>

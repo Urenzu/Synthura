@@ -12,7 +12,7 @@ import { React, useState, useEffect } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import { WebSocketProvider } from '../../scripts/WebSocketContext';
-import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
 
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
@@ -23,46 +23,52 @@ const CameraGrid = () => {
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
   const [cameraURL, setCameraURL] = useState('');
-  const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
-  const [entered, setEntered] = useState(false);
+  const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered } = useEnvironmentPage();
+  const [ addingCamera, setAddingCamera] = useState(false);
 
+  // Add a new camera
   useEffect(() => {
-    if (!active && entered && !canceled) {
-      let temp_name = name;
-      setCamList(prevList => {
-        const updatedList = new LinkedList();
-        Object.assign(updatedList, prevList);
-        if (!updatedList.isPresent(id)) {
-          updatedList.append(id, <div key={id} className="live-feed" >
-                                  <WebSocketProvider>
-                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
-                                    <AnalyticsFeed id={id} />
-                                  </WebSocketProvider>
-                                 </div>);
-          setId(id + 2);
-        }
-        return updatedList;
-      });
-      setName("");
-      setEntered(false);
+    if (addingCamera) {
+      if(canceled) {
+        setCanceled(false);
+        setAddingCamera(false);
+        setActive(false);
+        setName("");
+      }
+      else {
+        let temp_name = name;
+        setCamList(prevList => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList);
+          if (!updatedList.isPresent(id)) {
+            updatedList.append(id, <div key={id} className="live-feed" >
+                                    <WebSocketProvider>
+                                      <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
+                                      <AnalyticsFeed id={id} />
+                                    </WebSocketProvider>
+                                   </div>);
+            setId(id + 2);
+          }
+          return updatedList;
+        });
+        setActive(false);
+        setEntered(false);
+        setAddingCamera(false);
+        setName("");
+      }
     }
-    else if (canceled) {
-      setCanceled(false);
-      setEntered(false);
-    }
-  }, [active]);
+  }, [entered, canceled]);
 
   // add a live feed to the camera grid. this includes a video frame and an analytics feed Component.
   const handleAddCamera = () => {
     if (cameraURL) {
-      setText('Enter Camera Name');
-      setEntered(true);
+      setPrompt('Enter Camera Name');
       setActive(true);
+      setAddingCamera(true);
     } 
     else {
       console.error('No URL provided');
     }
-
   };
 
   // update active cameras the moment camList changes
