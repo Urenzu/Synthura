@@ -211,7 +211,7 @@ function RecordingsPage() {
   const fetchRecordings = async () => {
     try {
       setIsLoading(true); // Set loading to true before fetching recordings
-      const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Nam');
+      const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Owen');
       setRecordings(response.data[0]["recordings"]);
       user_id = response.data[0]["user"];
     } catch (error) {

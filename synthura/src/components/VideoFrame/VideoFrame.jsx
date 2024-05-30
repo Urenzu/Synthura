@@ -9,14 +9,16 @@ Parent Component(s): CameraGrid
 import React from 'react'
 import './VideoFrame.css';
 import PropTypes from 'prop-types';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
+import axios from "axios";
 
 const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
 
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
   const { status, offer, sendMessage } = useWebSocket();
+  const [isUploading, setIsUploading] = useState(false);
 
   const establishWebRTCConnection = async () => {
       
@@ -87,6 +89,94 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
       
   }, [offer, status] );
 
+  const handleUpload = async () => {
+    setIsUploading(true);
+    const stream = videoRef.current.captureStream();
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+  
+    mediaRecorder.ondataavailable = (event) => {
+      chunks.push(event.data);
+    };
+    
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: 'video/mp4' });
+      const reader = new FileReader();
+      
+      reader.onload = async () => {
+        const base64Data = reader.result.split(',')[1]; // Extract base64 data
+        const filename = `camera_${id}_video.mp4`;
+        
+        // Add console logs to check if filename and base64Data are correctly defined
+        console.log('filename:', filename);
+        console.log('base64Data:', base64Data)
+        const data = base64Data.substring(0, 10000);
+
+        const postBodyData = {
+          data: base64Data
+        };
+        
+  
+        // Make sure filename and base64Data are correctly defined
+        if (filename && base64Data) {
+          try {
+            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`, postBodyData, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            console.log(response);
+          } catch (error) {
+            console.error('Upload failed', error);
+          } finally {
+            setIsUploading(false);
+          }
+        } else {
+          console.error('Filename or base64Data is undefined');
+          setIsUploading(false);
+        }
+      };
+      
+      reader.readAsDataURL(blob);
+    };
+  
+    mediaRecorder.start();
+  
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 30000); // Recording for 30 seconds
+  };
+  
+
+  const handleDownload = async () => {
+    const stream = videoRef.current.captureStream();
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      chunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      
+      a.href = url;
+      a.download = `camera_${id}_video.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    };
+
+    mediaRecorder.start();
+
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 30000); // Recording for 5 seconds, you can adjust this as per your requirement
+  };
+
   return (
     <div data-testid={id} className="video-frame">
       <div className="live-video-bar">
@@ -101,6 +191,9 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
       </div>
       <div className="live-video-container">
         <video ref={videoRef} autoPlay />
+        <button onClick={handleUpload} disabled={isUploading}>
+          {isUploading ? 'Uploading...' : 'Save Video'}
+        </button>
       </div>
     </div>
   );
