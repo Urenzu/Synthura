@@ -1,5 +1,5 @@
 import cv2
-from ultralytics import YOLO
+from ultralytics import YOLO, YOLOv10
 from threading import Event, Thread
 from queue import Queue
 import os
@@ -26,8 +26,9 @@ Backend environment setup:
 1. python -m venv synthura
 2. synthura\Scripts\activate (In base backend directory)
 3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
-4. To run: uvicorn backend:app --reload
-5. Enter url: http://<ip>:<port>/video
+4  pip install -q git+https://github.com/THU-MIG/yolov10.git
+5. To run: uvicorn backend:app --reload
+6. Enter url: http://<ip>:<port>/video
 
 Cuda environment setup:
 1. cmd: nvidia-smi
@@ -55,7 +56,7 @@ app.add_middleware(
 )
 
 class SynthuraSecuritySystem:
-    def __init__(self, model_path='yolov8n.pt', frame_width=640, frame_height=480):
+    def __init__(self, model_path='yolov10x.pt', frame_width=640, frame_height=480):
         self.model = self.load_model(model_path)
         self.camera_connections = {}
         self.camera_urls = []
