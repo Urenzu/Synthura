@@ -54,3 +54,25 @@
     height: 16px;
     cursor: pointer;
 }
+
+/* styling for renaming button  */
+.elipses-icon {
+    width: 16px;
+    height: 75%;
+    fill: snow;
+    right: 7%;
+    position: absolute;
+}
+.elipses-icon:hover {
+    cursor: pointer;
+}
+.tooltip {
+    position: absolute;
+    background-color: var(--background-dark1);
+    color: snow;
+    right: 12%;
+    padding: 5px;
+    font-size: 0.8rem;
+    font-family: 'Roboto', sans-serif;
+    border-radius: 5px;
+}

@@ -22,11 +22,11 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   const [clustersList, setClustersList] = useState(new LinkedList());
   const [activeClusters, setActiveClusters] = useState([]);
   const [id, setId] = useState(1);
-  const { name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
+  const { active, name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
   const [ addingCluster, setAddingCluster ] = useState(false);
 
   // Delete a cluster
-  const handleDeleteCluster = (rem) => {
+  const handleDeleteCluster = (rem, cluster_name) => {
     setClustersList(prevList => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList); // Copy previous state
@@ -35,18 +35,18 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
     });
     setEnvironmentsMap(prevMap => {
       const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
-      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== name); // Remove cluster name from map
+      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== cluster_name); // Remove cluster name from map
       updatedMap.set(environment_name, updatedClusterList); // Set the updated array back into the map
       return updatedMap; // Return updated map
     })
   }
 
-  // Add a new cluster
+  // Add the cluster
   useEffect(() => {
     if (addingCluster) {
       if(canceled) {
         setCanceled(false);
-        setAddingEnvironment(false);
+        setAddingCluster(false);
         setActive(false);
         setName("");
       }
@@ -60,7 +60,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
           const updatedList = new LinkedList();
           Object.assign(updatedList, prevList); // Copy previous state
           if(!updatedList.isPresent(id)) {
-            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
+            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} environment_name={environment_name} cluster_name={temp_name} />); // Append new data
             setId(id+1);
           }
           return updatedList; // Return updated list
@@ -81,7 +81,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
     }
   }, [entered, canceled]);
 
-  // create a new cluster
+  // prompt user to enter cluster name
   const handleCreateCluster = () => {
     setPrompt("Enter Cluster Name");
     setActive(true);
@@ -94,7 +94,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   }, [clustersList]);
 
   return (
-    <div className={"environment" + (entered ? " active" : "") } >
+    <div className={"environment" + (active ? " active" : "") } >
       <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} environment_name={environment_name} />
       <div className="cluster">
         <div className="active-clusters" >
