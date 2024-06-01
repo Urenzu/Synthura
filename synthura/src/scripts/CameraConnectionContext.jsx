@@ -5,26 +5,23 @@ Description: stores the video frames associated with each cluster
 */
 
 import React, { createContext, useContext, useState } from 'react'
-import { LinkedList } from './LinkedList';
 
 const CameraConnectionContext = createContext(null);
 
-export const NameComponentProvider = ({ children }) => {
+export const CameraConnectionProvider = ({ children }) => {
 
+  const [globalEnvironment, updateGlobalEnvironment] = useState("");
+  const [globalCluster, updateGlobalCluster] = useState("");
   const [connections, updateConnections] = useState(new Map());
 
-  // const addConnection = (environmentID, clusterID, component) {
-
-  // }
-
   return (
-    <CameraConnectionContext.Provider value={{ connections }}>
+    <CameraConnectionContext.Provider value={{ connections, globalEnvironment, globalCluster, updateConnections, updateGlobalEnvironment, updateGlobalCluster }}>
       {children}
     </CameraConnectionContext.Provider>
   );
 
 }
 
-export const useNameComponent = () => {
+export const useCameraConnection = () => {
   return useContext(CameraConnectionContext);
 }

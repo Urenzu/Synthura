@@ -10,69 +10,102 @@ Child Component(s): EnvironmentButton, ClusterButton
 
 */
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { LinkedList } from "../../scripts/LinkedList"
 import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"
 import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
+import { useCameraConnection } from "../../scripts/CameraConnectionContext";
+import { useClusterEnvironment } from "../../scripts/ClusterEnvironmentContext";
 import "./EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_name} ) => {
 
-  const [clustersList, setClustersList] = useState(new LinkedList());
-  const [activeClusters, setActiveClusters] = useState([]);
-  const [id, setId] = useState(1);
-  const { active, name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
+  // Local State 
+  const [ clustersList, setClustersList ] = useState(new LinkedList());
+  const [ activeClusters, setActiveClusters ] = useState([]);
+  const [ id, setId ] = useState(1);
   const [ addingCluster, setAddingCluster ] = useState(false);
+  const initializedRef = useRef(false);
+
+  // Context
+  const { active, name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
+  const { updateGlobalEnvironment, globalCluster, updateGlobalCluster } = useCameraConnection();
+  const { environment, setEnvironment } = useClusterEnvironment();
+
+  // Update environment name
+  useEffect(() => {
+    if (!initializedRef.current) {
+      setEnvironment(environment_name);
+      initializedRef.current = true;
+    }
+  }, []);
 
   // Delete a cluster
   const handleDeleteCluster = (rem, cluster_name) => {
+
+    // Remove cluster from the list
     setClustersList(prevList => {
       const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList); // Copy previous state
-      updatedList.remove(rem); // Append new data
-      return updatedList; // Return updated list
+      Object.assign(updatedList, prevList);
+      updatedList.remove(rem);
+      return updatedList;
     });
+
+    // Remove cluster from the map
     setEnvironmentsMap(prevMap => {
-      const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
-      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== cluster_name); // Remove cluster name from map
-      updatedMap.set(environment_name, updatedClusterList); // Set the updated array back into the map
-      return updatedMap; // Return updated map
+      const updatedMap = new Map(prevMap);
+      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== cluster_name);
+      updatedMap.set(environment_name, updatedClusterList);
+      return updatedMap;
     })
+
+    // Reset global cluster if active
+    if(globalCluster === cluster_name) {
+      updateGlobalCluster("");
+    }
+
   }
 
-  // Add the cluster
   useEffect(() => {
+    // Check if this component is adding a cluster
     if (addingCluster) {
+      // Cancel the operation
       if(canceled) {
         setCanceled(false);
         setAddingCluster(false);
         setActive(false);
         setName("");
       }
-      else if (environmentsMap.get(environment_name).includes(name)) {
+      // Check if the cluster name is already in use
+      else if (environmentsMap.get(environment).includes(name)) {
         setError("Error: Clusters in this environment must have unique names.");
         setEntered(false);
       }
+      // Add the cluster
       else {
         let temp_name = name;
+        // Add the cluster to the list
         setClustersList(prevList => {
           const updatedList = new LinkedList();
-          Object.assign(updatedList, prevList); // Copy previous state
+          Object.assign(updatedList, prevList);
           if(!updatedList.isPresent(id)) {
-            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} environment_name={environment_name} cluster_name={temp_name} />); // Append new data
+            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
             setId(id+1);
           }
-          return updatedList; // Return updated list
+          return updatedList;
         });
+        // Add the cluster to the map
         setEnvironmentsMap(prevMap => {
           const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
-          if (environmentsMap.get(environment_name).includes(name)) {}
+          if (environmentsMap.get(environment).includes(name)) {}
           else {
-            updatedMap.get(environment_name).push(temp_name); // Append new data
+            updatedMap.get(environment).push(temp_name); // Append new data
           }
           return updatedMap; // Return updated map
         })
+        updateGlobalEnvironment(environment);
+        updateGlobalCluster(temp_name);
         setEntered(false);
         setActive(false);
         setAddingCluster(false);
@@ -95,12 +128,12 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   return (
     <div className={"environment" + (active ? " active" : "") } >
-      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} environment_name={environment_name} />
+      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} />
       <div className="cluster">
         <div className="active-clusters" >
           {activeClusters}
         </div>
-        <button className="add-cluster-btn" onClick={handleCreateCluster}>
+        <button className="add-cluster-btn" onClick={handleCreateCluster} >
             <svg id="add-cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
               <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 
               32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>

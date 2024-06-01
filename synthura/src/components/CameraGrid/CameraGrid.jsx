@@ -13,6 +13,7 @@ import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import { WebSocketProvider } from '../../scripts/WebSocketContext';
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
+import { useCameraConnection } from '../../scripts/CameraConnectionContext';
 
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
@@ -23,8 +24,9 @@ const CameraGrid = () => {
   const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
   const [cameraURL, setCameraURL] = useState('');
-  const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered } = useEnvironmentPage();
-  const [ addingCamera, setAddingCamera] = useState(false);
+  const {name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError} = useEnvironmentPage();
+  const {currentCluster, currentEnvironment} = useCameraConnection();
+  const [addingCamera, setAddingCamera] = useState(false);
 
   // Add a new camera
   useEffect(() => {
@@ -34,6 +36,10 @@ const CameraGrid = () => {
         setAddingCamera(false);
         setActive(false);
         setName("");
+      }
+      else if (camList.isPresent(name)) {
+        SetError("Error: Cameras in this cluster must have unique names.");
+        setEntered(false);
       }
       else {
         let temp_name = name;
@@ -108,8 +114,8 @@ const CameraGrid = () => {
   };
 
   return (
+    (currentCluster && currentEnvironment) && (
     <section id="camera-grid-container">
-      <h2>Enter Device IP Address</h2>
       <div id="input-url-container" >
         <input
           type="text"
@@ -129,7 +135,7 @@ const CameraGrid = () => {
         {activeCameras}
       </div>
     </section>
-  );
+  ));
 };
 
 export default CameraGrid;

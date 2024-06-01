@@ -12,13 +12,15 @@ import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
 import { useState } from "react";
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
+import { useCameraConnection } from '../../scripts/CameraConnectionContext';
 import './EnvironmentsPage.css';
 
 
 const EnvironmentsPage = () => {
 
-  const [ showSideBar, setShowSideBar ] = useState(false);
+  const [ showSideBar, setShowSideBar ] = useState(true);
   const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  const { connections, globalCluster, globalEnvironment } = useCameraConnection();
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {
@@ -65,11 +67,15 @@ const EnvironmentsPage = () => {
           }
         </div>
         <section id="environments-page" className={active ? "environments-page-blur" : ""} >
-          <svg id="side-bar-icon" onClick={toggleSideBar} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-            <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 
-            14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 
-            0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
-          </svg>
+          <nav id="environments-page-nav-bar">
+            <svg id="side-bar-icon" onClick={toggleSideBar} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+              <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 
+              14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 
+              0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
+            </svg>
+            {(globalEnvironment && globalCluster) && (<h3>{globalEnvironment}: {globalCluster}</h3>)}
+            <span></span>
+          </nav>
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid />
         </section>

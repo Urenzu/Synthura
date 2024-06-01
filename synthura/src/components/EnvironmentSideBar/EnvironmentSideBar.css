@@ -52,16 +52,3 @@
     position: absolute;
     bottom: 10px;
 }
-
-
-/* hamburger sidebar icon */
-#side-bar-icon {
-    position: fixed;
-    left: 1%;
-    top: 2%;
-    width: 25px;
-    height: 20px;
-    fill: snow;
-    cursor: pointer;
-    z-index: 10;
-}
