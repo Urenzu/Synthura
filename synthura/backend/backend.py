@@ -1,5 +1,5 @@
 import cv2
-from ultralytics import YOLO
+from ultralytics import YOLO, YOLOv10
 from threading import Event, Thread
 from queue import Queue
 import os
@@ -26,8 +26,9 @@ Backend environment setup:
 1. python -m venv synthura
 2. synthura\Scripts\activate (In base backend directory)
 3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
-4. To run: uvicorn backend:app --reload
-5. Enter url: http://<ip>:<port>/video
+4  pip install -q git+https://github.com/THU-MIG/yolov10.git
+5. To run: uvicorn backend:app --reload
+6. Enter url: http://<ip>:<port>/video
 
 Cuda environment setup:
 1. cmd: nvidia-smi
@@ -55,11 +56,12 @@ app.add_middleware(
 )
 
 class SynthuraSecuritySystem:
-    def __init__(self, model_path='yolov8n.pt', frame_width=640, frame_height=480):
+    def __init__(self, model_path='yolov10n_expanded.pt', frame_width=640, frame_height=480):
         self.model = self.load_model(model_path)
         self.camera_connections = {}
         self.camera_urls = []
         self.detected_objects = {}
+        self.dangerous_objects = {}
         self.motion_status = {}
         self.frame_width = frame_width
         self.frame_height = frame_height
@@ -82,6 +84,7 @@ class SynthuraSecuritySystem:
         self.camera_connections[camera_id] = [camera_url, websocket, pc, cap]
         self.camera_urls.append(camera_url)
         self.detected_objects[camera_id] = []
+        self.dangerous_objects[camera_id] = []
         self.motion_status[camera_id] = "no motion"
         logger.info(f"Camera {camera_url} added successfully.")
 
@@ -118,6 +121,7 @@ class SynthuraSecuritySystem:
         self.camera_connections[camera_id][3].stop()
         self.camera_connections.pop(camera_id)
         self.detected_objects.pop(camera_id)
+        self.dangerous_objects.pop(camera_id)
         self.motion_status.pop(camera_id)
         logger.info(f"Camera {camera_id} removed successfully.")
 
@@ -168,11 +172,12 @@ class SynthuraSecuritySystem:
                     logger.info(f"sent offer")
                 
                 elif type == "analytics":
-            
                     detected_objects = self.detected_objects.get(camera_id)
+                    dangerous_objects = self.dangerous_objects.get(camera_id)
                     await websocket.send_json({
                         "type": "analytics",
                         "detected_objects": detected_objects,
+                        "dangerous_objects": dangerous_objects,
                         "motion_status": self.motion_status.get(camera_id)
                     })
 
@@ -185,15 +190,7 @@ class SynthuraSecuritySystem:
                 break
 
 #----------------------------------------------------------------------------------------------------#
-"""
-Buffer sizes: 1, 3, 5, 10, 20, 30, 40, 50
-Explanation: 
-Smaller buffer sizes reduce latency between capturing frames and processing them. This results in lower camera delay.
-Although if the buffer is too small it may lead to dropped frames since the processing cannot kepp up with the frame capture rate.
 
-Larger buffer sizes will increase latency between capturing frames and processing them resulting in higher camera delay.
-However larger buffer sizes can help smooth out any temporary processing delays leading to more stable streams and a reduction in the likelihood of dropped frames.
-"""
 class MyVideoStreamTrack(VideoStreamTrack):
     def __init__(self, cap, security_system, camera_id, buffer_size=1):
         super().__init__()
@@ -209,7 +206,6 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.capture_thread.start()
         self.last_annotated_frame = None
 
-        # Motion detection attributes #
         self.background = None
         self.background = None
         self.frame_count = 0
@@ -257,6 +253,10 @@ class MyVideoStreamTrack(VideoStreamTrack):
 
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects
+
+        dangerous_objects = [obj for obj in detected_objects if obj in ['knife', 'gun', 'weapon']]  # Add more dangerous objects as needed
+        self.security_system.dangerous_objects[self.camera_id] = dangerous_objects
+
         motion_detected = await asyncio.to_thread(self.detect_motion, frame)
 
         if motion_detected:
@@ -265,6 +265,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
             self.security_system.motion_status[self.camera_id] = "no motion"
 
         logger.info(f"Camera {self.camera_id} detected objects: {self.security_system.detected_objects[self.camera_id]}")
+        logger.info(f"Camera {self.camera_id} dangerous objects: {self.security_system.dangerous_objects[self.camera_id]}")
         logger.info(f"Camera {self.camera_id} motion status: {self.security_system.motion_status[self.camera_id]}")
 
         return annotated_frame
