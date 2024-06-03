@@ -22,16 +22,15 @@ import "./EnvironmentContainer.css"
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_name} ) => {
 
   // Local State 
-  const [ clustersList, setClustersList ] = useState(new LinkedList());
   const [ activeClusters, setActiveClusters ] = useState([]);
   const [ id, setId ] = useState(1);
   const [ addingCluster, setAddingCluster ] = useState(false);
   const initializedRef = useRef(false);
 
   // Context
-  const { active, name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
-  const { updateGlobalEnvironment, globalCluster, updateGlobalCluster } = useCameraConnection();
-  const { environment, setEnvironment } = useClusterEnvironment();
+  const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  const { updateGlobalEnvironment, updateGlobalCluster, addEnvironmentCluster, removeEnvironmentCluster, globalCluster } = useCameraConnection();
+  const { environment, clustersList, setEnvironment, setClustersList } = useClusterEnvironment();
 
   // Update environment name
   useEffect(() => {
@@ -42,28 +41,18 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   }, []);
 
   // Delete a cluster
-  const handleDeleteCluster = (rem, cluster_name) => {
-
+  const handleDeleteCluster = (cluster_name) => {
+    
+    console.log("hello");
     // Remove cluster from the list
     setClustersList(prevList => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList);
-      updatedList.remove(rem);
+      updatedList.remove(cluster_name);
       return updatedList;
     });
 
-    // Remove cluster from the map
-    setEnvironmentsMap(prevMap => {
-      const updatedMap = new Map(prevMap);
-      const updatedClusterList = updatedMap.get(environment_name).filter(item => item !== cluster_name);
-      updatedMap.set(environment_name, updatedClusterList);
-      return updatedMap;
-    })
-
-    // Reset global cluster if active
-    if(globalCluster === cluster_name) {
-      updateGlobalCluster("");
-    }
+    removeEnvironmentCluster(environment, cluster_name);
 
   }
 
@@ -78,34 +67,26 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
         setName("");
       }
       // Check if the cluster name is already in use
-      else if (environmentsMap.get(environment).includes(name)) {
+      else if (clustersList.isPresent(name)) {
         setError("Error: Clusters in this environment must have unique names.");
         setEntered(false);
       }
       // Add the cluster
       else {
         let temp_name = name;
+        updateGlobalEnvironment(environment);
+        updateGlobalCluster(temp_name);
+        addEnvironmentCluster(environment, temp_name);
         // Add the cluster to the list
         setClustersList(prevList => {
           const updatedList = new LinkedList();
           Object.assign(updatedList, prevList);
-          if(!updatedList.isPresent(id)) {
-            updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
+          if(!updatedList.isPresent(temp_name)) {
+            updatedList.append(temp_name, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} cluster_name={temp_name} />); // Append new data
             setId(id+1);
           }
           return updatedList;
         });
-        // Add the cluster to the map
-        setEnvironmentsMap(prevMap => {
-          const updatedMap = new Map(prevMap); // Create a shallow copy of the previous map
-          if (environmentsMap.get(environment).includes(name)) {}
-          else {
-            updatedMap.get(environment).push(temp_name); // Append new data
-          }
-          return updatedMap; // Return updated map
-        })
-        updateGlobalEnvironment(environment);
-        updateGlobalCluster(temp_name);
         setEntered(false);
         setActive(false);
         setAddingCluster(false);
@@ -123,8 +104,16 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   // renders updated column of clusters
   useEffect(() => { 
+    console.log(globalCluster);
+    if(!clustersList.isPresent(globalCluster)) {
+      updateGlobalCluster("");
+    }
     setActiveClusters(clustersList.render());
   }, [clustersList]);
+
+  useEffect(() => {
+    console.log(globalCluster);
+  }, [globalCluster]);
 
   return (
     <div className={"environment" + (active ? " active" : "") } >

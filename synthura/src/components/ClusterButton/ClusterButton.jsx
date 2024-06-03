@@ -15,8 +15,9 @@ import { useState, useEffect, useRef } from "react"
 import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
 import { useCameraConnection } from "../../scripts/CameraConnectionContext";
 import { useClusterEnvironment } from "../../scripts/ClusterEnvironmentContext";
+import { LinkedList } from "../../scripts/LinkedList"
 
-const ClusterButton = ( {id, handleDeleteCluster, cluster_name} ) => {
+const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
 
   // Local state
   const [ renamingCluster, setRenamingCluster ] = useState(false);
@@ -25,9 +26,9 @@ const ClusterButton = ( {id, handleDeleteCluster, cluster_name} ) => {
   const [ currentClusterName, setCurrentClusterName ] = useState(cluster_name);
 
   // Context
-  const { name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
-  const { updateGlobalCluster, updateGlobalEnvironment } = useCameraConnection();
-  const { environment } = useClusterEnvironment();
+  const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  const { globalCluster, updateGlobalCluster, updateGlobalEnvironment } = useCameraConnection();
+  const { environment, clustersList, setClustersList } = useClusterEnvironment();
 
   useEffect(() => {
     // Check if this component is renaming a cluster
@@ -47,7 +48,7 @@ const ClusterButton = ( {id, handleDeleteCluster, cluster_name} ) => {
         setName("");
       }
       // Check if the new name is already in use
-      else if (environmentsMap.get(environment).includes(name)) {
+      else if (clustersList.isPresent(name)) {
         setError("Error: Clusters in this environment must have unique names.");
         setEntered(false);
       }
@@ -55,17 +56,14 @@ const ClusterButton = ( {id, handleDeleteCluster, cluster_name} ) => {
       else {
         let temp_name = name;
         setCurrentClusterName(temp_name);
-        // Filter map to reflect name change
-        setEnvironmentsMap(prevMap => {
-          const updatedMap = new Map(prevMap);
-          const updatedClusterList = updatedMap.get(environment).map(item => {
-            if (item === currentClusterName) {
-              return temp_name;
-            }
-            return item;
-          });
-          updatedMap.set(environment, updatedClusterList); // Set the updated array back into the map
-          return updatedMap; // Return updated map
+        if(currentClusterName === globalCluster) {
+          updateGlobalCluster(temp_name);
+        }
+        setClustersList((prevList) => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList);
+          updatedList.changeName(currentClusterName, temp_name);
+          return updatedList;
         })
         setEntered(false);
         setActive(false);
@@ -96,11 +94,12 @@ const ClusterButton = ( {id, handleDeleteCluster, cluster_name} ) => {
   const handleChangeCluster = () => {
     updateGlobalCluster(currentClusterName);
     updateGlobalEnvironment(environment);
+    console.log("hey");
   }
 
   return (
     <button onClick={handleChangeCluster} className="cluster-btn">
-      <svg className="close-cluster-icon" onClick={() => handleDeleteCluster(id, currentClusterName)} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+      <svg className="close-cluster-icon" onClick={(e) => {e.stopPropagation(); handleDeleteCluster(currentClusterName);}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
           <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 
           0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 
           32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>

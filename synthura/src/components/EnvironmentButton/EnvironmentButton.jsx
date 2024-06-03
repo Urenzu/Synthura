@@ -15,8 +15,9 @@ import { useState, useRef, useEffect } from "react"
 import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
 import { useCameraConnection } from "../../scripts/CameraConnectionContext";
 import { useClusterEnvironment } from "../../scripts/ClusterEnvironmentContext";
+import { LinkedList } from "../../scripts/LinkedList"
 
-const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
+const EnvironmentButton = ( {handleDeleteEnvironment} ) => {
 
   // Local state
   const [ renamingEnvironment, setRenamingEnvironment ] = useState(false);
@@ -25,7 +26,7 @@ const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
 
   // Context
   const { globalEnvironment, updateGlobalEnvironment } = useCameraConnection();
-  const { name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
+  const { name, canceled, entered, environmentsList, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList } = useEnvironmentPage();
   const { environment, setEnvironment } = useClusterEnvironment();
 
   useEffect(() => {
@@ -46,26 +47,22 @@ const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
         setName("");
       }
       // Check if the new name is already in use
-      else if (environmentsMap.get(name)) {
+      else if (environmentsList.isPresent(name)) {
         setError("Error: Environments in this environment must have unique names.");
         setEntered(false);
       }
       // Rename the environment
       else {
         let temp_name = name;
-        setEnvironmentsMap(prevMap => {
-          const updatedMap = new Map(prevMap);
-          if(updatedMap.has(environment)) {
-            const clusterList = updatedMap.get(environment);
-            updatedMap.set(temp_name, clusterList);
-            updatedMap.delete(environment);
-          }
-          console.log(updatedMap);
-          return updatedMap;
-        })
         if(environment === globalEnvironment) {
           updateGlobalEnvironment(temp_name);
         }
+        setEnvironmentsList(prevList => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList);
+          updatedList.changeName(environment, temp_name);
+          return updatedList;
+        })
         setEnvironment(temp_name);
         setEntered(false);
         setActive(false);
@@ -96,7 +93,7 @@ const EnvironmentButton = ( {handleDeleteEnvironment, id} ) => {
   return (
     <>
        <button className="environment-dropdown-btn">
-          <svg id="close-env-icon" onClick={() => handleDeleteEnvironment(id, environment)} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+          <svg id="close-env-icon" onClick={() => handleDeleteEnvironment(environment)} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
             <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 
             0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 
             32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>

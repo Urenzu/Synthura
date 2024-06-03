@@ -20,34 +20,36 @@ import { ClusterEnvironmentProvider } from "../../scripts/ClusterEnvironmentCont
 
 const EnvironmentSideBar = ({showSideBar}) => {
 
-  const [environmentsList, setEnvironmentsList] = useState(new LinkedList());
+  // Local State
   const [activeEnvironments, setActiveEnvironments] = useState([]);
   const [id, setId] = useState(1);
-  const { name, canceled, entered, environmentsMap, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap } = useEnvironmentPage();
-  const { globalEnvironment, updateGlobalEnvironment, updateGlobalCluster } = useCameraConnection();
   const [ addingEnvironment, setAddingEnvironment ] = useState(false);
 
+  // Context
+  const { name, canceled, entered, environmentsList, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList } = useEnvironmentPage();
+  const { globalEnvironment, updateGlobalEnvironment, updateGlobalCluster, removeEnvironment } = useCameraConnection();
+
   // Delete an environment
-  const handleDeleteEnvironment= (rem, environment_name) => {
+  const handleDeleteEnvironment= (environment_name) => {
+
     // Remove environment from the list
     setEnvironmentsList(prevList => {
       const updatedList = new LinkedList();
       Object.assign(updatedList, prevList);
-      updatedList.remove(rem);
+      updatedList.remove(environment_name);
       return updatedList;
     });
-    // Remove environment from the map
-    setEnvironmentsMap(prevMap => {
-      const updatedMap = new Map(prevMap);
-      updatedMap.delete(environment_name);
-      return updatedMap;
-    });
-    // Reset global environment and cluster if active
-    if(globalEnvironment === environment_name) {
+
+    removeEnvironment(environment_name);
+
+  }
+
+  useEffect(() => {
+    if (!environmentsList.isPresent(globalEnvironment)) {
       updateGlobalEnvironment("");
       updateGlobalCluster("");
     }
-  }
+  })
 
   useEffect(() => {
     // Check if this component is adding an environment
@@ -60,7 +62,7 @@ const EnvironmentSideBar = ({showSideBar}) => {
         setName("");
       }
       // Check if the name is already in use
-      else if (environmentsMap.has(name)) {
+      else if (environmentsList.isPresent(name)) {
         setError("Error: Environments must have unique names.");
         setEntered(false);
       }
@@ -70,21 +72,15 @@ const EnvironmentSideBar = ({showSideBar}) => {
         setEnvironmentsList(prevList => {
           const updatedList = new LinkedList();
           Object.assign(updatedList, prevList);
-          if(!updatedList.isPresent(id)) {
-            updatedList.append(id, <ClusterEnvironmentProvider key={id} >
-                                     <EnvironmentContainer handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} environment_name={temp_name} />
-                                   </ClusterEnvironmentProvider>); // Append new data
-            setId(id+1);
+          if(!updatedList.isPresent(temp_name)) {
+            updatedList.append(temp_name, 
+                                    <ClusterEnvironmentProvider key={id} >
+                                      <EnvironmentContainer handleDeleteEnvironment={handleDeleteEnvironment} environment_name={temp_name} />
+                                    </ClusterEnvironmentProvider>); // Append new data
           }
           return updatedList;
         });
-        setEnvironmentsMap(prevMap => {
-          const updatedMap = new Map(prevMap);
-          updatedMap.set(temp_name, []);
-          return updatedMap;
-        })
-        updateGlobalEnvironment(temp_name);
-        updateGlobalCluster("");
+        setId(id+1);
         setEntered(false);
         setActive(false);
         setAddingEnvironment(false);

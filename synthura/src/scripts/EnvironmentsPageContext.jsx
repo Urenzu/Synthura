@@ -5,6 +5,7 @@ Description: React context to share state between environment page and its child
 */
 
 import React, { createContext, useContext, useState } from 'react'
+import { LinkedList } from "./LinkedList"
 
 const EnvironmentsPageContext = createContext(null);
 
@@ -16,11 +17,11 @@ export const EnvironmentsPageProvider = ({ children }) => {
   const [canceled, setCanceled] = useState(false);
   const [entered, setEntered] = useState(false);
   const [error, setError] = useState(null);
-  const [environmentsMap, setEnvironmentsMap] = useState(new Map());
+  const [environmentsList, setEnvironmentsList] = useState(new LinkedList());
 
   return (
-    <EnvironmentsPageContext.Provider value={{ prompt, active, name, canceled, entered, error, environmentsMap,
-                                            setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsMap }}>
+    <EnvironmentsPageContext.Provider value={{ prompt, active, name, canceled, entered, error, environmentsList,
+                                            setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList }}>
       {children}
     </EnvironmentsPageContext.Provider>
   );

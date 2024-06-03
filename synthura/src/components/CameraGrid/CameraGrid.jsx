@@ -8,60 +8,77 @@ Child Component(s): AnalyticsFeed, VideoFrame, NameComponent
 
 */
 
-import { React, useState, useEffect } from 'react';
+import { React, useState, useEffect, act } from 'react';
 import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import { WebSocketProvider } from '../../scripts/WebSocketContext';
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
 import { useCameraConnection } from '../../scripts/CameraConnectionContext';
+import { LinkedList } from '../../scripts/LinkedList';
 
 import './CameraGrid.css';
-import { LinkedList } from '../../scripts/LinkedList';
 
 const CameraGrid = () => {
 
+  // Local State
   const [activeCameras, setActiveCameras] = useState([]);
-  const [camList, setCamList] = useState(new LinkedList());
   const [id, setId] = useState(1);
   const [cameraURL, setCameraURL] = useState('');
-  const {name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError} = useEnvironmentPage();
-  const {currentCluster, currentEnvironment} = useCameraConnection();
   const [addingCamera, setAddingCamera] = useState(false);
 
-  // Add a new camera
+  // Context
+  const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  const { connections, globalCluster, globalEnvironment, updateConnections, renderConnectionList } = useCameraConnection();
+
+  // Custom function to check array equality
+  const arraysEqual = (a, b) => {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  };
+  
   useEffect(() => {
+    // Check if a camera is being added
     if (addingCamera) {
+      // Cancel the operation
       if(canceled) {
         setCanceled(false);
         setAddingCamera(false);
         setActive(false);
         setName("");
       }
-      else if (camList.isPresent(name)) {
-        SetError("Error: Cameras in this cluster must have unique names.");
-        setEntered(false);
-      }
+      // Add camera to the grid
       else {
         let temp_name = name;
-        setCamList(prevList => {
-          const updatedList = new LinkedList();
-          Object.assign(updatedList, prevList);
-          if (!updatedList.isPresent(id)) {
-            updatedList.append(id, <div key={id} className="live-feed" >
-                                    <WebSocketProvider>
-                                      <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
-                                      <AnalyticsFeed id={id} />
-                                    </WebSocketProvider>
-                                   </div>);
-            setId(id + 2);
+        updateConnections((prevMap) => {
+          const updatedMap = new Map(prevMap);
+          const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
+          let list;
+          if (key) {
+            list = connections.get(key);
           }
-          return updatedList;
+          else {
+            list = new LinkedList();
+          }
+          list.append(temp_name,
+            <div key={id} className="live-feed" >
+              <WebSocketProvider>
+                <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
+                <AnalyticsFeed id={id} />
+              </WebSocketProvider>
+            </div>
+          );
+          updatedMap.set(key, list);
+          return updatedMap;
         });
-        setActive(false);
-        setEntered(false);
-        setAddingCamera(false);
-        setName("");
       }
+      setId(id + 2);
+      setActive(false);
+      setEntered(false);
+      setAddingCamera(false);
+      setName("");
     }
   }, [entered, canceled]);
 
@@ -77,13 +94,21 @@ const CameraGrid = () => {
     }
   };
 
-  // update active cameras the moment camList changes
+
+  // update active cameras the moment connections map changes
   useEffect(() => {
-    setActiveCameras(camList.render());
-  }, [camList]);
+
+    const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
+    if (key) {
+      setActiveCameras(renderConnectionList(key));
+    }
+
+  }, [connections, globalCluster]);
 
   // remove a live feed from the camera grid
-  const handleRemoveCamera = (id) => {
+  const handleRemoveCamera = (id, name, camera_url) => {
+
+    const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
 
     fetch(`http://localhost:8000/api/remove_camera/${id}`, {
       method: 'GET'
@@ -99,43 +124,44 @@ const CameraGrid = () => {
       .catch(error => {
         console.error('Error:', error);
       });
-
-    setCamList(prevList => {
-
-      const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList);
-      updatedList.remove(id);
-      if (updatedList.getSize() === 0) {
-        setId(1);
+    
+    updateConnections((prevMap) => {
+        const updatedMap = new Map(prevMap);
+        let list = updatedMap.get(key);
+        list.remove(name);
+        updatedMap.set(key, list);
+        return updatedMap;
       }
-      return updatedList;
-    });
-
+    )
+    setActiveURLS(prevURLs => prevURLs.filter(url => camera_url !== url));
   };
 
   return (
-    (currentCluster && currentEnvironment) && (
-    <section id="camera-grid-container">
-      <div id="input-url-container" >
-        <input
-          type="text"
-          id="cameraIP"
-          placeholder="Enter Camera IP"
-          autoComplete="off"
-          onChange={(e) => setCameraURL(e.target.value)}
-          data-testid="cameraIP-test"
-        />
-        <button id="add-camera-btn" data-testid={`add-camera-btn-${id}`} onClick={handleAddCamera}>
-          <svg id="plus-sign" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-            <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
-          </svg>
-        </button>
-      </div>
-      <div id="camera-grid">
-        {activeCameras}
-      </div>
-    </section>
-  ));
+    <>
+      {(globalCluster && globalEnvironment) && (
+        <section id="camera-grid-container">
+          <div id="input-url-container" >
+            <input
+              type="text"
+              id="cameraIP"
+              placeholder="Enter Camera IP"
+              autoComplete="off"
+              onChange={(e) => setCameraURL(e.target.value)}
+              data-testid="cameraIP-test"
+            />
+            <button id="add-camera-btn" data-testid={`add-camera-btn-${id}`} onClick={handleAddCamera}>
+              <svg id="plus-sign" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+              </svg>
+            </button>
+          </div>
+          <div id="camera-grid">
+            {activeCameras}
+          </div>
+        </section>
+      )}
+    </>
+  );
 };
 
 export default CameraGrid;
