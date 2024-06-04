@@ -1,0 +1,46 @@
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: black;
+    max-width: 200px;
+    color: white;
+    padding: 20px;
+    border: 5px solid yellow;
+    border-radius: 10px;
+    z-index: 10; /* Ensure popup is above other elements */
+  }
+  
+  .popup.flashing {
+    animation: flash 1s ease-in-out infinite;
+  }
+  
+  @keyframes flash {
+    0% {
+      border-color: yellow;
+    }
+    50% {
+      border-color: rgb(145, 145, 0);
+    }
+    100% {
+      border-color: yellow;
+    }
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+  }
+  
+  .popup button {
+    padding: 10px;
+    border: 2px solid yellow;
+    border-radius: 5px;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    outline: none;
+  }
+  

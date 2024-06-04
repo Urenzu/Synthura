@@ -30,31 +30,10 @@ main > p {
     font-size: 1.5rem;
 }
 
-#google-auth-btn{
-    text-align: center;
-    width: 50%;
-}
-
 .nav-link {
     margin-left: 10px;
     color: snow;
 }
-
-/* .get-started-btn {
-    background-color: var(--accent-light);
-    width: 200px;
-    height: 50px;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1rem;
-    color: snow;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-    cursor: pointer;
-}
-.get-started-btn:hover {
-    background-color: var(--border-color);
-} */
 
 body {
     display: flex;

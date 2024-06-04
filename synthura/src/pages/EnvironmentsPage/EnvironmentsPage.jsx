@@ -10,8 +10,10 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
-import { useState } from "react";
+import Popup from '../../components/PopUp/PopUp';
+import { useState, useEffect } from "react";
 import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useNavigate } from 'react-router-dom'; // for navigation
 import './EnvironmentsPage.css';
 
 
@@ -20,6 +22,8 @@ const EnvironmentsPage = () => {
   const [ showSideBar, setShowSideBar ] = useState(false);
   const [ error, setError ] = useState(false);
   const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
+  const navigate = useNavigate();
+
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {
@@ -49,6 +53,131 @@ const EnvironmentsPage = () => {
     }
   }
 
+  //Tutorial CODE
+  const [currentPopup, setCurrentPopup] = useState(0);
+
+  useEffect(() => {
+    // This effect runs whenever currentPopup changes
+    console.log("in useeffect :P currentPopup now", currentPopup)
+  }, [currentPopup]);
+
+
+  const popups = [
+    {
+      message: 'Would you like a tutorial of how to use the interface?',
+      buttons: ['Begin Tutorial', 'Skip Tutorial'],
+      position: 'center',
+      onButtonClick: (index) => {
+        if (index === 0) {
+          console.log('Starting Tutorial');
+          setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
+        }
+        else if (index === 1) {
+            console.log('Skipping Tutorial');
+            navigate("/main");
+          }
+      },
+    },
+    //second pop up is to make a new environment
+    {
+        message: "Click on the button in the top left corner to toggle the environments menu. Then click 'Add Environment' at the bottom of the menu.",
+        buttons: ['Continue'],
+        position: 'top-left',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
+      },
+      //third pop up is to name a new environment
+    {
+        message: "Please name the environment. An environment is usually a generic location, so you can name it something like 'California Warehouse' or 'Miami Condo'",
+        buttons: ['Continue'],
+        position: 'middle-right',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+
+        },
+      },
+      //forth pop up is to make a new cluster
+    {
+        message: 'Hover over the environment. Click the plus to add a cluster to the environment.',
+        buttons: ['Continue'],
+        position: 'top-left',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
+      },
+
+         //fifth pop up is to name the cluster
+    {
+      message: "Name the cluster. A cluster consists of a set of cameras, typically depicting a room, floor, or building. Appropriate names could be 'Store 1' or 'Floor 1'.",
+      buttons: ['Continue'],
+      position: 'middle-right',
+      onButtonClick: (index) => {
+          setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
+      },
+    },
+      //fifth pop up is to add a camera connection
+    {
+        message: "Add a camera to this cluster by entering in the camera's IP address in format http://<ip>:<port>/video. Hit the plus sign once you are done.",
+        buttons: ['Continue'],
+        position: 'top-right',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
+      },
+      //sixth pop up is naming camera
+    {
+      message: "Name this camera. Cameras are usually named based on where they are placed. Example names could be 'Front Entrance' or 'Main Hallway'.",
+      buttons: ['Continue'],
+      position: 'middle-right',
+      onButtonClick: (index) => {
+          setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
+      },
+    },
+      //seventh pop up is about viewing your feed
+      {
+        message: "You can see your camera feed live here. Objects in the feed are recognized and listed below the feed.",
+        buttons: ['Continue'],
+        position: 'center',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
+      },
+        //eight pop up is to save the camera
+    {
+      message: "At any point, you can save each camera's feed. That way you'll never miss anything! You can view these saved videos in the recordings page.",
+      buttons: ['Continue'],
+      position: 'top-right',
+      onButtonClick: (index) => {
+          setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
+      },
+    },
+    //ninth pop up is general message
+    {
+      message: "Continue adding environments, clusters, and cameras as you see fit. The basic idea is that environments have clusters which have cameras. Our simple design will allow you to easily keep your properties safe.",
+      buttons: ['Done'],
+      position: 'center',
+      onButtonClick: (index) => {
+          //setCurrentPopup(currentPopup + 1); // Move to next popup
+          setCurrentPopup(currentPopup + 1);
+          console.log("done with popups")
+      },
+    },
+    // Add more popup objects here with their messages and buttons
+    // More pop ups to 
+        // see how to save videos? if that is an option
+  ];
+
+
   return (
       <>
         <div className={"name-component-field" + (active ? " show" : "")} >
@@ -74,6 +203,16 @@ const EnvironmentsPage = () => {
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid />
         </section>
+
+        {popups[currentPopup] && (
+        <Popup
+          message={popups[currentPopup].message}
+          buttons={popups[currentPopup].buttons}
+          onButtonClick={popups[currentPopup].onButtonClick} 
+          position={popups[currentPopup].position}
+        />
+        )}
+
       </>
   );
 }
