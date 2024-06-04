@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom'; // for navigation
+import { useNavigate } from 'react-router-dom'; // for navigation
 import './Login.css'; // Import the CSS file
 
 function LoginSignup() {
@@ -7,6 +7,7 @@ function LoginSignup() {
   const [username, setUsername] = useState(''); // Username state
   const [password, setPassword] = useState(''); // Password state
   const [error, setError] = useState(null); // Error message state
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -22,7 +23,7 @@ function LoginSignup() {
     console.log('Login attempted with username:', username);
 
     //after they log in, route to tour page
-    // useNavigate('/tour');
+    navigate('/tour');
   };
 
   const handleSignup = () => {
@@ -48,7 +49,7 @@ function LoginSignup() {
     setPassword('');
 
     //after they log in, route to tour page
-    // useNavigate('/tour');
+    navigate('/tour');
   };
 
   const validateUsername= (username) => {

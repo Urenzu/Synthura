@@ -13,6 +13,7 @@ import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentS
 import Popup from '../../components/PopUp/PopUp';
 import { useState } from "react";
 import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useNavigate } from 'react-router-dom'; // for navigation
 import './TourPage.css';
 
 
@@ -21,6 +22,8 @@ const TourPage = () => {
   const [ showSideBar, setShowSideBar ] = useState(false);
   const [ error, setError ] = useState(false);
   const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
+  const navigate = useNavigate();
+
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {
@@ -61,8 +64,13 @@ const TourPage = () => {
         if (index === 0) {
           // Handle starting the tour
           console.log('Starting Tour');
+          setCurrentPopup(currentPopup + 1); // Move to next popup
         }
-        setCurrentPopup(currentPopup + 1); // Move to next popup
+        else if (index === 1) {
+            // Handle "Skip Tour" button click
+            console.log('Skipping Tour');
+            navigate("/main");
+          }
       },
     },
     // Add more popup objects here with their messages and buttons
