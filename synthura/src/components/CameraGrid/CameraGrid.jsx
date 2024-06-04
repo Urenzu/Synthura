@@ -97,8 +97,6 @@ const CameraGrid = () => {
   // remove a live feed from the camera grid
   const handleRemoveCamera = (id, name, camera_url) => {
 
-    const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
-
     fetch(`http://localhost:8000/api/remove_camera/${id}`, {
       method: 'GET'
     })
@@ -116,9 +114,10 @@ const CameraGrid = () => {
     
     updateConnections((prevMap) => {
         const updatedMap = new Map(prevMap);
-        let list = updatedMap.get(key);
+        const compositeKey = `${globalEnvironment}:${globalCluster}`;
+        let list = updatedMap.get(compositeKey);
         list.remove(name);
-        updatedMap.set(key, list);
+        updatedMap.set(compositeKey, list);
         return updatedMap;
       }
     )
