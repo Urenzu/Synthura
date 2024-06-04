@@ -10,72 +10,122 @@ Child Component(s): EnvironmentButton, ClusterButton
 
 */
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { LinkedList } from "../../scripts/LinkedList"
 import EnvironmentButton from "../EnvironmentButton/EnvironmentButton"
 import ClusterButton from "../ClusterButton/ClusterButton"
-import { useNameComponent } from "../../scripts/NameComponentContext";
+import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
+import { useCameraConnection } from "../../scripts/CameraConnectionContext";
+import { useClusterEnvironment } from "../../scripts/ClusterEnvironmentContext";
 import "./EnvironmentContainer.css"
 
 const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_name} ) => {
 
-  const [clustersList, setClustersList] = useState(new LinkedList());
-  const [activeClusters, setActiveClusters] = useState([]);
-  const [id, setId] = useState(1);
-  const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
-  const [entered, setEntered] = useState(false);
+  // Local State 
+  const [ activeClusters, setActiveClusters ] = useState([]);
+  const [ id, setId ] = useState(1);
+  const [ addingCluster, setAddingCluster ] = useState(false);
+  const initializedRef = useRef(false);
+
+  // Context
+  const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  const { connections, updateGlobalEnvironment, updateGlobalCluster, updateConnections, addEnvironmentCluster, globalCluster } = useCameraConnection();
+  const { environment, clustersList, setEnvironment, setClustersList } = useClusterEnvironment();
+
+  // Update environment name
+  useEffect(() => {
+    if (!initializedRef.current) {
+      setEnvironment(environment_name);
+      initializedRef.current = true;
+    }
+  }, []);
 
   // Delete a cluster
-  const handleDeleteCluster = (rem) => {
+  const handleDeleteCluster = (cluster_name) => {
+    
+    // Remove cluster from the list
     setClustersList(prevList => {
       const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList); // Copy previous state
-      updatedList.remove(rem); // Append new data
-      return updatedList; // Return updated list
+      Object.assign(updatedList, prevList);
+      updatedList.remove(cluster_name);
+      return updatedList;
     });
+
+    console.log(connections);
+    console.log(environment, cluster_name)
+    updateConnections(prev => {
+      const updatedConnections = new Map(prev);
+      const compositeKey = `${environment}:${cluster_name}`;
+      updatedConnections.delete(compositeKey); 
+      console.log(updatedConnections);
+      return updatedConnections;
+    });
+
   }
 
   useEffect(() => {
-    if (!active && entered && !canceled) {
-      let temp_name = name;
-      setClustersList(prevList => {
-        const updatedList = new LinkedList();
-        Object.assign(updatedList, prevList); // Copy previous state
-        if(!updatedList.isPresent(id)) {
-          updatedList.append(id, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} id={id} cluster_name={temp_name} />); // Append new data
-          setId(id+1);
-        }
-        return updatedList; // Return updated list
-      });
-      setName("");
-      setEntered(false);
+    // Check if this component is adding a cluster
+    if (addingCluster) {
+      // Cancel the operation
+      if(canceled) {
+        setCanceled(false);
+        setAddingCluster(false);
+        setActive(false);
+        setName("");
+      }
+      // Check if the cluster name is already in use
+      else if (clustersList.isPresent(name)) {
+        setError("Error: Clusters in this environment must have unique names.");
+        setEntered(false);
+      }
+      // Add the cluster
+      else {
+        let temp_name = name;
+        updateGlobalEnvironment(environment);
+        updateGlobalCluster(temp_name);
+        addEnvironmentCluster(environment, temp_name);
+        // Add the cluster to the list
+        setClustersList(prevList => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList);
+          if(!updatedList.isPresent(temp_name)) {
+            updatedList.append(temp_name, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} cluster_name={temp_name} />); // Append new data
+            setId(id+1);
+          }
+          return updatedList;
+        });
+        setEntered(false);
+        setActive(false);
+        setAddingCluster(false);
+        setName("");
+      }
     }
-    else if (canceled) {
-      setCanceled(false);
-      setEntered(false);
-    }
-  }, [active]);
+  }, [entered, canceled]);
 
-  // create a new cluster
+  // prompt user to enter cluster name
   const handleCreateCluster = () => {
-    setText("Enter Cluster Name");
-    setEntered(true);
+    setPrompt("Enter Cluster Name");
     setActive(true);
+    setAddingCluster(true);
   }
 
   // renders updated column of clusters
   useEffect(() => { 
+    if(!clustersList.isPresent(globalCluster)) {
+      updateGlobalCluster("");
+    }
+
     setActiveClusters(clustersList.render());
   }, [clustersList]);
 
   return (
-    <div className={"environment" + (entered ? " active" : "") } >
-      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} environment_name={environment_name} />
+    <div className={"environment" + (active ? " active" : "") } >
+      <EnvironmentButton id={env_id} handleDeleteEnvironment={handleDeleteEnvironment} />
       <div className="cluster">
         <div className="active-clusters" >
           {activeClusters}
         </div>
-        <button className="add-cluster-btn" onClick={handleCreateCluster}>
+        <button className="add-cluster-btn" onClick={handleCreateCluster} >
             <svg id="add-cluster-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
               <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 
               32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/>

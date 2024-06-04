@@ -3,6 +3,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import CameraGrid from './CameraGrid';
+import { NameComponentProvider } from '../../scripts/NameComponentContext';
 
 // Mock RTCPeerConnection
 class MockRTCPeerConnection {
@@ -25,7 +26,7 @@ test('VideoFrame renders upon button click', async () => {
 
   // Arrange ----------------
 
-  const { getByTestId, queryByTestId } = render(<CameraGrid />);
+  const { getByTestId, queryByTestId } = render(<NameComponentProvider><CameraGrid /></NameComponentProvider>);
   expect(queryByTestId("1")).toBeFalsy();
 
   // Act --------------------
@@ -46,7 +47,7 @@ test('VideoFrame unrenders upon button click', async () => {
 
   // Arrange ----------------
 
-  const { getByTestId, queryByTestId } = render(<CameraGrid />);
+  const { getByTestId, queryByTestId } = render(<NameComponentProvider><CameraGrid /></NameComponentProvider>);
   expect(queryByTestId("1")).toBeFalsy();
 
   // Act --------------------

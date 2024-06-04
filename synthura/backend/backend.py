@@ -153,10 +153,28 @@ class SynthuraSecuritySystem:
                     camera_url = json_data.get("camera_url")
                     camera_id = json_data.get("camera_id")
                     decoded_camera_url = unquote(camera_url)
+
+                    print(decoded_camera_url)
                     
                     pc = RTCPeerConnection()
 
-                    cap = cv2.VideoCapture(decoded_camera_url)
+                    # Attempt to capture video from url, retry up to 10 times if failed
+                    attempts = 0
+                    cap = None
+                    while attempts < 10:
+                        cap = cv2.VideoCapture(decoded_camera_url)
+                        if cap.isOpened():
+                            logger.info(f"Successfully opened video capture for camera ID: {camera_id} on attempt {attempts + 1}")
+                            break
+                        else:
+                            logger.info(f"Failed to open video capture for camera ID: {camera_id} on attempt {attempts + 1}")
+                            attempts += 1
+                            time.sleep(0.1)
+
+                    if not cap or not cap.isOpened():
+                        logger.info(f"All attempts to open video capture failed for camera ID: {camera_id}")
+                        return None
+                    
                     track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
@@ -184,6 +202,8 @@ class SynthuraSecuritySystem:
                 else:
                     logging.info("Received Answer")
                     await pc.setRemoteDescription(RTCSessionDescription(type="answer", sdp=json_data["sdp"]))
+                
+                logger.info(self.camera_connections)
 
             except WebSocketDisconnect:
                 logging.info("Websocket disconnected")
@@ -215,12 +235,14 @@ class MyVideoStreamTrack(VideoStreamTrack):
         while self.running:
             ret, frame = self.cap.read()
             if ret:
+                logger.info(f"Camera {self.camera_id} frame captured")
                 resized_frame = cv2.resize(frame, (self.resize_width, self.resize_height))
                 if not self.frame_buffer.full():
                     self.frame_buffer.put(resized_frame)
                 else:
                     continue
             else:
+                logger.warning(f"Camera {self.camera_id} frame not captured")
                 time.sleep(0.01)
     
     def stop(self):
@@ -237,6 +259,7 @@ class MyVideoStreamTrack(VideoStreamTrack):
             if self.last_annotated_frame is not None:
                 annotated_frame = self.last_annotated_frame
             else:
+                logger.info("No frames available")
                 annotated_frame = numpy.zeros((self.resize_height, self.resize_width, 3), dtype=numpy.uint8)
 
         pts, time_base = await self.next_timestamp()
@@ -246,8 +269,12 @@ class MyVideoStreamTrack(VideoStreamTrack):
         return finished_frame
 
     async def process_frame(self, frame):
-        loop = asyncio.get_event_loop()
 
+        # loop = asyncio.get_event_loop()
+
+        # results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
+        # annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
+        
         results = await asyncio.to_thread(self.security_system.object_detection, frame)
         annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
@@ -258,6 +285,8 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.security_system.dangerous_objects[self.camera_id] = dangerous_objects
 
         motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+
+        # motion_detected = await loop.run_in_executor(None, self.detect_motion, frame)
 
         if motion_detected:
             self.security_system.motion_status[self.camera_id] = "motion"
