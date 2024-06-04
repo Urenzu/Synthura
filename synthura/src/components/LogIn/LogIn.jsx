@@ -22,6 +22,10 @@ function LoginSignup() {
     // Implement login functionality here (e.g., call an API)
     console.log('Login attempted with username:', username);
 
+    // if (!UserFound(username, password)) {
+    //   return;
+    // }
+
     //after they log in, route to tour page
     navigate('/main');
   };
@@ -29,20 +33,20 @@ function LoginSignup() {
   const handleSignup = () => {
     // implement later
 
-    // if (!UniqueUsername(username)) {
+    // if (UserNameExists(username)) {
     //   setError('That username is taken. Please try another one.');
     //   return;
     // }
 
-    // if (!validateUsername(username)) {
-    //   setError('Each username must contain at least one letter.');
-    //   return;
-    // }
+    if (!validateUsername(username)) {
+      setError('Each username must contain at least one letter.');
+      return;
+    }
 
-    // if (!validatePassword(password)) {
-    //   setError('Each password must contain a capital letter, a number, a special character, and be of at least 8 characters');
-    //   return;
-    // }
+    if (!validatePassword(password)) {
+      setError('Each password must contain a capital letter, a number, a special character, and be of at least 8 characters');
+      return;
+    }
     // Implement signup functionality here (e.g., call an API)
     console.log('Signup attempted with username:', username, 'password:', password);
     setUsername('');
@@ -62,9 +66,19 @@ function LoginSignup() {
     return regex.test(password);
   };
 
-  const UniqueUsername= (username) => {
-    //check to see if username already exists
-  };
+  const UserFound = (username, password) => {
+    if (!UserNameExists(username)){
+      setError('Username does not exist');
+      return false;
+    }
+    //if username and password do not match
+    setError('Wrong password. Please try again');
+    return false;
+  }
+
+  const UserNameExists = (username) => {
+    //check to see if username the username exists
+  }
 
   return (
     <>
@@ -81,6 +95,7 @@ function LoginSignup() {
             <div className="login-input-wrapper">
             Password: <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
             </div>
+            {error && <p>{error}</p>}
             <button onClick={handleLogin} className="login-submit">Login</button>
         </div>
       )}
@@ -93,7 +108,7 @@ function LoginSignup() {
             <div className="login-input-wrapper">
             Password: <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
             </div>
-            {/* {error && <p>{error}</p>} */}
+            {error && <p>{error}</p>}
           <button onClick={handleSignup} className="login-submit">Sign Up</button>
         </div>
       )}

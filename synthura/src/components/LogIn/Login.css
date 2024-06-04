@@ -57,4 +57,8 @@
   .login-form + .login-form {
     margin-top: 20px; /* Add spacing between forms */
   }
+
+  .error {
+    color: red;
+  }
   
