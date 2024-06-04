@@ -154,9 +154,9 @@ class SynthuraSecuritySystem:
                     
                     pc = RTCPeerConnection()
 
+                    # Attempt to capture video from url, retry up to 10 times if failed
                     attempts = 0
                     cap = None
-
                     while attempts < 10:
                         cap = cv2.VideoCapture(decoded_camera_url)
                         if cap.isOpened():
@@ -170,7 +170,7 @@ class SynthuraSecuritySystem:
                     if not cap or not cap.isOpened():
                         logger.info(f"All attempts to open video capture failed for camera ID: {camera_id}")
                         return None
-
+                    
                     track = MyVideoStreamTrack(cap, self, camera_id)
                     pc.addTrack(track)
 
@@ -274,17 +274,19 @@ class MyVideoStreamTrack(VideoStreamTrack):
 
     async def process_frame(self, frame):
 
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
 
-        results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
-        annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
-        # results = await asyncio.to_thread(self.security_system.object_detection, frame)
-        # annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
+        # results = await loop.run_in_executor(None, self.security_system.object_detection, frame)
+        # annotated_frame = await loop.run_in_executor(None, self.security_system.frame_annotation, results)
+        
+        results = await asyncio.to_thread(self.security_system.object_detection, frame)
+        annotated_frame = await asyncio.to_thread(self.security_system.frame_annotation, results)
 
         detected_objects = [str(self.security_system.model.names[int(obj.cls)]) for obj in results[0].boxes]
         self.security_system.detected_objects[self.camera_id] = detected_objects
-        motion_detected = await loop.run_in_executor(None, self.detect_motion, frame)
-        # motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+        motion_detected = await asyncio.to_thread(self.detect_motion, frame)
+
+        # motion_detected = await loop.run_in_executor(None, self.detect_motion, frame)
 
         if motion_detected:
             self.security_system.motion_status[self.camera_id] = "motion"
