@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom'; // for navigation
 import './EnvironmentsPage.css';
 
 
-const TourPage = () => {
+const EnvironmentsPage = () => {
 
   const [ showSideBar, setShowSideBar ] = useState(false);
   const [ error, setError ] = useState(false);
@@ -53,7 +53,7 @@ const TourPage = () => {
     }
   }
 
-  //TOUR CODE
+  //Tutorial CODE
   const [currentPopup, setCurrentPopup] = useState(0);
 
   useEffect(() => {
@@ -64,17 +64,17 @@ const TourPage = () => {
 
   const popups = [
     {
-      message: 'Would you like a tour of the interface?',
-      buttons: ['Begin Tour', 'Skip Tour'],
+      message: 'Would you like a tutorial of how to use the interface?',
+      buttons: ['Begin Tutorial', 'Skip Tutorial'],
       position: 'center',
       onButtonClick: (index) => {
         if (index === 0) {
-          console.log('Starting Tour');
+          console.log('Starting Tutorial');
           setCurrentPopup(currentPopup + 1); // Move to next popup
           console.log("currentPopup now", currentPopup)
         }
         else if (index === 1) {
-            console.log('Skipping Tour');
+            console.log('Skipping Tutorial');
             navigate("/main");
           }
       },
@@ -217,4 +217,4 @@ const TourPage = () => {
   );
 }
 
-export default TourPage
+export default EnvironmentsPage

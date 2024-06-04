@@ -5,7 +5,6 @@ import './App.css'
 import EnvironmentsPage from './pages/EnvironmentsPage/EnvironmentsPage.jsx'
 import RecordingsPage from './pages/RecordingsPage/RecordingsPage.jsx'
 import LandingPage from './pages/LandingPage/LandingPage.jsx'
-import TourPage from './pages/TourPage/TourPage.jsx';
 
 function App() {
 
