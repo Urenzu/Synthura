@@ -1,16 +1,28 @@
 import React from 'react'
-import { GoogleLogin } from '@react-oauth/google'
 import { Link } from 'react-router-dom';
 import './LandingPage.css'
-import LoginSignup from '../../components/LogIn/LogIn';
 
 
 const LandingPage = () => {
   return (
     <main>
       <h1>Synthura</h1>
-      {/* <p>Blurb about product. Blurb about product. Blurb about product. Blurb about product. Blurb about product. </p> */}
-      <LoginSignup/>
+      <p><strong>ENHANCE</strong> Your Security with <strong>CUTTING-EDGE AI</strong> Object Detection</p>
+      <p>Monitor Live Video from Everyday Devices to Advanced Cameras</p>
+      <form id="login-container">
+        <h2>Login To Get Started</h2>
+        <div id="user-information-fields">
+          <h3>Username</h3>
+          <input type="text" />
+          <h3>Password</h3>
+          <input type="password" />
+          <p>
+            New to Synthura? Sign up <Link id="register-link" to="/register">Here</Link>
+          </p>
+        </div>
+        <span></span>
+        <button id="login-button" type="submit">Login</button>
+      </form>
     </main>
   );
 }
