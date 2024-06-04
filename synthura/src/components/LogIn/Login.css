@@ -1,0 +1,48 @@
+/* Style the login container */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f1f1f1;
+}
+
+/* Style the login container */
+.login-container {
+    background-color: white;
+    padding: 5px;
+    border-radius: 10px;
+    color: black; /* Set default text color to black */
+  }
+  
+  /* Style the buttons and input fields */
+  .login-container button {
+    background-color: #f1f1f1; /* Light gray background for buttons and inputs */
+    color: black;
+    padding: 10px;
+    margin: 5px;
+    width: 300px;
+    border: none; /* Remove borders for a cleaner look */
+    align-self: center;
+  }
+  
+  .login-container input {
+    background-color: #f1f1f1; /* Light gray background for buttons and inputs */
+    color: black;
+    padding: 10px;
+    margin: 5px;
+    width: 300px;
+    border: none; /* Remove borders for a cleaner look */
+  }
+  
+  .login-container button:hover,
+  .login-container input:hover {
+    background-color: #e0e0e0; /* Slightly darker background on hover */
+  }
+  
+  /* Style the error message */
+  .login-container p {
+    color: red;
+    margin: 5px;
+  }
+  
