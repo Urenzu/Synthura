@@ -25,7 +25,7 @@ Backend environment setup:
 
 1. python -m venv synthura
 2. synthura\Scripts\activate (In base backend directory)
-3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
+3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch huggingface_hub
 4  pip install -q git+https://github.com/THU-MIG/yolov10.git
 5. To run: uvicorn backend:app --reload
 6. Enter url: http://<ip>:<port>/video

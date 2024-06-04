@@ -28,7 +28,7 @@ const CameraGrid = () => {
 
   // Context
   const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { connections, globalCluster, globalEnvironment, updateConnections, renderConnectionList } = useCameraConnection();
+  const { connections, globalCluster, globalEnvironment, updateConnections, renderConnectionList, noConnections } = useCameraConnection();
   
   useEffect(() => {
     // Check if a camera is being added
@@ -91,6 +91,9 @@ const CameraGrid = () => {
     const compositeKey = `${globalEnvironment}:${globalCluster}`;
     if(connections.has(compositeKey)) {
       setActiveCameras(renderConnectionList(compositeKey));
+    }
+    if(noConnections()) {
+      setId(0);
     }
   }, [connections, globalCluster]);
 

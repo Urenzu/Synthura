@@ -46,9 +46,20 @@ export const CameraConnectionProvider = ({ children }) => {
     return connectionsList.render();
   }
 
+  const noConnections = () => {
+    for (let key of connections.keys()) {
+      if (connections.get(key).getSize() > 0) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }
+
   return (
     <CameraConnectionContext.Provider value={{ connections, globalEnvironment, globalCluster, updateConnections, updateGlobalEnvironment, 
-    updateGlobalCluster, renderConnectionList, addEnvironmentCluster, removeEnvironment}}>
+    updateGlobalCluster, renderConnectionList, addEnvironmentCluster, removeEnvironment, noConnections}}>
       {children}
     </CameraConnectionContext.Provider>
   );
