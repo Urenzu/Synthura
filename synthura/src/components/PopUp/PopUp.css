@@ -4,6 +4,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: black;
+    max-width: 200px;
     color: white;
     padding: 20px;
     border: 5px solid yellow;

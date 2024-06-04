@@ -30,7 +30,7 @@ const Popup = ({ message, buttons, onButtonClick , position}) => {
   const getPositionStyles = () => {
     switch (position) {
       case 'top-left':
-        return { top: '20%', left: '20%' };
+        return { top: '20%', left: '30%' };
       case 'two-thirds-left':
         return { top: '40%', left: '40%' };
       case 'top-center':

@@ -23,7 +23,7 @@ function LoginSignup() {
     console.log('Login attempted with username:', username);
 
     //after they log in, route to tour page
-    navigate('/tour');
+    navigate('/main');
   };
 
   const handleSignup = () => {
@@ -49,7 +49,7 @@ function LoginSignup() {
     setPassword('');
 
     //after they log in, route to tour page
-    navigate('/tour');
+    navigate('/main');
   };
 
   const validateUsername= (username) => {
