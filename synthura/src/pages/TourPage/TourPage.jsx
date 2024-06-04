@@ -65,37 +65,76 @@ const TourPage = () => {
   const popups = [
     {
       message: 'Would you like a tour of the interface?',
+      buttons: ['Begin Tour'], //      buttons: ['Begin Tour', 'Skip Tour'],
       position: 'center',
+      onButtonClick: (index) => {
+        if (index === 0) {
+          console.log('Starting Tour');
+          setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
+        }
+        else if (index === 1) {
+            console.log('Skipping Tour');
+            navigate("/main");
+          }
+      },
     },
     //second pop up is to make a new environment
     {
         message: 'Click on the button in the top corner to toggle the environments menu.',
+        buttons: ['Continue'],
         position: 'top-left',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
       },
       //third pop up is to name a new environment
     {
         message: 'Please name the environment. An environment is usually a generic location.',
+        buttons: ['Continue'],
         position: 'middle-right',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+
+        },
       },
       //forth pop up is to make a new cluster
     {
         message: 'Hover over the environment to add a cluster to it. A cluster consists of a set of cameras, typically depicting a room, floor, or building.',
+        buttons: ['Continue'],
         position: 'top-left',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
       },
       //fifth pop up is to add a camera connection
     {
         message: "Add a camera to this cluster by entering in the camera's IP address in format _____. Hit the plus sign once you are done.",
+        buttons: ['Continue'],
         position: 'top-right',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
       },
       //sixth pop up is about viewing 
       {
         message: "You can see your camera feed live here. Objects in the feed are recognized and listed below the feed.",
+        buttons: ['Continue'],
         position: 'center',
+        onButtonClick: (index) => {
+            setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+        },
       }
     // Add more popup objects here with their messages and buttons
     // More pop ups to 
         // see how to save videos? if that is an option
   ];
+
 
   return (
       <>
@@ -126,6 +165,8 @@ const TourPage = () => {
         {popups[currentPopup] && (
         <Popup
           message={popups[currentPopup].message}
+          buttons={popups[currentPopup].buttons}
+          onButtonClick={popups[currentPopup].onButtonClick} 
           position={popups[currentPopup].position}
         />
         )}

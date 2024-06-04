@@ -1,15 +1,15 @@
-// Popup.jsx
 import React, { useState, useEffect } from 'react';
 import './PopUp.css'
 
-const Popup = ({ message , position}) => {
+const Popup = ({ message, buttons, onButtonClick , position}) => {
   const [showPopup, setShowPopup] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
-  const [currentPopup, setCurrentPopup] = useState(0);
+  const [showNextPopUp, setShowNextPopUp] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowPopup(true);
+      setShowNextPopUp(false);
       // Start flashing after a delay (adjust delay as needed)
       const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 500);
       return () => {
@@ -19,12 +19,12 @@ const Popup = ({ message , position}) => {
 
     console.log("in popup use effect!")
     return () => clearTimeout(timeout);
-  }, [currentPopup]);
+  }, [showNextPopUp]);
 
   const handleButtonClick = (index) => {
+    onButtonClick(index);
     setShowPopup(false);
-    //go to next one
-    setCurrentPopup(currentPopup + 1);
+    setShowNextPopUp(true);
   };
 
   const getPositionStyles = () => {
@@ -59,9 +59,11 @@ const Popup = ({ message , position}) => {
       <div className={`popup ${isFlashing ? 'flashing' : ''}`} style={getPositionStyles()}>
         <p>{message}</p>
         <div className="button-container">
-            <button onClick={() => handleButtonClick(index)}>
-              Continue
+          {buttons.map((button, index) => (
+            <button key={index} onClick={() => handleButtonClick(index)}>
+              {button}
             </button>
+          ))}
         </div>
       </div>
     )
