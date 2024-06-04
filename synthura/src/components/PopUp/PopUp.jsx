@@ -10,11 +10,11 @@ const Popup = ({ message, buttons, onButtonClick , position}) => {
     const timeout = setTimeout(() => {
       setShowPopup(true);
       // Start flashing after a delay (adjust delay as needed)
-      const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 500);
+      const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 0);
       return () => {
         clearInterval(flashInterval);
       };
-    }, 1000); // Show popup after 1 second delay (adjust as needed)
+    }, 0); // Show popup after 1 second delay (adjust as needed)
     return () => clearTimeout(timeout);
   }, []);
 
@@ -37,6 +37,8 @@ const Popup = ({ message, buttons, onButtonClick , position}) => {
         return { top: '50%', left: '50%' };
       case 'middle-left':
         return { top: '50%', left: '30%' };
+        case 'middle-right':
+        return { top: '50%', left: '85%' };
       case 'bottom-left':
         return { bottom: '10%', left: '10%' };
       case 'bottom-center':
