@@ -75,7 +75,7 @@ const EnvironmentsPage = () => {
         }
         else if (index === 1) {
             console.log('Skipping Tutorial');
-            navigate("/main");
+            setCurrentPopup(currentPopup + popups.length + 1); 
           }
       },
     },
