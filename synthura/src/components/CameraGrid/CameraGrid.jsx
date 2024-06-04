@@ -17,7 +17,7 @@ import { useNameComponent } from '../../scripts/NameComponentContext';
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
 
-const CameraGrid = () => {
+const CameraGrid = ({username}) => {
 
   const [activeCameras, setActiveCameras] = useState([]);
   const [camList, setCamList] = useState(new LinkedList());
@@ -35,7 +35,7 @@ const CameraGrid = () => {
         if (!updatedList.isPresent(id)) {
           updatedList.append(id, <div key={id} className="live-feed" >
                                   <WebSocketProvider>
-                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
+                                    <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} username={username} />
                                     <AnalyticsFeed id={id} />
                                   </WebSocketProvider>
                                  </div>);
@@ -104,6 +104,7 @@ const CameraGrid = () => {
   return (
     <section id="camera-grid-container">
       <h2>Enter Device IP Address</h2>
+      <h2>User: {username}</h2>
       <div id="input-url-container" >
         <input
           type="text"

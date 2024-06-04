@@ -12,11 +12,15 @@ import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
 import { useState } from "react";
 import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useLocation, useNavigate } from "react-router-dom";
 import './EnvironmentsPage.css';
 
 
 const EnvironmentsPage = () => {
 
+  const {state} = useLocation();
+  const navigate = useNavigate();
+  const username = state.username;
   const [ showSideBar, setShowSideBar ] = useState(false);
   const [ error, setError ] = useState(false);
   const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
@@ -49,6 +53,16 @@ const EnvironmentsPage = () => {
     }
   }
 
+  const handleNavigateToRecordings = () => {
+    console.log("Navigated to Recordings Page");
+    navigate("/recordings", {state: {username: username}});
+  }
+  
+  const handleSignOut = () => {
+    console.log("Signed Out");
+    navigate("/");
+  }
+
   return (
       <>
         <div className={"name-component-field" + (active ? " show" : "")} >
@@ -72,8 +86,11 @@ const EnvironmentsPage = () => {
             0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
           </svg>
           <EnvironmentSideBar showSideBar={showSideBar} />
-          <CameraGrid />
+          <CameraGrid username={username} />
         </section>
+        <button onClick={handleNavigateToRecordings}>Go to Recordings Page</button>
+        <br />
+        <button onClick={handleSignOut}>Sign Out</button>
       </>
   );
 }
