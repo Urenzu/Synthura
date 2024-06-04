@@ -6,4 +6,3 @@ cd synthura <br>
 npm install <br>
 npm run dev <br>
 
-test
