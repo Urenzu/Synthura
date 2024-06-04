@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Login.css';
+import './Login.css'; // Import the CSS file
 
 function LoginSignup() {
   const [action, setAction] = useState('login'); // Login or Signup state
@@ -39,28 +39,34 @@ function LoginSignup() {
 
   return (
     <div className="login-wrapper">
-      <div className="login-container"> 
+      <div className="login-container">
         <button onClick={() => setAction('login')}>Login</button>
         <button onClick={() => setAction('signup')}>Sign Up</button>
 
-        {action === 'login' && (
-          <div>
-            <input type="text" name="username" placeholder="Username" value={username} onChange={handleInputChange} className="login-input" />
-            <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
-            <br></br>
-            <button onClick={handleLogin}>Login</button>
-          </div>
-        )}
+    {action === 'login' && (
+        <div className="login-form"> {/* New class for styling */}
+            <div className="login-input-wrapper">
+            Username: <input type="text" name="username" placeholder="Username" value={username} onChange={handleInputChange} className="login-input"/>
+            </div>
+            <div className="login-input-wrapper">
+            Password: <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
+            </div>
+            <button onClick={handleLogin} className="login-submit">Login</button>
+        </div>
+      )}
 
-        {action === 'signup' && (
-          <div>
-            <input type="text" name="username" placeholder="Username" value={username} onChange={handleInputChange} className="login-input" />
-            <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
-            {/* {error && <p style={{ color: 'red', margin: 5 }}>{error}</p>} */}  {/* implement this later */}
-            <br></br>
-            <button onClick={handleSignup}>Sign Up</button>
-          </div>
-        )}
+      {action === 'signup' && (
+        <div className="login-form"> {/* New class for styling */}
+          <div className="login-input-wrapper">
+            Username: <input type="text" name="username" placeholder="Username" value={username} onChange={handleInputChange} className="login-input"/>
+            </div>
+            <div className="login-input-wrapper">
+            Password: <input type="password" name="password" placeholder="Password" value={password} onChange={handleInputChange} className="login-input" />
+            </div>
+            {/* {error && <p>{error}</p>} */}
+          <button onClick={handleSignup} className="login-submit">Sign Up</button>
+        </div>
+      )}
       </div>
     </div>
   );
