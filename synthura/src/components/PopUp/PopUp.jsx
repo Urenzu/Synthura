@@ -2,28 +2,29 @@
 import React, { useState, useEffect } from 'react';
 import './PopUp.css'
 
-const Popup = ({ message, buttons, onButtonClick , position}) => {
+const Popup = ({ message , position}) => {
   const [showPopup, setShowPopup] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
+  const [currentPopup, setCurrentPopup] = useState(0);
 
   useEffect(() => {
-    // const timeout = setTimeout(() => {
-    //   setShowPopup(true);
-    //   // Start flashing after a delay (adjust delay as needed)
-    //   const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 500);
-    //   return () => {
-    //     clearInterval(flashInterval);
-    //   };
-    // }); // Show popup after 1 second delay (adjust as needed)
-    
-    // return () => clearTimeout(timeout);
-    setShowPopup(true);
+    const timeout = setTimeout(() => {
+      setShowPopup(true);
+      // Start flashing after a delay (adjust delay as needed)
+      const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 500);
+      return () => {
+        clearInterval(flashInterval);
+      };
+    }); // Show popup after 1 second delay (adjust as needed)
+
     console.log("in popup use effect!")
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [currentPopup]);
 
   const handleButtonClick = (index) => {
-    onButtonClick(index);
     setShowPopup(false);
+    //go to next one
+    setCurrentPopup(currentPopup + 1);
   };
 
   const getPositionStyles = () => {
@@ -58,11 +59,9 @@ const Popup = ({ message, buttons, onButtonClick , position}) => {
       <div className={`popup ${isFlashing ? 'flashing' : ''}`} style={getPositionStyles()}>
         <p>{message}</p>
         <div className="button-container">
-          {buttons.map((button, index) => (
-            <button key={index} onClick={() => handleButtonClick(index)}>
-              {button}
+            <button onClick={() => handleButtonClick(index)}>
+              Continue
             </button>
-          ))}
         </div>
       </div>
     )
