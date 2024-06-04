@@ -27,7 +27,7 @@ const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
 
   // Context
   const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { globalCluster, updateGlobalCluster, updateGlobalEnvironment } = useCameraConnection();
+  const { connections, globalCluster, updateGlobalCluster, updateGlobalEnvironment, updateConnections } = useCameraConnection();
   const { environment, clustersList, setClustersList } = useClusterEnvironment();
 
   useEffect(() => {
@@ -65,6 +65,15 @@ const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
           updatedList.changeName(currentClusterName, temp_name);
           return updatedList;
         })
+        updateConnections(prev => {
+          const updatedConnections = new Map(prev);
+          const oldCompositeKey = `${environment}:${currentClusterName}`;
+          const newCompositeKey = `${environment}:${temp_name}`;
+          updatedConnections.set(newCompositeKey, updatedConnections.get(oldCompositeKey)); 
+          updatedConnections.delete(oldCompositeKey);
+          console.log(updatedConnections);
+          return updatedConnections;
+        });
         setEntered(false);
         setActive(false);
         setRenamingCluster(false);
@@ -78,7 +87,7 @@ const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
     setPrompt("Enter New Cluster Name");
     setActive(true);
     setRenamingCluster(true);
-  }
+  }                             
 
   const handleMouseOver = () => {
     timeoutRef.current = setTimeout(() => {

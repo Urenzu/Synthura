@@ -29,7 +29,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   // Context
   const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { updateGlobalEnvironment, updateGlobalCluster, addEnvironmentCluster, removeEnvironmentCluster, globalCluster } = useCameraConnection();
+  const { connections, updateGlobalEnvironment, updateGlobalCluster, updateConnections, addEnvironmentCluster, globalCluster } = useCameraConnection();
   const { environment, clustersList, setEnvironment, setClustersList } = useClusterEnvironment();
 
   // Update environment name
@@ -43,7 +43,6 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   // Delete a cluster
   const handleDeleteCluster = (cluster_name) => {
     
-    console.log("hello");
     // Remove cluster from the list
     setClustersList(prevList => {
       const updatedList = new LinkedList();
@@ -52,7 +51,15 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
       return updatedList;
     });
 
-    removeEnvironmentCluster(environment, cluster_name);
+    console.log(connections);
+    console.log(environment, cluster_name)
+    updateConnections(prev => {
+      const updatedConnections = new Map(prev);
+      const compositeKey = `${environment}:${cluster_name}`;
+      updatedConnections.delete(compositeKey); 
+      console.log(updatedConnections);
+      return updatedConnections;
+    });
 
   }
 
@@ -104,16 +111,12 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   // renders updated column of clusters
   useEffect(() => { 
-    console.log(globalCluster);
     if(!clustersList.isPresent(globalCluster)) {
       updateGlobalCluster("");
     }
+
     setActiveClusters(clustersList.render());
   }, [clustersList]);
-
-  useEffect(() => {
-    console.log(globalCluster);
-  }, [globalCluster]);
 
   return (
     <div className={"environment" + (active ? " active" : "") } >

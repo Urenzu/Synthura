@@ -29,15 +29,6 @@ const CameraGrid = () => {
   // Context
   const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
   const { connections, globalCluster, globalEnvironment, updateConnections, renderConnectionList } = useCameraConnection();
-
-  // Custom function to check array equality
-  const arraysEqual = (a, b) => {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
-  };
   
   useEffect(() => {
     // Check if a camera is being added
@@ -54,10 +45,10 @@ const CameraGrid = () => {
         let temp_name = name;
         updateConnections((prevMap) => {
           const updatedMap = new Map(prevMap);
-          const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
+          const compositeKey = `${globalEnvironment}:${globalCluster}`;
           let list;
-          if (key) {
-            list = connections.get(key);
+          if(connections.has(compositeKey)) {
+            list = connections.get(compositeKey);
           }
           else {
             list = new LinkedList();
@@ -70,11 +61,11 @@ const CameraGrid = () => {
               </WebSocketProvider>
             </div>
           );
-          updatedMap.set(key, list);
+          updatedMap.set(compositeKey, list);
           return updatedMap;
         });
       }
-      setId(id + 2);
+      setId(id+1);
       setActive(false);
       setEntered(false);
       setAddingCamera(false);
@@ -97,12 +88,10 @@ const CameraGrid = () => {
 
   // update active cameras the moment connections map changes
   useEffect(() => {
-
-    const key = Array.from(connections.keys()).find(k => arraysEqual(k, [globalEnvironment, globalCluster]));
-    if (key) {
-      setActiveCameras(renderConnectionList(key));
+    const compositeKey = `${globalEnvironment}:${globalCluster}`;
+    if(connections.has(compositeKey)) {
+      setActiveCameras(renderConnectionList(compositeKey));
     }
-
   }, [connections, globalCluster]);
 
   // remove a live feed from the camera grid
@@ -133,7 +122,7 @@ const CameraGrid = () => {
         return updatedMap;
       }
     )
-    setActiveURLS(prevURLs => prevURLs.filter(url => camera_url !== url));
+
   };
 
   return (

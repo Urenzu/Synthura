@@ -11,8 +11,6 @@ import './VideoFrame.css';
 import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
-import { useCameraConnection } from '../../scripts/CameraConnectionContext';
-import { LinkedList } from '../../scripts/LinkedList';
 
 
 const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
@@ -22,15 +20,6 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
   const { status, offer, sendMessage } = useWebSocket();
 
   const establishWebRTCConnection = async () => {
-      
-    // const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
-    // const websocket = getWebSocket(websocketUrl);
-
-    // Create peer connection and configure ICE server(s)
-    // const config = {
-    //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    // };
-    // const pc = new RTCPeerConnection(config);
 
     const pc = new RTCPeerConnection();
 
@@ -115,7 +104,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
     <div data-testid={id} className="video-frame">
       <div className="live-video-bar">
         <span>{cameraName}</span>
-        <button className="close-camera-button" onClick={() => handleRemoveCamera(id, cameraName, cameraURL)}>
+        <button className="close-camera-button" onClick={() => handleRemoveCamera(id, cameraName)}>
           <svg id="close-camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
             <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 
             0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 
