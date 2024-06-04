@@ -5,6 +5,7 @@ import './App.css'
 import EnvironmentsPage from './pages/EnvironmentsPage/EnvironmentsPage.jsx'
 import RecordingsPage from './pages/RecordingsPage/RecordingsPage.jsx'
 import LandingPage from './pages/LandingPage/LandingPage.jsx'
+import TourPage from './pages/TourPage/TourPage.jsx';
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path = "/" element={<LandingPage/>}/> 
           <Route path="/main" element={<EnvironmentsPage/>}/>
+          <Route path = "/tour" element={<TourPage/>}/> 
           <Route path="/recordings" element={<RecordingsPage/>}/>
           <Route path="*" element={<h1>Page Not Found</h1>}/>
         </Routes>
