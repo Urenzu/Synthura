@@ -20,7 +20,7 @@
       border-color: yellow;
     }
     50% {
-      border-color: transparent;
+      border-color: rgb(145, 145, 0);
     }
     100% {
       border-color: yellow;

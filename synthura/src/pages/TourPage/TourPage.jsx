@@ -10,6 +10,7 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
+import Popup from '../../components/PopUp/PopUp';
 import { useState } from "react";
 import { useNameComponent } from '../../scripts/NameComponentContext';
 import './TourPage.css';
@@ -49,6 +50,24 @@ const TourPage = () => {
     }
   }
 
+  //TOUR CODE
+  const [currentPopup, setCurrentPopup] = useState(0);
+  const popups = [
+    {
+      message: 'Would you like a tour of the interface?',
+      buttons: ['Begin Tour', 'Skip Tour'],
+      position: 'top-right',
+      onButtonClick: (index) => {
+        if (index === 0) {
+          // Handle starting the tour
+          console.log('Starting Tour');
+        }
+        setCurrentPopup(currentPopup + 1); // Move to next popup
+      },
+    },
+    // Add more popup objects here with their messages and buttons
+  ];
+
   return (
       <>
         <div className={"name-component-field" + (active ? " show" : "")} >
@@ -74,6 +93,15 @@ const TourPage = () => {
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid />
         </section>
+
+        {popups[currentPopup] && (
+        <Popup
+          message={popups[currentPopup].message}
+          buttons={popups[currentPopup].buttons}
+          onButtonClick={popups[currentPopup].onButtonClick} // Pass the actual function
+          position={popups[currentPopup].position}
+        />
+      )}
       </>
   );
 }
