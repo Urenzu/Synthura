@@ -11,7 +11,7 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
 import Popup from '../../components/PopUp/PopUp';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNameComponent } from '../../scripts/NameComponentContext';
 import { useNavigate } from 'react-router-dom'; // for navigation
 import './TourPage.css';
@@ -55,15 +55,23 @@ const TourPage = () => {
 
   //TOUR CODE
   const [currentPopup, setCurrentPopup] = useState(0);
+
+  useEffect(() => {
+    // This effect runs whenever currentPopup changes
+    console.log("in useeffect :P currentPopup now", currentPopup)
+  }, [currentPopup]);
+
+
   const popups = [
     {
       message: 'Would you like a tour of the interface?',
-      buttons: ['Begin Tour', 'Skip Tour'],
+      buttons: ['Begin Tour'], //      buttons: ['Begin Tour', 'Skip Tour'],
       position: 'center',
       onButtonClick: (index) => {
         if (index === 0) {
           console.log('Starting Tour');
           setCurrentPopup(currentPopup + 1); // Move to next popup
+          console.log("currentPopup now", currentPopup)
         }
         else if (index === 1) {
             console.log('Skipping Tour');
@@ -78,6 +86,7 @@ const TourPage = () => {
         position: 'top-left',
         onButtonClick: (index) => {
             setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
         },
       },
       //third pop up is to name a new environment
@@ -86,8 +95,9 @@ const TourPage = () => {
         buttons: ['Continue'],
         position: 'middle-right',
         onButtonClick: (index) => {
-            console.log('Starting Tour');
             setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
+
         },
       },
       //forth pop up is to make a new cluster
@@ -96,8 +106,8 @@ const TourPage = () => {
         buttons: ['Continue'],
         position: 'top-left',
         onButtonClick: (index) => {
-            console.log('Starting Tour');
             setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
         },
       },
       //fifth pop up is to add a camera connection
@@ -106,8 +116,8 @@ const TourPage = () => {
         buttons: ['Continue'],
         position: 'top-right',
         onButtonClick: (index) => {
-            console.log('Starting Tour');
             setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
         },
       },
       //sixth pop up is about viewing 
@@ -116,8 +126,8 @@ const TourPage = () => {
         buttons: ['Continue'],
         position: 'center',
         onButtonClick: (index) => {
-            console.log('Starting Tour');
             setCurrentPopup(currentPopup + 1); // Move to next popup
+            console.log("currentPopup now", currentPopup)
         },
       }
     // Add more popup objects here with their messages and buttons
@@ -158,7 +168,8 @@ const TourPage = () => {
           onButtonClick={popups[currentPopup].onButtonClick} // Pass the actual function
           position={popups[currentPopup].position}
         />
-      )}
+        )}
+
       </>
   );
 }

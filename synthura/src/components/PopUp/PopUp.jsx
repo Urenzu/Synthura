@@ -7,15 +7,18 @@ const Popup = ({ message, buttons, onButtonClick , position}) => {
   const [isFlashing, setIsFlashing] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShowPopup(true);
-      // Start flashing after a delay (adjust delay as needed)
-      const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 0);
-      return () => {
-        clearInterval(flashInterval);
-      };
-    }, 0); // Show popup after 1 second delay (adjust as needed)
-    return () => clearTimeout(timeout);
+    // const timeout = setTimeout(() => {
+    //   setShowPopup(true);
+    //   // Start flashing after a delay (adjust delay as needed)
+    //   const flashInterval = setInterval(() => setIsFlashing(!isFlashing), 500);
+    //   return () => {
+    //     clearInterval(flashInterval);
+    //   };
+    // }); // Show popup after 1 second delay (adjust as needed)
+    
+    // return () => clearTimeout(timeout);
+    setShowPopup(true);
+    console.log("in popup use effect!")
   }, []);
 
   const handleButtonClick = (index) => {
