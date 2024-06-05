@@ -154,6 +154,7 @@ const CameraGrid = ({username}) => {
           <div id="camera-grid">
             {activeCameras}
           </div>
+          <button className="btn recordingsPage"onClick={handleNavigateToRecordings}>Recordings Page</button>
         </section>
       )}
     </>

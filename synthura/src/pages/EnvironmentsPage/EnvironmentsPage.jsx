@@ -10,7 +10,6 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
-import { useNameComponent } from '../../scripts/NameComponentContext';
 import { useLocation, useNavigate } from "react-router-dom";
 import Popup from '../../components/PopUp/PopUp';
 import { useState, useEffect } from "react";
@@ -21,13 +20,15 @@ import './EnvironmentsPage.css';
 
 const EnvironmentsPage = () => {
 
+  //used in login branch
   const {state} = useLocation();
   const navigate = useNavigate();
-  const username = state.username;
-  const [ showSideBar, setShowSideBar ] = useState(false);
-  const [ error, setError ] = useState(false);
-  const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
-  const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
+  //only checks username if state is not null
+  const username = state?.username;
+
+  //used in main branch
+  const [ showSideBar, setShowSideBar ] = useState(true);
+  const { prompt, active, name, error, setError, setName, setCanceled, setEntered } = useEnvironmentPage();
   const { globalCluster, globalEnvironment } = useCameraConnection();
 
 
