@@ -25,7 +25,7 @@ Backend environment setup:
 
 1. python -m venv synthura
 2. synthura\Scripts\activate (In base backend directory)
-3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch huggingface_hub
+3. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch
 4  pip install -q git+https://github.com/THU-MIG/yolov10.git
 5. To run: uvicorn backend:app --reload
 6. Enter url: http://<ip>:<port>/video
@@ -56,7 +56,18 @@ app.add_middleware(
 )
 
 class SynthuraSecuritySystem:
+    """
+    SynthuraSecuritySystem class represents the main security system.
+    It manages the camera connections, object detection, and motion detection.
+    """
     def __init__(self, model_path='yolov10n_expanded.pt', frame_width=640, frame_height=480):
+        """
+        Initialize the SynthuraSecuritySystem.
+
+        model_path: Path to the YOLOv10 model file.
+        frame_width: Width of the frame for resizing.
+        frame_height: Height of the frame for resizing.
+        """
         self.model = self.load_model(model_path)
         self.camera_connections = {}
         self.camera_urls = []
@@ -67,6 +78,12 @@ class SynthuraSecuritySystem:
         self.frame_height = frame_height
 
     def load_model(self, model_path):
+        """
+        Load the YOLOv10 model.
+
+        model_path: Path to the YOLOv10 model file.
+        return: Loaded YOLOv10 model.
+        """
         model_path = os.path.join(os.path.dirname(__file__), model_path)
         model = YOLO(model_path)
         if torch.cuda.is_available():
@@ -78,6 +95,15 @@ class SynthuraSecuritySystem:
         return model
 
     def add_camera(self, camera_id, camera_url, websocket, pc, cap):
+        """
+        Add a new camera to the security system.
+
+        camera_id: Unique identifier for the camera.
+        camera_url: URL of the camera stream.
+        websocket: WebSocket connection associated with the camera.
+        pc: RTCPeerConnection associated with the camera.
+        cap: VideoCapture object for the camera.
+        """
         if camera_url in self.camera_urls:
             logger.warning(f"Camera {camera_url} is already added.")
             return
@@ -89,6 +115,12 @@ class SynthuraSecuritySystem:
         logger.info(f"Camera {camera_url} added successfully.")
 
     def object_detection(self, frame):
+        """
+        Perform object detection on a frame.
+
+        frame: Input frame for object detection.
+        return: Results of object detection.
+        """
         if torch.cuda.is_available():
             frame = torch.from_numpy(frame)
             frame = frame.permute(2, 0, 1).unsqueeze(0).float()
@@ -106,9 +138,20 @@ class SynthuraSecuritySystem:
             return self.model(frame)
 
     def frame_annotation(self, results):
+        """
+        Annotate the frame with object detection results.
+
+        results: Object detection results.
+        return: Annotated frame.
+        """
         return results[0].plot()
 
     async def remove_camera(self, camera_id):
+        """
+        Remove a camera from the security system.
+
+        camera_id: Unique identifier for the camera.
+        """
         logger.info(self.camera_connections)
 
         if camera_id not in list(self.camera_connections.keys()):
@@ -126,6 +169,9 @@ class SynthuraSecuritySystem:
         logger.info(f"Camera {camera_id} removed successfully.")
 
     def stop(self):
+        """
+        Stop the security system and clean up resources.
+        """
         for camera_id in list(self.camera_connections.keys()):
             self.remove_camera(camera_id)
         cv2.destroyAllWindows()
@@ -134,7 +180,11 @@ class SynthuraSecuritySystem:
 #----------------------------------------------------------------------------------------------------#
 
     async def handle_websocket(self, websocket: WebSocket):
+        """
+        Handle the WebSocket connection for a camera.
 
+        websocket: WebSocket connection.
+        """
         await websocket.accept()
         pc = None
         decoded_camera_url = ""
@@ -212,7 +262,19 @@ class SynthuraSecuritySystem:
 #----------------------------------------------------------------------------------------------------#
 
 class MyVideoStreamTrack(VideoStreamTrack):
+    """
+    MyVideoStreamTrack class represents a video stream track for a camera.
+    It captures frames from the camera, processes them, and sends them over the WebSocket.
+    """
     def __init__(self, cap, security_system, camera_id, buffer_size=1):
+        """
+        Initialize the MyVideoStreamTrack.
+
+        cap: VideoCapture object for the camera.
+        security_system: SynthuraSecuritySystem instance.
+        camera_id: Unique identifier for the camera.
+        buffer_size: Size of the frame buffer.
+        """
         super().__init__()
         self.cap = cap
         self.security_system = security_system
@@ -232,6 +294,9 @@ class MyVideoStreamTrack(VideoStreamTrack):
         self.background_update_interval = 50
 
     def capture_frames(self):
+        """
+        Capture frames from the camera and add them to the frame buffer.
+        """
         while self.running:
             ret, frame = self.cap.read()
             if ret:
@@ -246,11 +311,19 @@ class MyVideoStreamTrack(VideoStreamTrack):
                 time.sleep(0.01)
     
     def stop(self):
+        """
+        Stop the video stream track and release resources.
+        """
         self.running = False
         self.capture_thread.join()
         self.cap.release()
 
     async def recv(self):
+        """
+        Receive frames from the frame buffer, process them, and send them over the WebSocket.
+
+        return: Processed frame.
+        """
         if not self.frame_buffer.empty():
             frame = self.frame_buffer.get()
             annotated_frame = await self.process_frame(frame)
@@ -269,6 +342,12 @@ class MyVideoStreamTrack(VideoStreamTrack):
         return finished_frame
 
     async def process_frame(self, frame):
+        """
+        Process a frame by performing object detection and motion detection.
+
+        frame: Input frame for processing.
+        return: Processed frame.
+        """
 
         # loop = asyncio.get_event_loop()
 
@@ -299,10 +378,13 @@ class MyVideoStreamTrack(VideoStreamTrack):
 
         return annotated_frame
     
-    """
-    Background subtraction motion detection implementation.
-    """
     def detect_motion(self, frame):
+        """
+        Detect motion in a frame using background subtraction.
+
+        frame: Input frame for motion detection.
+        return: True if motion is detected, False otherwise.
+        """
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         resized_gray = cv2.resize(gray, (self.resize_width // 2, self.resize_height // 2))
         blurred = cv2.GaussianBlur(resized_gray, (5, 5), 0)
@@ -335,34 +417,64 @@ class MyVideoStreamTrack(VideoStreamTrack):
 security_system = SynthuraSecuritySystem()
 
 class CameraIP(BaseModel):
+    """
+    CameraIP class represents the camera IP address.
+    """
     camera_ip: str
 
 #----------------------------------------------------------------------------------------------------#
 
 @app.websocket("/api/video_feed/ws")
 async def video_feed_websocket(websocket: WebSocket):
-    await security_system.handle_websocket(websocket)
- 
+   """
+   WebSocket endpoint for video feed.
+
+   websocket: WebSocket connection.
+   """
+   await security_system.handle_websocket(websocket)
+
 @app.get("/api/remove_camera/{camera_id}")
 async def remove_camera(camera_id: int):
-    await security_system.remove_camera(camera_id)
-    return {"message": "Camera removed successfully"}
+   """
+   Remove a camera from the security system.
+
+   camera_id: Unique identifier for the camera.
+   return: JSON response indicating the success of the removal.
+   """
+   await security_system.remove_camera(camera_id)
+   return {"message": "Camera removed successfully"}
 
 @app.get("/api/get_camera_urls")
 async def get_camera_urls():
-    camera_urls = security_system.camera_ips
-    return {"camera_urls": camera_urls}
+   """
+   Get the list of camera URLs.
+
+   return: JSON response containing the list of camera URLs.
+   """
+   camera_urls = security_system.camera_ips
+   return {"camera_urls": camera_urls}
 
 @app.get("/api/get_camera_results")
 async def get_camera_results(camera_ip: str):
-    results = security_system.get_camera_results(camera_ip)
-    return {"results": results}
+   """
+   Get the results for a specific camera.
+
+   camera_ip: IP address of the camera.
+   return: JSON response containing the results for the camera.
+   """
+   results = security_system.get_camera_results(camera_ip)
+   return {"results": results}
 
 @app.post("/api/stop_system")
 async def stop_system():
-    security_system.stop()
-    return {"message": "Security system stopped successfully"}
+   """
+   Stop the security system.
+
+   return: JSON response indicating the success of stopping the system.
+   """
+   security_system.stop()
+   return {"message": "Security system stopped successfully"}
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+   import uvicorn
+   uvicorn.run(app, host="0.0.0.0", port=8000)
