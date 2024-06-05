@@ -34,7 +34,8 @@
 #environments-page-nav-bar #recordings-page-link {
     font-size: 1.5rem;
     font-family: 'Roboto', sans-serif;
-    color: snow;
+    background-color:#181818;
+    color: white;
     position: absolute;
     right: 1%;
     text-decoration: none;

@@ -14,7 +14,7 @@ import { useWebSocket } from '../../scripts/WebSocketContext';
 import axios from "axios";
 
 
-const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
+const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username }) => {
 
   // Local state
   const videoRef = useRef(null);
@@ -126,7 +126,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
       
       reader.onload = async () => {
         const base64Data = reader.result.split(',')[1]; // Extract base64 data
-        const filename = `camera_${id}_video.mp4`;
+        const filename = cameraName;
         
         // Add console logs to check if filename and base64Data are correctly defined
         console.log('filename:', filename);
@@ -141,7 +141,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
         // Make sure filename and base64Data are correctly defined
         if (filename && base64Data) {
           try {
-            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`, postBodyData, {
+            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=${username}&filename=${filename}&data=${data}`, postBodyData, {
               headers: {
                 'Content-Type': 'application/json'
               }

@@ -151,28 +151,6 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
     return (
       <>
         <MongoDBVideoPlayer fileId={videoSource} />
-        <div id="analytics_window">
-          <table>
-            <tbody>
-              <tr>
-                <td id="analytics_window_row">
-                  <div id="analytics_window_circle_red"></div>
-                </td>
-                <td>
-                  <h3>Dangerous - <br />10:54:26 to 10:59:50</h3>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div id="analytics_window_circle_purple"></div>
-                </td>
-                <td>
-                  <h3>Potential Threat - <br />10:54:26 to 10:59:50</h3>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </>
     );
   };

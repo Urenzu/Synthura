@@ -14,12 +14,16 @@ import Popup from '../../components/PopUp/PopUp';
 import { useState, useEffect } from "react";
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
 import { useCameraConnection } from '../../scripts/CameraConnectionContext';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './EnvironmentsPage.css';
 
 
 const EnvironmentsPage = () => {
 
+  const {state} = useLocation();
+  const navigate = useNavigate();
+  const username = state.username;
+  console.log(username);
   const [ showSideBar, setShowSideBar ] = useState(true);
   const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
   const { globalCluster, globalEnvironment } = useCameraConnection();
@@ -176,6 +180,16 @@ const EnvironmentsPage = () => {
         // see how to save videos? if that is an option
   ];
 
+  const handleNavigateToRecordings = () => {
+    console.log("Navigated to Recordings Page");
+    navigate("/recordings", {state: {username: username}});
+  }
+  
+  const handleSignOut = () => {
+    console.log("Signed Out");
+    navigate("/");
+  }
+
   return (
       <>
         <div className={"name-component-field" + (active ? " show" : "")} >
@@ -200,10 +214,10 @@ const EnvironmentsPage = () => {
               0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
             </svg>
             {(globalEnvironment && globalCluster) && (<h3>Viewing Cluster <span className="emphasize">{globalCluster}</span> of Environment <span className="emphasize">{globalEnvironment}</span></h3>)}
-            <Link id="recordings-page-link" to="/recordings">RECORDINGS</Link>
+            <button id="recordings-page-link" onClick={handleNavigateToRecordings}>Go to Recordings Page</button>
           </nav>
           <EnvironmentSideBar showSideBar={showSideBar} />
-          <CameraGrid />
+          <CameraGrid username={username} />
         </section>
         {popups[currentPopup] && (
         <Popup
@@ -214,6 +228,7 @@ const EnvironmentsPage = () => {
           position={popups[currentPopup].position}
         />
         )}
+        <button onClick={handleSignOut}>Sign Out</button>
       </>
   );
 }

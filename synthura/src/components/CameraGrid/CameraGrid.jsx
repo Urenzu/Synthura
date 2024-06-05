@@ -18,7 +18,7 @@ import { LinkedList } from '../../scripts/LinkedList';
 
 import './CameraGrid.css';
 
-const CameraGrid = () => {
+const CameraGrid = ({username}) => {
 
   // Local State
   const [activeCameras, setActiveCameras] = useState([]);
@@ -56,7 +56,7 @@ const CameraGrid = () => {
           list.append(temp_name,
             <div key={id} className="live-feed" >
               <WebSocketProvider>
-                <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} />
+                <VideoFrame  id={id} cameraURL={cameraURL} handleRemoveCamera={handleRemoveCamera} cameraName={temp_name} username={username} />
                 <AnalyticsFeed id={id} />
               </WebSocketProvider>
             </div>
