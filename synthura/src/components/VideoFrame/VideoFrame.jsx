@@ -249,9 +249,4 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
   );
 };
 
-VideoFrame.propTypes = {
-  id: PropTypes.number.isRequired,
-  handleRemoveCamera: PropTypes.func.isRequired,
-};
-
 export default VideoFrame;

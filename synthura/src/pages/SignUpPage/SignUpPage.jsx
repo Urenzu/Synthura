@@ -49,7 +49,7 @@ const SignUpPage = () => {
   }
 
   return (
-    <main>
+    <section className="landing-page" >
       <h1>Synthura</h1>
       <p><strong>ENHANCE</strong> Your Security with <strong>CUTTING-EDGE AI</strong> Object Detection</p>
       <p>Monitor Live Video from Everyday Devices to Advanced Cameras</p>
@@ -65,7 +65,7 @@ const SignUpPage = () => {
         <span></span>
         <button id="login-button" type="submit">Sign Up</button>
       </form>
-    </main>
+    </section>
   );
 }
 

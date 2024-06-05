@@ -184,6 +184,7 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
 }
 
 function RecordingsPage() {
+
   const {state} = useLocation();
   const navigate = useNavigate();
   const username = state.username;
@@ -208,25 +209,32 @@ function RecordingsPage() {
     navigate("/main", {state: {username: username}});
   }
 
+  const handleSignOut = () => {
+    navigate("/");
+  }
+
   useEffect(() => {
     fetchRecordings();
   }, []);
 
+
   return (
-    <div id="recording_page_container">
-      <center>
-        <h1>Saved Recordings:</h1>
-        <p>User: {username}</p>
-        <button className="unique_button" onClick={handleNavigateToMain}>Go to Main Page</button>
-        <br />
-        <br />
+    <section id="recordings-page" >
+      <nav id="environments-page-nav-bar">
+          <h1>Recordings</h1>
+          <div id="links">
+            <button onClick={handleSignOut}>Sign Out</button>
+            <button onClick={handleNavigateToMain}>Environments</button>
+          </div>
+        </nav>
+      <div>
         {isLoading ? ( // Display loading message if recordings are being fetched
           <p>Loading recordings...</p>
         ) : (
           <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
         )}
-      </center>
-    </div>
+      </div>
+    </section>
   );
 }
 

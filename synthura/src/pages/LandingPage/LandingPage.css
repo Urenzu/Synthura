@@ -17,7 +17,7 @@ body {
     justify-content: center;
 }
 
-main {
+.landing-page {
     background-color: #1e1e1e;
     color: snow;
     box-sizing: border-box;
@@ -29,7 +29,7 @@ main {
     height: 100vh;
 }
 
-main::before {
+.landing-page::before {
     content: '';
     position: absolute;
     bottom: 0;
@@ -40,7 +40,7 @@ main::before {
     border-top: 100vh solid transparent;
 }
 
-main::after {
+.landing-page::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -61,7 +61,7 @@ h1 {
     z-index: 5;
 }
 
-main > p {
+.landing-page > p {
     margin-top: -20px;
     font-size: 2rem;
     font-family: var(--primary-font);
@@ -78,16 +78,13 @@ main > p {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     margin-top: 20px;
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-around;
     font-family: var(--secondary-font);
     z-index: 5;
     position: relative;
@@ -104,6 +101,8 @@ main > p {
     font-weight: 800;
     margin-bottom: 20px;
     font-family: var(--secondary-font);
+    position: relative;
+    top: 5%;
 }
 
 #login-container #user-information-fields {
@@ -127,8 +126,8 @@ main > p {
 }
 
 #login-button {
-    width: 100px;
-    height: 50px;
+    width: 200px;
+    height: 75px;
     background: var(--background-dark1);
     color: snow;
     font-size: 1.3rem;
@@ -137,6 +136,8 @@ main > p {
     cursor: pointer;
     outline: none;
     margin: 0 10px;
+    position: relative;
+    bottom: 5%;
 }
 
 #register-link {

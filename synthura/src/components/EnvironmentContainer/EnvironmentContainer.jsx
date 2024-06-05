@@ -91,10 +91,10 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
           Object.assign(updatedList, prevList);
           if(!updatedList.isPresent(temp_name)) {
             updatedList.append(temp_name, <ClusterButton key={id} handleDeleteCluster={handleDeleteCluster} cluster_name={temp_name} />); // Append new data
-            setId(id+1);
           }
           return updatedList;
         });
+        setId(id+1);
         setEntered(false);
         setActive(false);
         setAddingCluster(false);
