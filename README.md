@@ -1,6 +1,6 @@
 # Synthura
 
-## To get local host running
+## To get local host running:
 
 Bring up webpage:
 1. cd synthura <br>
