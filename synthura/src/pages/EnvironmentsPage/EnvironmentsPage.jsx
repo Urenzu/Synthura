@@ -27,7 +27,7 @@ const EnvironmentsPage = () => {
   const username = state?.username;
 
   //used in main branch
-  const [ showSideBar, setShowSideBar ] = useState(true);
+  const [ showSideBar, setShowSideBar ] = useState(false);
   const { prompt, active, name, error, setError, setName, setCanceled, setEntered } = useEnvironmentPage();
   const { globalCluster, globalEnvironment } = useCameraConnection();
 
@@ -59,7 +59,12 @@ const EnvironmentsPage = () => {
       setError("Error: Name cannot be empty.");
     }
   }
-  
+
+  const handleNavigateToRecordings = () => {
+    console.log("Navigated to Recordings Page");
+    navigate("/recordings", {state: {username: username}});
+  }
+
   const handleSignOut = () => {
     console.log("Signed Out");
     navigate("/");
@@ -218,7 +223,9 @@ const EnvironmentsPage = () => {
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid username={username} />
         </section>
-        <button className="btn signout"onClick={handleSignOut}>Sign Out</button>
+            {/* <button className="btn signout"onClick={handleSignOut}>Sign Out</button>
+            <button className="btn recordingsPage"onClick={handleNavigateToRecordings}>Recordings Page</button>
+         */}
         {popups[currentPopup] && (
         <Popup
           message={popups[currentPopup].message}

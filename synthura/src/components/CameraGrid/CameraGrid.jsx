@@ -127,10 +127,6 @@ const CameraGrid = ({username}) => {
 
   };
 
-  const handleNavigateToRecordings = () => {
-    console.log("Navigated to Recordings Page");
-    navigate("/recordings", {state: {username: username}});
-  }
 
   return (
     <>
@@ -154,7 +150,6 @@ const CameraGrid = ({username}) => {
           <div id="camera-grid">
             {activeCameras}
           </div>
-          <button className="btn recordingsPage"onClick={handleNavigateToRecordings}>Recordings Page</button>
         </section>
       )}
     </>

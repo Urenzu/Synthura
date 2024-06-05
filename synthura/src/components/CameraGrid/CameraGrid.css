@@ -46,26 +46,6 @@ h2 {
     letter-spacing: 1px;
 }
   
-  /* Hover effect for all buttons with class "btn" */
-  .btn.recordingsPage {
-    width: 200px;
-  height: 60px;
-  background: var(--accent-dark);
-  color: snow;
-  font-size: 1.3rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  outline: none;
-  margin-right: -10px; /* Adjust as needed */
-  align-self: flex-end;
-  /* New property */
-  box-sizing: border-box;
-  }
-
-  .btn recordingsPage:hover {
-    background-color: var(--background-dark1);
-  }
 
 /* styling of input field and button container */
 #input-url-container {
