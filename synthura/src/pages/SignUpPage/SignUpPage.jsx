@@ -18,11 +18,11 @@ const SignUpPage = () => {
       return;
     }
 
-    if (password.length == 0) {
-      console.log("Missing password");
-      setMessage("Password cannot be empty");
+    if (!validatePassword(password)) {
+      setMessage('Each password must contain a capital letter, a number, a special character, and be of at least 8 characters');
       return;
     }
+
     setMessage("");
     const response = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/checkUserExists?user=${username}&password=${password}`);
     console.log("Username: " + username);
@@ -47,6 +47,11 @@ const SignUpPage = () => {
     console.log(response2);
     navigate("/");
   }
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)[^ ]{8,}$/;
+    return regex.test(password);
+  };
 
   return (
     <main>
