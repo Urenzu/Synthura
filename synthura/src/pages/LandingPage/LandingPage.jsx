@@ -21,7 +21,9 @@ const LandingPage = () => {
           </p>
         </div>
         <span></span>
-        <button id="login-button" type="submit">Login</button>
+        <Link to="/main">
+          <button id="login-button" type="submit">Login</button>
+        </Link>
       </form>
     </main>
   );
