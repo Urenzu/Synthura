@@ -62,9 +62,7 @@ const LandingPage = () => {
           </p>
         </div>
         <span></span>
-        <Link to="/main">
-          <button id="login-button" type="submit">Login</button>
-        </Link>
+        <button id="login-button" type="submit">Login</button>
       </form>
     </main>
   );

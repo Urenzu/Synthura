@@ -46,11 +46,10 @@ const EnvironmentSideBar = ({showSideBar}) => {
 
   useEffect(() => {
     if (!environmentsList.isPresent(globalEnvironment)) {
-      console.log("Environment no longer exists");
       updateGlobalEnvironment("");
       updateGlobalCluster("");
     }
-  }, [environmentsList]);
+  })
 
   useEffect(() => {
     // Check if this component is adding an environment
@@ -81,9 +80,6 @@ const EnvironmentSideBar = ({showSideBar}) => {
           }
           return updatedList;
         });
-        if(globalEnvironment === "") {
-          updateGlobalEnvironment(temp_name);
-        }
         setId(id+1);
         setEntered(false);
         setActive(false);

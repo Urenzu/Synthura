@@ -29,7 +29,7 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   // Context
   const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { connections, updateGlobalEnvironment, updateGlobalCluster, updateConnections, addEnvironmentCluster, globalCluster, globalEnvironment } = useCameraConnection();
+  const { connections, updateGlobalEnvironment, updateGlobalCluster, updateConnections, addEnvironmentCluster, globalCluster } = useCameraConnection();
   const { environment, clustersList, setEnvironment, setClustersList } = useClusterEnvironment();
 
   // Update environment name
@@ -81,7 +81,6 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
       // Add the cluster
       else {
         let temp_name = name;
-        console.log(environment);
         updateGlobalEnvironment(environment);
         updateGlobalCluster(temp_name);
         addEnvironmentCluster(environment, temp_name);
@@ -112,10 +111,10 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
 
   // renders updated column of clusters
   useEffect(() => { 
-    if(environment === globalEnvironment && !clustersList.isPresent(globalCluster)) {
-      console.log("Cluster no longer exists");
+    if(!clustersList.isPresent(globalCluster)) {
       updateGlobalCluster("");
     }
+
     setActiveClusters(clustersList.render());
   }, [clustersList]);
 
