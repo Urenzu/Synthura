@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import './LandingPage.css';
 
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [username, setUserName] = useState("");
@@ -61,7 +62,9 @@ const LandingPage = () => {
           </p>
         </div>
         <span></span>
-        <button id="login-button" type="submit">Login</button>
+        <Link to="/main">
+          <button id="login-button" type="submit">Login</button>
+        </Link>
       </form>
     </main>
   );

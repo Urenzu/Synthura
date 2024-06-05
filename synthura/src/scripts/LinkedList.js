@@ -1,8 +1,8 @@
 
 // node object that stores camera identifier, video Component, and next node in list
 class Node {
-    constructor(camNum, camComponent) {
-      this.id = camNum;
+    constructor(name, camComponent) {
+      this.name = name;
       this.camComponent = camComponent;
       this.next = null;
     }
@@ -16,11 +16,22 @@ class LinkedList {
         this.size = 0;
     }
 
-    // check if a node with camNum is present in the list
-    isPresent(camNum) {
+    // change the name of a component
+    changeName(oldName, newName) {
         let current = this.head;
         while(current) {
-            if(current.id === camNum) {
+            if(current.name === oldName) {
+                current.name = newName;
+            }
+            current = current.next;
+        }
+    }
+
+    // check if a node with name is present in the list
+    isPresent(name) {
+        let current = this.head;
+        while(current) {
+            if(current.name === name) {
                 return true;
             }
             current = current.next;
@@ -30,8 +41,8 @@ class LinkedList {
 
 
     // add a new node to the end of the list
-    append(camNum, camComponent) {
-        let node = new Node(camNum, camComponent);
+    append(Name, camComponent) {
+        let node = new Node(Name, camComponent);
         let current;
         if (this.head === null) {
             this.head = node;
@@ -45,14 +56,14 @@ class LinkedList {
         this.size++;
     }
     
-    // remove node specified by camNum from list
-    remove(camNum) {
+    // remove node specified by Name from list
+    remove(name) {
         let current = this.head;
         let previous;
-        if (current.id === camNum) {
+        if (current.name === name) {
             this.head = current.next;
         } else {
-            while (current && (current.id !== camNum)) {
+            while (current && (current.name !== name)) {
                 previous = current;
                 current = current.next;
             }

@@ -36,3 +36,6 @@
     height: 16px;
     cursor: pointer;
 }
+.cluster-btn .elipses-icon {
+    fill: var(--background-dark2);
+}

@@ -1,0 +1,60 @@
+:root{
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Style the login container */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40vh;
+  }
+  
+  /* Style the login container */
+  .login-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    color: black; /* Set default text color to black */
+    font-family: 'Roboto', sans-serif;
+    font: size 20px;
+  }
+  
+  /* Style the buttons and input fields */
+  .login-container button {
+    border-radius: 20px;
+    background-color: #f1f1f1; /* Light gray background for buttons and inputs */
+    color: black;
+    padding: 10px;
+    margin: 5px;
+    width: 300px;
+    border: none; /* Remove borders for a cleaner look */
+  }
+  
+  .login-input {
+    border-radius: 20px;
+    background-color: #f1f1f1; /* Light gray background for buttons and inputs */
+    color: black;
+    padding: 10px;
+    margin: 5px;
+    width: 300px;
+    border: none; /* Remove borders for a cleaner look */
+  }
+  
+  .login-container button:hover,
+  .login-input:hover {
+    background-color: #e0e0e0; /* Slightly darker background on hover */
+  }
+  
+  /* Style the login form (containing inputs and submit button) */
+  .login-form {
+    display: flex; /* Make it a flexbox container */
+    flex-direction: column; /* Arrange elements vertically */
+    align-items: center; /* Center elements horizontally */
+  }
+  
+  /* Maintain consistent spacing between login and signup forms */
+  .login-form + .login-form {
+    margin-top: 20px; /* Add spacing between forms */
+  }
+  
