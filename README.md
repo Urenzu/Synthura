@@ -1,8 +1,5 @@
 # Synthura
 
-# Usage
-## To get local host running
-
 Bring up webpage:
 1. cd synthura <br>
 2. npm install <br>
