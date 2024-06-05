@@ -1,32 +1,37 @@
 # Synthura
 
-# Usage
-## To get local host running
+## Setup Instructions
 
-Bring up webpage:
-1. cd synthura <br>
-2. npm install <br>
-3. npm run dev <br>
+### Get Local Host Running
 
-Bring up server:
-1. cd synthura <br>
-2. cd backend <br>
-3. python -m venv synthura <br>
-4. synthura\Scripts\activate (In base backend directory) <br>
-5. pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch <br>
-6  pip install -q git+https://github.com/THU-MIG/yolov10.git <br>
-7. To run: uvicorn backend:app --reload <br>
+**Webpage Setup:**
+1. `cd synthura`
+2. `npm install`
+3. `npm run dev`
 
-Get camera IP URL:
-1. Download droidcam or similar application <br>
+**Server Setup:**
+1. `cd synthura`
+2. `cd backend`
+3. `python -m venv synthura`
+4. `synthura\Scripts\activate` (Run this in the base backend directory)
+5. `pip install opencv-python ultralytics fastapi uvicorn aiortc av websockets torch`
+6. `pip install -q git+https://github.com/THU-MIG/yolov10.git`
+7. To run server: `uvicorn backend:app --reload`
 
-On webpage:
-1. Follow the tutorial
-2. Type in your IP URL in this format http://<ip>:<port>/video <br>
+### Get Camera IP URL
 
-If you want cuda GPU:
-1. cmd: nvidia-smi <br>
-2. Check what cuda version you would need to install (Right side). <br>
-3. Install: Correct CUDA Toolkit. (Example Toolkit: https://developer.nvidia.com/cuda-downloads) <br>
-4. Install: Correct torch version for your CUDA Toolkit within virtual environment from the website: https://pytorch.org/get-started/locally/ (Make sure to 'pip unistall torch torchvision torchaudio' first) <br>
-Example command for synthura virtual environment: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 <br>
+1. Download DroidCam or a similar application.
+
+### Webpage Interaction
+
+1. Follow the tutorial.
+2. Type in your IP URL in the following format: `http://<ip>:<port>/video`
+
+### GPU Acceleration with CUDA (Optional)
+
+1. Open command prompt and run `nvidia-smi` to check the required CUDA version.
+2. Install the correct CUDA Toolkit from [NVIDIA's CUDA Toolkit page](https://developer.nvidia.com/cuda-downloads).
+3. Within the `synthura` virtual environment, uninstall the current torch installation:
+   - `pip uninstall torch torchvision torchaudio`
+4. Install the correct version of torch for your CUDA Toolkit by using the appropriate command from [PyTorch's official site](https://pytorch.org/get-started/locally/). 
+   - Example: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
