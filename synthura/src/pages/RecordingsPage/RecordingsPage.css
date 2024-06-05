@@ -1,10 +1,17 @@
-.unique_button {
-  font-size: 20px; 
-  font-family: OCR A Std, monospace;
-  border-color: rgb(255, 255, 255); 
-  border-radius: 10px; 
-  background-color: rgb(0, 0, 0);
-  color: white;
+.btn {
+  width: 200px;
+  height: 50px;
+  background: var(--accent-dark);
+  color: snow;
+  font-size: 1.3rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  /* Margin from the right edge */
+  margin-top: 20px; /* Adjust as needed */
+  align-self: flex-end; /* Aligns to bottom if parent uses flexbox */
+  box-sizing: border-box;
 }
   
 #analytics_window {
@@ -61,4 +68,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#title{
+  justify-content: center;
+  position: relative;
+  top: 20px;
 }

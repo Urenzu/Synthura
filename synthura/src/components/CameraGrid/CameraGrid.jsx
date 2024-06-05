@@ -13,6 +13,8 @@ import VideoFrame from '../VideoFrame/VideoFrame';
 import AnalyticsFeed from '../AnalyticsFeed/AnalyticsFeed';
 import { WebSocketProvider } from '../../scripts/WebSocketContext';
 import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useNavigate } from "react-router-dom";
+
 
 import './CameraGrid.css';
 import { LinkedList } from '../../scripts/LinkedList';
@@ -25,6 +27,8 @@ const CameraGrid = ({username}) => {
   const [cameraURL, setCameraURL] = useState('');
   const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
   const [entered, setEntered] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!active && entered && !canceled) {
@@ -101,7 +105,13 @@ const CameraGrid = ({username}) => {
 
   };
 
+  const handleNavigateToRecordings = () => {
+    console.log("Navigated to Recordings Page");
+    navigate("/recordings", {state: {username: username}});
+  }
+
   return (
+    <>
     <section id="camera-grid-container">
       <h2>Enter Device IP Address</h2>
       <h2>User: {username}</h2>
@@ -123,7 +133,9 @@ const CameraGrid = ({username}) => {
       <div id="camera-grid">
         {activeCameras}
       </div>
+      <button className="btn recordingsPage"onClick={handleNavigateToRecordings}>Recordings Page</button>
     </section>
+    </>
   );
 };
 

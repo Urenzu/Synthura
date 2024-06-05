@@ -237,9 +237,9 @@ function RecordingsPage() {
   return (
     <div id="recording_page_container">
       <center>
-        <h1>Saved Recordings:</h1>
-        <p>User: {username}</p>
-        <button className="unique_button" onClick={handleNavigateToMain}>Go to Main Page</button>
+        <h2 id="title">Saved Recordings | User: {username}</h2>
+        {/* <h3 id="user">User: {username}</h3> */}
+        <button className="btn" onClick={handleNavigateToMain}>Go to Main Page</button>
         <br />
         <br />
         {isLoading ? ( // Display loading message if recordings are being fetched

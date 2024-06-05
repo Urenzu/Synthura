@@ -52,11 +52,6 @@ const EnvironmentsPage = () => {
       setError(true);
     }
   }
-
-  const handleNavigateToRecordings = () => {
-    console.log("Navigated to Recordings Page");
-    navigate("/recordings", {state: {username: username}});
-  }
   
   const handleSignOut = () => {
     console.log("Signed Out");
@@ -88,9 +83,7 @@ const EnvironmentsPage = () => {
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid username={username} />
         </section>
-        <button onClick={handleNavigateToRecordings}>Go to Recordings Page</button>
-        <br />
-        <button onClick={handleSignOut}>Sign Out</button>
+        <button className="btn signout"onClick={handleSignOut}>Sign Out</button>
       </>
   );
 }
