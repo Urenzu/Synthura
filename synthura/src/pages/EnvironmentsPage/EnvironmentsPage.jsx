@@ -14,6 +14,7 @@ import Popup from '../../components/PopUp/PopUp';
 import { useState, useEffect } from "react";
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
 import { useCameraConnection } from '../../scripts/CameraConnectionContext';
+import { Link } from 'react-router-dom';
 import './EnvironmentsPage.css';
 
 
@@ -198,8 +199,8 @@ const EnvironmentsPage = () => {
               14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 
               0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
             </svg>
-            {(globalEnvironment && globalCluster) && (<h3>{globalEnvironment}: {globalCluster}</h3>)}
-            <span></span>
+            {(globalEnvironment && globalCluster) && (<h3>Viewing Cluster <span className="emphasize">{globalCluster}</span> of Environment <span className="emphasize">{globalEnvironment}</span></h3>)}
+            <Link id="recordings-page-link" to="/recordings">RECORDINGS</Link>
           </nav>
           <EnvironmentSideBar showSideBar={showSideBar} />
           <CameraGrid />

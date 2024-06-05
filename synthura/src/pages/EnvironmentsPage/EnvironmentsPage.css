@@ -18,16 +18,33 @@
 #environments-page-nav-bar {
     position: absolute;
     width: 100%;
-    height: 6%;
+    height: 7.5%;
     background-color:#181818;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     color: snow;
+    gap: 5%;
 }
 #environments-page-nav-bar h3 {
     font-size: 1.5rem;
     font-family: 'Roboto', sans-serif;
+    text-align: center;
+}
+#environments-page-nav-bar #recordings-page-link {
+    font-size: 1.5rem;
+    font-family: 'Roboto', sans-serif;
+    color: snow;
+    position: absolute;
+    right: 1%;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 5;
+}
+#environments-page-nav-bar #recordings-page-link:hover {
+    background-color: var(--accent-light);
+    cursor: pointer;
 }
 /* hamburger sidebar icon */
 #side-bar-icon {
@@ -37,6 +54,8 @@
     cursor: pointer;
     margin-left: 10px;
     z-index: 10;
+    position: absolute;
+    left: 0;
 }
 
 /* blur rest of page and disable pointer events when naming component  */
@@ -69,14 +88,12 @@
     visibility: visible;
     transition: opacity 0.5s ease, visibility 0.5s ease;
 }
-
 .name-component-field h2 {
     color: snow;
     font-family: 'Roboto', sans-serif;
     font-size: 2rem;
     margin-bottom: 0;
 }
-
 .name-component-field input {
     height: 3rem;
     width: 70%;
@@ -87,7 +104,6 @@
     border-radius: 5px;
     border: 2px solid var(--accent-dark);
 }
-
 .name-component-field button {
     width: 100px;
     height: 50px;
@@ -100,7 +116,7 @@
     outline: none;
     margin: 0 10px;
 }
-
+/* styling of error message component */
 #error-message-naming-component {
     display: flex;
     flex-direction: column;
@@ -108,7 +124,6 @@
     align-items: center;
     gap: 5px;
 }
-
 #error-message-naming-component span {
     font-family: 'Roboto', sans-serif;
     color: snow;
@@ -119,8 +134,13 @@
     border: solid 2px var(--accent-dark);
     border-radius: 5px;
 }
-
 #error-message-naming-component button {
     width: 80px;
     height: 40px;
+}
+/* miscellaneous */
+.emphasize {
+    font-weight: 800;
+    font-size: 1.75rem;
+    margin: 0 5px;
 }

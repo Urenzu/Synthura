@@ -72,17 +72,17 @@ const EnvironmentButton = ( {handleDeleteEnvironment} ) => {
     }
   }, [entered, canceled]);
   
-    // prompt user to new environment name
-    const handleRename = () => {
-      setPrompt("Enter New Environment Name");
-      setActive(true);
-      setRenamingEnvironment(true);
-    }
+  // prompt user to new environment name
+  const handleRename = () => {
+    setPrompt("Enter New Environment Name");
+    setActive(true);
+    setRenamingEnvironment(true);
+  }
 
   const handleMouseOver = () => {
     timeoutRef.current = setTimeout(() => {
       setToolTip(true);
-    }, 1000);
+    }, 500);
   }
 
   const handleMouseOut = () => {

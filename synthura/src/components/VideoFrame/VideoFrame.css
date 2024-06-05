@@ -1,12 +1,3 @@
-/* global variables */
-:root {
-    --background-dark1: #1e1e1e;
-    --background-dark2: #252526;
-    --accent-dark: #2d2d30;
-    --accent-light: #4f4f55;
-    --border-color: #3e3e42;
-}
-
 /* styling for video frame */
 .video-frame {
     position: relative;
@@ -18,8 +9,6 @@
 }
 
 /* Live video feed styling */
-
-/* styling for frame of live video feed */
 .live-video-container {
     position: relative;
     top: 2.5rem;
@@ -44,38 +33,90 @@ video {
     box-sizing: border-box;
     padding: 0 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     z-index: 2;
     font-family: 'roboto', sans-serif;
     font-size: 13px;
-    color: #cccccc;
 }
 
+.live-video-bar p {
+    color: snow;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Container for the button and tooltip */
+.button-tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* styling for close camera button */
 .close-camera-button {
     background: transparent;
     outline: none;
     border: none;
-    width: 22px; /* Adjust the width to your desired size */
-    height: 22px; /* Adjust the height to your desired size */
-    border-radius: 5px; /* Adjust the border-radius to create rounded corners */
-    position: relative; /* Positioning for the icon */
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    position: absolute;
+    left: 1%;
 }
 
 .close-camera-button:hover::before {
-    content: ""; /* Create a pseudo-element to overlay the background */
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.2); /* Light up the background color on hover */
-    border-radius: 5px; /* Ensure pseudo-element has same rounded corners as button */
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
     cursor: pointer;
 }
 
-#close-camera-icon {
+.close-camera-icon {
     fill: white;
     width: 100%;
     height: 100%;
+}
+
+/* styling for recording button */
+.save-recording-button {
+    background: transparent;
+    outline: none;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left: 1%;
+}
+
+.save-recording-icon {
+    fill: red;
+}
+
+.save-recording-icon:hover {
+    cursor: pointer;
+}
+
+/* styling for tooltip */
+.button-tooltip-container .tooltip {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 5px); /* Position to the right of the button with a small margin */
+    transform: translateY(-50%);
+    background-color: var(--accent-light);
+    color: snow;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    z-index: 3;
+    width: fit-content;
 }

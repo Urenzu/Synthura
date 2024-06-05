@@ -27,7 +27,7 @@ const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
 
   // Context
   const { name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { connections, globalCluster, updateGlobalCluster, updateGlobalEnvironment, updateConnections } = useCameraConnection();
+  const { globalCluster, updateGlobalCluster, updateGlobalEnvironment, updateConnections } = useCameraConnection();
   const { environment, clustersList, setClustersList } = useClusterEnvironment();
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const ClusterButton = ( {handleDeleteCluster, cluster_name} ) => {
   const handleMouseOver = () => {
     timeoutRef.current = setTimeout(() => {
       setToolTip(true);
-    }, 1000);
+    }, 500);
   }
 
   const handleMouseOut = () => {

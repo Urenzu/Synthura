@@ -9,12 +9,14 @@
 
 /* layout styling */
 #camera-grid-container {
-    width: 90vw;
+    width: 95vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    gap: 15px;
     align-items: center;
+    position: relative;
 }
 #camera-grid {
     display: flex;
@@ -49,7 +51,7 @@ h2 {
 /* styling of input field and button container */
 #input-url-container {
     position: relative;
-    top: 4%;
+    top: 5%;
     display: flex;;
     justify-content: space-between;
     align-items: center;

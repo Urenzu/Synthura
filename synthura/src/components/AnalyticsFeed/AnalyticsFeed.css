@@ -7,30 +7,18 @@
     --border-color: #3e3e42;
 }
 
+/* styling for analytics feed */
 .analytics-feed {
     width: 100%;
-    height: 33%;
+    height: 32%;
     box-sizing: border-box;
     margin-top: 5px;
-    padding: 5px;
+    padding: 3px;
     font-family: 'Roboto', sans-serif;
-}
-
-.objects-div {
-    height: 50%;
-}
-
-.objects-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 5px;
+    flex-direction: column;
+    justify-content: space-between;
 }
-
-.analytics-feed h2 {
-    color: snow;
-}
-
 .analytics-feed p {
     color: var(--background-dark1);
     background-color: var(--accent-light);
@@ -40,22 +28,52 @@
     margin: 0;
     font-weight: 700;
 }
-.status-bar {
-    height: 50%;
-    display: flex;
-    align-items: center;
+.analytics-feed p.dangerous {
+    background-color: #881414;
+    color: var(--accent-dark);
+}
+.analytics-feed h2 {
+    color: snow;
 }
 
-.status-bar .motion {
+/* styling for objects container */
+.objects-div {
+    height: 54%;
+    max-height: 54%;
+    overflow-y: auto;
+}
+.objects-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+/* styling for status bars */
+.motion-status-bar {
+    height: 45%;
+    width: 100%;
+    text-align: center;
+}
+.motion-status-bar .motion {
     background-color: snow;
     color: var(--background-dark1);
-    width: 100%;
-    text-align: center;
 }
-
-.status-bar .no-motion {
-    background: var(--accent-dark);
+.motion-status-bar .no-motion {
+    background-color: var(--accent-dark);
     color: snow;
+}
+.dangerous-objects-bar {
+    height: 45%;
     width: 100%;
     text-align: center;
+    margin-bottom: 10px;
+}
+.dangerous-objects-bar .dangerous-objects-detected {
+    background-color: red;
+    color: snow;
+}
+.dangerous-objects-bar .no-dangerous-objects-detected {
+    background-color: var(--accent-dark);
+    color: snow;
 }

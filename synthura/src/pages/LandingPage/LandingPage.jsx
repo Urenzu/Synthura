@@ -9,7 +9,7 @@ const LandingPage = () => {
       <h1>Synthura</h1>
       <p><strong>ENHANCE</strong> Your Security with <strong>CUTTING-EDGE AI</strong> Object Detection</p>
       <p>Monitor Live Video from Everyday Devices to Advanced Cameras</p>
-      <form id="login-container">
+      <div id="login-container">
         <h2>Login To Get Started</h2>
         <div id="user-information-fields">
           <h3>Username</h3>
@@ -24,7 +24,7 @@ const LandingPage = () => {
         <Link to="/main">
           <button id="login-button" type="submit">Login</button>
         </Link>
-      </form>
+      </div>
     </main>
   );
 }

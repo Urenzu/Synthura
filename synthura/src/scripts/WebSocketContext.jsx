@@ -13,6 +13,7 @@ export const WebSocketProvider = ({ children }) => {
 
     const ws = useRef(null);
     const [detectedObjects, setDetectedObjects] = useState([]);
+    const [dangerousObjects, setDangerousObjects] = useState([]);
     const [offer, setOffer] = useState(null);
     const [status, setStatus] = useState('disconnected');
     const [motionStatus, setMotionStatus] = useState("no motion");
@@ -47,6 +48,7 @@ export const WebSocketProvider = ({ children }) => {
                 }
                 else {
                     setDetectedObjects(data.detected_objects);
+                    setDangerousObjects(data.dangerous_objects);
                     setMotionStatus(data.motion_status);
                     console.log(data.motion_status);
                 }
@@ -64,7 +66,7 @@ export const WebSocketProvider = ({ children }) => {
     };
 
     return (
-        <WebSocketContext.Provider value={{ status, offer, detectedObjects, sendMessage, motionStatus }}>
+        <WebSocketContext.Provider value={{ status, offer, detectedObjects, dangerousObjects, sendMessage, motionStatus }}>
             {children}
         </WebSocketContext.Provider>
     );
