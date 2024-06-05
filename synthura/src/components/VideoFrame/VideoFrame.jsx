@@ -13,23 +13,21 @@ import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../scripts/WebSocketContext';
 import axios from "axios";
 
-const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username }) => {
 
+const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName }) => {
+
+  // Local state
   const videoRef = useRef(null);
   const initializedRef = useRef(false);
-  const { status, offer, sendMessage } = useWebSocket();
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadedVideo, setUploadedVideo] = useState(false);
+  const [ toolTip, setToolTip ] = useState(false);
+  const timeoutRef = useRef(null);
+
+  // Context
+  const { status, offer, sendMessage } = useWebSocket();
 
   const establishWebRTCConnection = async () => {
-      
-    // const websocketUrl = `ws://localhost:8000/api/video_feed/ws`;
-    // const websocket = getWebSocket(websocketUrl);
-
-    // Create peer connection and configure ICE server(s)
-    // const config = {
-    //   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    // };
-    // const pc = new RTCPeerConnection(config);
 
     const pc = new RTCPeerConnection();
 
@@ -87,9 +85,32 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
       initializedRef.current = true;
     }
       
-  }, [offer, status] );
+  }, [status, offer] );
+
+  useEffect(() => {
+    return () => {
+      if(initializedRef.current) {
+        fetch(`http://localhost:8000/api/remove_camera/${id}`, {
+          method: 'GET'
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to remove camera');
+          }
+          else {
+            console.log("Camera connection closed")
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      }
+    }
+  }, [])
 
   const handleUpload = async () => {
+
+    console.log("uploading video");
     setIsUploading(true);
     const stream = videoRef.current.captureStream();
     const mediaRecorder = new MediaRecorder(stream);
@@ -105,11 +126,11 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
       
       reader.onload = async () => {
         const base64Data = reader.result.split(',')[1]; // Extract base64 data
-        const filename = cameraName;
+        const filename = `camera_${id}_video.mp4`;
         
         // Add console logs to check if filename and base64Data are correctly defined
         console.log('filename:', filename);
-        console.log('base64Data:', base64Data);
+        console.log('base64Data:', base64Data)
         const data = base64Data.substring(0, 10000);
 
         const postBodyData = {
@@ -120,7 +141,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
         // Make sure filename and base64Data are correctly defined
         if (filename && base64Data) {
           try {
-            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=${username}&filename=${filename}&data=${data}`, postBodyData, {
+            const response = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/uploadVideo?username=Owen&filename=${filename}&data=${data}`, postBodyData, {
               headers: {
                 'Content-Type': 'application/json'
               }
@@ -130,6 +151,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
             console.error('Upload failed', error);
           } finally {
             setIsUploading(false);
+            setUploadedVideo(true);
           }
         } else {
           console.error('Filename or base64Data is undefined');
@@ -177,23 +199,51 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
     }, 30000); // Recording for 5 seconds, you can adjust this as per your requirement
   };
 
+  const handleMouseOver = () => {
+    timeoutRef.current = setTimeout(() => {
+      setToolTip(true);
+    }, 500);
+  }
+
+  const handleMouseOut = () => {
+    clearTimeout(timeoutRef.current);
+    setToolTip(false);
+  }
+
+  useEffect(() => {
+    if (uploadedVideo) {
+      const timer = setTimeout(() => {
+        setUploadedVideo(false);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [uploadedVideo]); 
+
   return (
-    <div data-testid={id} className="video-frame">
+    <div className="video-frame">
       <div className="live-video-bar">
-        <span>{cameraName}</span>
-        <button className="close-camera-button" data-testid={`close-camera-btn-${id}`} onClick={() => handleRemoveCamera(id)}>
-          <svg id="close-camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+        <button className="close-camera-button" onClick={() => handleRemoveCamera(id, cameraName)}>
+          <svg className="close-camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
             <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 
             0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 
             32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
           </svg>
         </button>
+        <p>{cameraName}</p>
+        <div className="button-tooltip-container">
+          <button className="save-recording-button" onClick={handleUpload} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut} disabled={isUploading}>
+            <svg className="save-recording-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192zm0 224a128 128 0 1 0 0-256 128 128 0 1 0 0 
+              256zm0-96a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"/>
+            </svg>
+          </button>
+          {toolTip && <span className="tooltip">Record Feed</span>}
+        </div>
+        {uploadedVideo && <p className="video-uploaded">Video Uploaded</p>}
       </div>
       <div className="live-video-container">
         <video ref={videoRef} autoPlay />
-        <button onClick={handleUpload} disabled={isUploading}>
-          {isUploading ? 'Uploading...' : 'Save Video'}
-        </button>
       </div>
     </div>
   );
@@ -201,7 +251,7 @@ const VideoFrame = ({ id, handleRemoveCamera, cameraURL, cameraName, username })
 
 VideoFrame.propTypes = {
   id: PropTypes.number.isRequired,
-  handleRemoveCamera: PropTypes.func.isRequired
+  handleRemoveCamera: PropTypes.func.isRequired,
 };
 
 export default VideoFrame;

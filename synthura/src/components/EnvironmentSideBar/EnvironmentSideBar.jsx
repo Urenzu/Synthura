@@ -14,52 +14,90 @@ import "./EnvironmentSideBar.css"
 import EnvironmentContainer from "../EnvironmentContainer/EnvironmentContainer"
 import { LinkedList } from '../../scripts/LinkedList';
 import { useState, useEffect } from 'react';
-import { useNameComponent } from "../../scripts/NameComponentContext";
+import { useEnvironmentPage } from "../../scripts/EnvironmentsPageContext";
+import { useCameraConnection } from "../../scripts/CameraConnectionContext";
+import { ClusterEnvironmentProvider } from "../../scripts/ClusterEnvironmentContext";
 
 const EnvironmentSideBar = ({showSideBar}) => {
 
-  const [environmentsList, setEnvironmentsList] = useState(new LinkedList());
+  // Local State
   const [activeEnvironments, setActiveEnvironments] = useState([]);
   const [id, setId] = useState(1);
-  const { canceled, active, name, setCanceled, setName, setActive, setText } = useNameComponent();
-  const [entered, setEntered] = useState(false);
+  const [ addingEnvironment, setAddingEnvironment ] = useState(false);
+
+  // Context
+  const { name, canceled, entered, environmentsList, setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList } = useEnvironmentPage();
+  const { globalEnvironment, updateGlobalEnvironment, updateGlobalCluster, removeEnvironment } = useCameraConnection();
 
   // Delete an environment
-  const handleDeleteEnvironment= (rem) => {
+  const handleDeleteEnvironment= (environment_name) => {
+
+    // Remove environment from the list
     setEnvironmentsList(prevList => {
       const updatedList = new LinkedList();
-      Object.assign(updatedList, prevList); // Copy previous state
-      updatedList.remove(rem); // Append new data
-      return updatedList; // Return updated list
+      Object.assign(updatedList, prevList);
+      updatedList.remove(environment_name);
+      return updatedList;
     });
+
+    removeEnvironment(environment_name);
+
   }
 
   useEffect(() => {
-    if (!active && entered && !canceled) {
-      let temp_name = name;
-      setEnvironmentsList(prevList => {
-        const updatedList = new LinkedList();
-        Object.assign(updatedList, prevList); // Copy previous state
-        if(!updatedList.isPresent(id)) {
-          updatedList.append(id, <EnvironmentContainer key={id} handleDeleteEnvironment={handleDeleteEnvironment} env_id={id} environment_name={temp_name}/>); // Append new data
-          setId(id+1);
+    if (!environmentsList.isPresent(globalEnvironment)) {
+      console.log("Environment no longer exists");
+      updateGlobalEnvironment("");
+      updateGlobalCluster("");
+    }
+  }, [environmentsList]);
+
+  useEffect(() => {
+    // Check if this component is adding an environment
+    if (addingEnvironment) {
+      // Cancel the operation
+      if(canceled) {
+        setCanceled(false);
+        setAddingEnvironment(false);
+        setActive(false);
+        setName("");
+      }
+      // Check if the name is already in use
+      else if (environmentsList.isPresent(name)) {
+        setError("Error: Environments must have unique names.");
+        setEntered(false);
+      }
+      // Add the environment
+      else {
+        let temp_name = name;
+        setEnvironmentsList(prevList => {
+          const updatedList = new LinkedList();
+          Object.assign(updatedList, prevList);
+          if(!updatedList.isPresent(temp_name)) {
+            updatedList.append(temp_name, 
+                                    <ClusterEnvironmentProvider key={id} >
+                                      <EnvironmentContainer handleDeleteEnvironment={handleDeleteEnvironment} environment_name={temp_name} />
+                                    </ClusterEnvironmentProvider>); // Append new data
+          }
+          return updatedList;
+        });
+        if(globalEnvironment === "") {
+          updateGlobalEnvironment(temp_name);
         }
-        return updatedList; // Return updated list
-      });
-      setName("");
-      setEntered(false);
+        setId(id+1);
+        setEntered(false);
+        setActive(false);
+        setAddingEnvironment(false);
+        setName("");
+      }
     }
-    else if (canceled) {
-      setCanceled(false);
-      setEntered(false);
-    }
-  }, [active]);
+  }, [entered, canceled]);
 
   // create a new environment
   const handleCreateEnvironment = () => {
-    setText("Enter Environment Name");
-    setEntered(true);
+    setPrompt("Enter Environment Name");
     setActive(true);
+    setAddingEnvironment(true);
   }
 
   // renders updated column of environments

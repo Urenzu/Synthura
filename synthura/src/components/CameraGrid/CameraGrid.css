@@ -9,12 +9,14 @@
 
 /* layout styling */
 #camera-grid-container {
-    width: 90vw;
+    width: 95vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    gap: 15px;
     align-items: center;
+    position: relative;
 }
 #camera-grid {
     display: flex;
@@ -23,11 +25,11 @@
     width: 100%;
     border: 2px solid var(--accent-light);
     border-radius: 3px;
-    height: 85%;
-    margin: 20px;
+    height: 80%;
     padding: 10px;
     gap: 16px;
     overflow-y: auto;
+    margin-bottom: -5px;
 }
 .live-feed {
     width: 32.7%;
@@ -44,12 +46,12 @@ h2 {
     color: snow;
     font-family: 'Roboto', sans-serif;
     letter-spacing: 1px;
-    height: 5%;
 }
 
 /* styling of input field and button container */
 #input-url-container {
     position: relative;
+    top: 5%;
     display: flex;;
     justify-content: space-between;
     align-items: center;
@@ -57,9 +59,8 @@ h2 {
     border: 1px solid var(--accent-light);
     border-radius: 20px;
     padding: 0 0 0 15px;
-    width: 50%;
-    height: 6%;
-    margin-bottom: 10px;
+    width: 70%;
+    margin-bottom: 10px;;
 }
 /* styling of input field */
 #cameraIP {
