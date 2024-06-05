@@ -10,6 +10,8 @@ Child Component(s): EnvironmentSideBar, CameraGrid
 
 import CameraGrid from '../../components/CameraGrid/CameraGrid';
 import EnvironmentSideBar from '../../components/EnvironmentSideBar/EnvironmentSideBar';
+import { useNameComponent } from '../../scripts/NameComponentContext';
+import { useLocation, useNavigate } from "react-router-dom";
 import Popup from '../../components/PopUp/PopUp';
 import { useState, useEffect } from "react";
 import { useEnvironmentPage } from '../../scripts/EnvironmentsPageContext';
@@ -19,9 +21,15 @@ import './EnvironmentsPage.css';
 
 const EnvironmentsPage = () => {
 
-  const [ showSideBar, setShowSideBar ] = useState(true);
+  const {state} = useLocation();
+  const navigate = useNavigate();
+  const username = state.username;
+  const [ showSideBar, setShowSideBar ] = useState(false);
+  const [ error, setError ] = useState(false);
+  const { name, text, active, setName, setActive, setCanceled } = useNameComponent();
   const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
   const { globalCluster, globalEnvironment } = useCameraConnection();
+
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {
@@ -49,6 +57,11 @@ const EnvironmentsPage = () => {
     else {
       setError("Error: Name cannot be empty.");
     }
+  }
+  
+  const handleSignOut = () => {
+    console.log("Signed Out");
+    navigate("/");
   }
 
   //Tutorial CODE
@@ -202,8 +215,9 @@ const EnvironmentsPage = () => {
             <span></span>
           </nav>
           <EnvironmentSideBar showSideBar={showSideBar} />
-          <CameraGrid />
+          <CameraGrid username={username} />
         </section>
+        <button className="btn signout"onClick={handleSignOut}>Sign Out</button>
         {popups[currentPopup] && (
         <Popup
           message={popups[currentPopup].message}

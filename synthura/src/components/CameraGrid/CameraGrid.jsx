@@ -18,7 +18,7 @@ import { LinkedList } from '../../scripts/LinkedList';
 
 import './CameraGrid.css';
 
-const CameraGrid = () => {
+const CameraGrid = ({username}) => {
 
   // Local State
   const [activeCameras, setActiveCameras] = useState([]);
@@ -126,6 +126,11 @@ const CameraGrid = () => {
     )
 
   };
+
+  const handleNavigateToRecordings = () => {
+    console.log("Navigated to Recordings Page");
+    navigate("/recordings", {state: {username: username}});
+  }
 
   return (
     <>

@@ -1,6 +1,7 @@
 import './RecordingsPage.css';
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 let camera_number = 0;
 let existance_number = 0;
@@ -205,13 +206,16 @@ function DynamicTable({ recordings, setRecordings, fetchRecordings }) {
 }
 
 function RecordingsPage() {
+  const {state} = useLocation();
+  const navigate = useNavigate();
+  const username = state.username;
   const [recordings, setRecordings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRecordings = async () => {
     try {
       setIsLoading(true); // Set loading to true before fetching recordings
-      const response = await axios.get('https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=Owen');
+      const response = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/getRecordings?username=${username}`);
       setRecordings(response.data[0]["recordings"]);
       user_id = response.data[0]["user"];
     } catch (error) {
@@ -221,19 +225,28 @@ function RecordingsPage() {
     }
   };
 
+  const handleNavigateToMain = () => {
+    console.log("Navigated to Main Page");
+    navigate("/main", {state: {username: username}});
+  }
+
   useEffect(() => {
     fetchRecordings();
   }, []);
 
   return (
     <div id="recording_page_container">
-      <h1>Saved Recordings:</h1>
       <center>
-      {isLoading ? ( // Display loading message if recordings are being fetched
-        <p>Loading recordings...</p>
-      ) : (
-        <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
-      )}
+        <h2 id="title">Saved Recordings | User: {username}</h2>
+        {/* <h3 id="user">User: {username}</h3> */}
+        <button className="btn" onClick={handleNavigateToMain}>Go to Main Page</button>
+        <br />
+        <br />
+        {isLoading ? ( // Display loading message if recordings are being fetched
+          <p>Loading recordings...</p>
+        ) : (
+          <DynamicTable recordings={recordings} setRecordings={setRecordings} fetchRecordings={fetchRecordings} />
+        )}
       </center>
     </div>
   );

@@ -1,10 +1,9 @@
 import React, { useState }  from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
-import './LandingPage.css';
+import './SignUpPage.css';
 
-
-const LandingPage = () => {
+const SignUpPage = () => {
   const navigate = useNavigate();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -19,30 +18,40 @@ const LandingPage = () => {
       return;
     }
 
-    if (password.length == 0) {
-      console.log("Missing password");
-      setMessage("Missing password");
+    if (!validatePassword(password)) {
+      setMessage('Each password must contain a capital letter, a number, a special character, and be of at least 8 characters');
       return;
     }
+
     setMessage("");
     const response = await axios.get(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/checkUserExists?user=${username}&password=${password}`);
     console.log("Username: " + username);
     console.log("Password: " + password);
     console.log(response.data);
 
-    if (response.data.success == true) {
-      console.log("Logged IN!!!!");
-      navigate("/main", {state: {username: username}});
+    if (response.data.count == 1) {
+        setMessage("User already exist, choose another username");
+        return;
     }
-    else if (response.data.count == 1) {
-      setMessage("Wrong Password");
-      return;
-    }
-    else {
-      setMessage("User Does Not Exist");
-      return;
-    }
+
+    const postBodyData = {
+        user: username,
+        password: password
+    };
+
+    const response2 = await axios.post(`https://us-west-2.aws.data.mongodb-api.com/app/application-1-urdjhcy/endpoint/createUser`, postBodyData, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    console.log(response2);
+    navigate("/");
   }
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)[^ ]{8,}$/;
+    return regex.test(password);
+  };
 
   return (
     <main>
@@ -50,24 +59,19 @@ const LandingPage = () => {
       <p><strong>ENHANCE</strong> Your Security with <strong>CUTTING-EDGE AI</strong> Object Detection</p>
       <p>Monitor Live Video from Everyday Devices to Advanced Cameras</p>
       <form id="login-container" onSubmit={handleSubmit}>
-        <h2>Login To Get Started</h2>
+        <h2>Sign Up To Get Started</h2>
         <h3>{message}</h3>
         <div id="user-information-fields">
           <h3>Username</h3>
           <input type="text" onChange={e => setUserName(e.target.value)}/>
           <h3>Password</h3>
           <input type="password" onChange={e => setPassword(e.target.value)}/>
-          <p>
-            New to Synthura? Sign up <Link id="register-link" to="/register">Here</Link>
-          </p>
         </div>
         <span></span>
-        <Link to="/main">
-          <button id="login-button" type="submit">Login</button>
-        </Link>
+        <button id="login-button" type="submit">Sign Up</button>
       </form>
     </main>
   );
 }
 
-export default LandingPage
+export default SignUpPage

@@ -101,6 +101,32 @@
     margin: 0 10px;
 }
 
+.btn {
+    width: 100px;
+    height: 50px;
+    background: var(--accent-dark);
+    color: snow;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    margin: 0 10px;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Hover effect for all buttons with class "btn" */
+  .btn:hover {
+    background-color: var(--background-dark1);
+  }
+
+  .signout {
+    position: absolute; /* Make it absolute for positioning */
+    top: 20px;  /* Position it 10px from the top */
+    right: 20px; /* Position it 10px from the right */
+  }
+
+
 #error-message-naming-component {
     display: flex;
     flex-direction: column;

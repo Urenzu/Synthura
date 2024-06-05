@@ -8,8 +8,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     https: {
-      key: fs.readFileSync('/home/owenhustles/certs/localhost-key.pem'),
-      cert: fs.readFileSync('/home/owenhustles/certs/localhost.pem')
+      key: fs.readFileSync('/Users/githika/localhost/localhost-key.pem'),
+      cert: fs.readFileSync('/Users/githika/localhost/localhost.pem')
     }
   }
 })
