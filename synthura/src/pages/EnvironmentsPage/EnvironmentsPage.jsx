@@ -214,7 +214,7 @@ const EnvironmentsPage = () => {
               0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
             </svg>
             {(globalEnvironment && globalCluster) && (<h3>Viewing Cluster <span className="emphasize">{globalCluster}</span> of Environment <span className="emphasize">{globalEnvironment}</span></h3>)}
-            <div id="links">
+            <div className="links">
               <button onClick={handleSignOut}>Sign Out</button>
               <button onClick={handleNavigateToRecordings}>Recordings</button>
             </div>

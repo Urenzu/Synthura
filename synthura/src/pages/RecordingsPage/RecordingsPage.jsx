@@ -221,12 +221,12 @@ function RecordingsPage() {
   return (
     <section id="recordings-page" >
       <nav id="environments-page-nav-bar">
-          <h1>Recordings</h1>
-          <div id="links">
-            <button onClick={handleSignOut}>Sign Out</button>
-            <button onClick={handleNavigateToMain}>Environments</button>
-          </div>
-        </nav>
+        <h1>Recordings</h1>
+        <div className="links">
+          <button onClick={handleSignOut}>Sign Out</button>
+          <button onClick={handleNavigateToMain}>Environments</button>
+        </div>
+      </nav>
       <div>
         {isLoading ? ( // Display loading message if recordings are being fetched
           <p>Loading recordings...</p>

@@ -38,8 +38,8 @@
 
 /* styling for objects container */
 .objects-div {
-    height: 54%;
-    max-height: 54%;
+    height: 59%;
+    max-height: 59%;
     overflow-y: auto;
 }
 .objects-container {
@@ -51,7 +51,7 @@
 
 /* styling for status bars */
 .motion-status-bar {
-    height: 45%;
+    height: 40%;
     width: 100%;
     text-align: center;
 }

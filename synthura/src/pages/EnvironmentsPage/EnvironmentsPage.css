@@ -30,25 +30,24 @@
     font-size: 1.5rem;
     font-family: 'Roboto', sans-serif;
     text-align: center;
+    max-width: 50%;
 }
-#environments-page-nav-bar #recordings-page-link:hover {
-    background-color: var(--accent-light);
-    cursor: pointer;
-}
-#links {
+.links {
     height: 100%;
+    width: 350px;
     position: absolute;
-    right: 1%;
+    right: 0;
 }
-#links button {
+.links button {
     height: 100%;
-    width: 150px;
+    width: 50%;
     font-size: 1.2rem;
     background: transparent;
     color: snow;
     border: none;
+    padding: 10px;
 }
-#links button:hover {
+.links button:hover {
     background-color: var(--accent-light);
     cursor: pointer;
 }
