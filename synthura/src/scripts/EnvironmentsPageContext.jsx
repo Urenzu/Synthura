@@ -17,12 +17,12 @@ export const EnvironmentsPageProvider = ({ children }) => {
   const [canceled, setCanceled] = useState(false);
   const [entered, setEntered] = useState(false);
   const [error, setError] = useState(null);
-  const [clustersList, setClustersList] = useState(new LinkedList());
+  
   const [environmentsList, setEnvironmentsList] = useState(new LinkedList());
 
   return (
-    <EnvironmentsPageContext.Provider value={{ prompt, active, name, canceled, entered, error, environmentsList, clustersList,
-                                            setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList, setClustersList }}>
+    <EnvironmentsPageContext.Provider value={{ prompt, active, name, canceled, entered, error, environmentsList,
+                                            setPrompt, setActive, setName, setCanceled, setEntered, setError, setEnvironmentsList }}>
       {children}
     </EnvironmentsPageContext.Provider>
   );

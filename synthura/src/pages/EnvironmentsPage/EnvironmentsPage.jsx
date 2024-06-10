@@ -26,7 +26,13 @@ const EnvironmentsPage = () => {
   console.log(username);
   const [ showSideBar, setShowSideBar ] = useState(true);
   const { prompt, active, name, error, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
-  const { globalCluster, globalEnvironment } = useCameraConnection();
+  const { globalCluster, updateGlobalCluster, globalEnvironment, updateGlobalEnvironment } = useCameraConnection();
+
+  // Reset the global cluster and environment when the page is loaded
+  useEffect(() => {
+    updateGlobalCluster("");
+    updateGlobalEnvironment("");
+  }, []);
 
   // show sidebar when the hamburger image is clicked
   const toggleSideBar = () => {

@@ -1,4 +1,3 @@
-/* global variables */
 :root {
   --background-dark1: #1e1e1e;
   --background-dark2: #252526;
@@ -10,9 +9,74 @@
 #recordings-page {
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
+
 #recordings-page h1 {
-  color: white;
+  color: snow;
   font-size: 3rem;
   margin: 1rem;
+}
+
+#recordings-container {
+  width: 100%;
+  height: 91%;
+  position: relative;
+  top: 9%;
+  overflow-y: auto;
+}
+
+.recordings-window {
+  border: solid 5px var(--border-color);
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  max-width: 60vw;
+}
+
+.recording-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px; /* Reduced padding */
+  background-color: var(--accent-dark);
+  border: solid 2px var(--border-color); /* Adjusted border width */
+  border-bottom: none;
+  box-sizing: border-box;
+  max-width: 60vw;
+}
+
+#recordings-container h2 {
+  font-size: 1rem; /* Adjusted font size */
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 1px;
+  font-weight: 400;
+  color: snow;
+}
+
+.delete-feed-button {
+  background: transparent;
+  outline: none;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.delete-feed-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-feed-icon {
+  fill: white;
+  width: 100%;
+  height: 100%;
+}
+
+table {
+  width: 100%;
 }

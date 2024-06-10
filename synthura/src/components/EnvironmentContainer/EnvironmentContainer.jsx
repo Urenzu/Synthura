@@ -28,9 +28,9 @@ const EnvironmentContainer = ( {env_id, handleDeleteEnvironment, environment_nam
   const initializedRef = useRef(false);
 
   // Context
-  const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError , clustersList, setClustersList} = useEnvironmentPage();
+  const { active, name, canceled, entered, setPrompt, setActive, setName, setCanceled, setEntered, setError } = useEnvironmentPage();
   const { connections, updateGlobalEnvironment, updateGlobalCluster, updateConnections, addEnvironmentCluster, globalCluster, globalEnvironment  } = useCameraConnection();
-  const { environment, setEnvironment } = useClusterEnvironment();
+  const { environment, setEnvironment, clustersList, setClustersList } = useClusterEnvironment();
 
   // Update environment name
   useEffect(() => {

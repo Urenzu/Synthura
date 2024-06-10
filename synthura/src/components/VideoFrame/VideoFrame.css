@@ -93,16 +93,21 @@ video {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    left: 1%;
+    margin-left: 3px;
 }
 
 .save-recording-icon {
+    fill: black;
+}
+.save-recording-icon.uploading {
     fill: red;
 }
-
 .save-recording-icon:hover {
     cursor: pointer;
+}
+
+.save-recording-button:active {
+    transform: scale(0.9);
 }
 
 /* styling for tooltip */

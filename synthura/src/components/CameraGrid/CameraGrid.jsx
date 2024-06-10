@@ -135,7 +135,7 @@ const CameraGrid = ({username}) => {
             <input
               type="text"
               id="cameraIP"
-              placeholder="Enter Camera IP"
+              placeholder="Enter URL of Camera Feed"
               autoComplete="off"
               onChange={(e) => setCameraURL(e.target.value)}
               data-testid="cameraIP-test"

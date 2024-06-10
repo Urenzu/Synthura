@@ -28,7 +28,6 @@
     padding: 10px;
     gap: 16px;
     overflow-y: auto;
-    margin-bottom: -5px;
     height: 85%;
 }
 .live-feed {
@@ -59,8 +58,7 @@ h2 {
     border-radius: 20px;
     padding: 0 0 0 15px;
     width: 70%;
-    margin-bottom: 10px;;
-    top: 5px;
+    top: 10px;
 }
 /* styling of input field */
 #cameraIP {
